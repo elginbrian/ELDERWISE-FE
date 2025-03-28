@@ -1,18 +1,49 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+enum Environment {
+  production,
+  local,
+  development,
+}
 
 class ApiConfig {
-  static final String baseUrl = "https://elderwise-dev.elginbrian.com/api/v1";
+  static Environment currentEnv = (() {
+    final env = dotenv.env['APP_ENV']?.toLowerCase();
+    switch (env) {
+      case 'production':
+        return Environment.production;
+      case 'local':
+        return Environment.local;
+      case 'development':
+        return Environment.development;
+      default:
+        return Environment.development;
+    }
+  })();
 
-  static final Dio dio = Dio(
-    BaseOptions(
-      baseUrl: baseUrl,
-      connectTimeout: const Duration(milliseconds: 5000),
-      receiveTimeout: const Duration(milliseconds: 3000),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    ),
-  );
+  static String get baseUrl {
+    switch (currentEnv) {
+      case Environment.production:
+        return "https://elderwise-prod.elginbrian.com/api/v1";
+      case Environment.local:
+        final port = dotenv.env['LOCAL_PORT'] ?? '3000';
+        return "http://10.10.10.2:$port/api/v1";
+      case Environment.development:
+        return "https://elderwise-dev.elginbrian.com/api/v1";
+    }
+  }
+
+  static Dio get dio => Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(milliseconds: 5000),
+          receiveTimeout: const Duration(milliseconds: 3000),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
   static String register = "/auth/register";
   static String login = "/auth/login";
