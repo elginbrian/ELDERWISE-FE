@@ -13,7 +13,7 @@ class AgendaRepositoryImpl implements AgendaRepository {
   @override
   Future<ResponseWrapper> getAgendaByID(String agendaId) async {
     final response = await dio.get(ApiConfig.getAgenda(agendaId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -21,7 +21,7 @@ class AgendaRepositoryImpl implements AgendaRepository {
   Future<ResponseWrapper> createAgenda(AgendaRequestDTO agendaRequest) async {
     final response =
         await dio.post(ApiConfig.createAgenda, data: agendaRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -30,14 +30,14 @@ class AgendaRepositoryImpl implements AgendaRepository {
       String agendaId, AgendaRequestDTO agendaRequest) async {
     final response = await dio.put(ApiConfig.updateAgenda(agendaId),
         data: agendaRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> deleteAgenda(String agendaId) async {
     final response = await dio.delete(ApiConfig.deleteAgenda(agendaId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

@@ -14,7 +14,7 @@ class LocationHistoryRepositoryImpl implements LocationHistoryRepository {
       String locationHistoryId) async {
     final response =
         await dio.get(ApiConfig.getLocationHistory(locationHistoryId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -23,7 +23,7 @@ class LocationHistoryRepositoryImpl implements LocationHistoryRepository {
       String locationHistoryId) async {
     final response =
         await dio.get(ApiConfig.getLocationHistoryPoints(locationHistoryId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

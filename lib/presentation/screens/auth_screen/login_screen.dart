@@ -55,7 +55,40 @@ class _LoginScreenState extends State<LoginScreen> {
     if (kIsWeb && _isConnectionError(error)) {
       return 'Koneksi gagal. Hal ini mungkin disebabkan oleh masalah CORS.';
     }
-    return error;
+
+    if (error.toLowerCase().contains('invalid credentials') ||
+        error.toLowerCase().contains('invalid password') ||
+        error.toLowerCase().contains('user not found')) {
+      return 'Email atau password tidak valid. Silakan periksa kembali.';
+    }
+
+    if (error.contains('500') || error.toLowerCase().contains('server error')) {
+      return 'Terjadi kesalahan pada server. Silakan coba lagi nanti.';
+    }
+
+    if (error.toLowerCase().contains('timeout')) {
+      return 'Koneksi timeout. Silakan periksa koneksi internet Anda dan coba lagi.';
+    }
+
+    if (error.toLowerCase().contains('network') ||
+        error.toLowerCase().contains('connection') ||
+        error.toLowerCase().contains('internet')) {
+      return 'Terjadi masalah koneksi internet. Silakan periksa koneksi Anda dan coba lagi.';
+    }
+
+    if (error.toLowerCase().contains('not found') || error.contains('404')) {
+      return 'Layanan tidak ditemukan. Silakan coba lagi nanti.';
+    }
+
+    if (error.toLowerCase().contains('unauthorized') || error.contains('401')) {
+      return 'Sesi Anda telah berakhir. Silakan login kembali.';
+    }
+
+    if (error.toLowerCase().contains('forbidden') || error.contains('403')) {
+      return 'Anda tidak memiliki akses ke layanan ini.';
+    }
+
+    return 'Terjadi kesalahan. Silakan coba lagi nanti.';
   }
 
   bool _isValidEmail(String email) {

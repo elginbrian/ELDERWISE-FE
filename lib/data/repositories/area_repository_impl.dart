@@ -13,7 +13,7 @@ class AreaRepositoryImpl implements AreaRepository {
   @override
   Future<ResponseWrapper> getAreaByID(String areaId) async {
     final response = await dio.get(ApiConfig.getArea(areaId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -21,7 +21,7 @@ class AreaRepositoryImpl implements AreaRepository {
   Future<ResponseWrapper> createArea(AreaRequestDTO areaRequest) async {
     final response =
         await dio.post(ApiConfig.createArea, data: areaRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -30,21 +30,21 @@ class AreaRepositoryImpl implements AreaRepository {
       String areaId, AreaRequestDTO areaRequest) async {
     final response =
         await dio.put(ApiConfig.updateArea(areaId), data: areaRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> deleteArea(String areaId) async {
     final response = await dio.delete(ApiConfig.deleteArea(areaId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getAreasByCaregiver(String caregiverId) async {
     final response = await dio.get(ApiConfig.getCaregiverAreas(caregiverId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

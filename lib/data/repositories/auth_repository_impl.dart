@@ -14,14 +14,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<ResponseWrapper> register(RegisterRequestDTO request) async {
     final response = await dio.post(ApiConfig.register, data: request.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> login(LoginRequestDTO request) async {
     final response = await dio.post(ApiConfig.login, data: request.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     final responseWrapper = ResponseWrapper.fromJson(response.data);
     if (responseWrapper.success) {
       final token = responseWrapper.data['token'] as String?;
