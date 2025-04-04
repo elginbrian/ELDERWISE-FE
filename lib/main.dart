@@ -10,14 +10,28 @@ import 'package:elderwise/presentation/bloc/area/area_bloc.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_bloc.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_bloc.dart';
 import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_bloc.dart';
+import 'package:elderwise/presentation/bloc/image/image_bloc.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/routes/test/test_route.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await appConfig.initialize();
+
+  try {
+    await Supabase.initialize(
+      url: appConfig.supabaseUrl,
+      anonKey: appConfig.supabaseAnonKey,
+      debug: appConfig.environment == 'development',
+    );
+    debugPrint("Supabase initialized successfully");
+  } catch (e, stackTrace) {
+    debugPrint("Error initializing Supabase: $e");
+    debugPrint(stackTrace.toString());
+  }
 
   try {
     setupDependencies();
@@ -41,6 +55,7 @@ void main() async {
         BlocProvider<LocationHistoryBloc>(
             create: (context) => getIt<LocationHistoryBloc>()),
         BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
+        BlocProvider<ImageBloc>(create: (context) => getIt<ImageBloc>()),
       ],
       child: const MyApp(),
     ),
