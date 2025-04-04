@@ -53,9 +53,9 @@ class CustomFormField extends StatelessWidget {
           ),
           prefixIcon: icon != null
               ? Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-            child: Image.asset(iconImages + icon!, height: 18),
-          )
+                  padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                  child: Image.asset(iconImages + icon!, height: 18),
+                )
               : null,
           contentPadding: icon != null
               ? const EdgeInsets.symmetric(vertical: 0, horizontal: 0)

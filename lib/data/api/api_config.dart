@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:elderwise/data/api/app_config.dart';
+import 'package:elderwise/data/api/env_config.dart';
 
 class ApiConfig {
   static String get currentEnv => appConfig.environment;

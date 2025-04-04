@@ -8,17 +8,19 @@ import '../themes/colors.dart';
 class MainButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback onTap;
+  final bool isLoading;
 
   const MainButton({
     super.key,
     required this.buttonText,
     required this.onTap,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       child: Container(
         width: double.infinity,
         height: 40,
@@ -34,16 +36,24 @@ class MainButton extends StatelessWidget {
           ],
         ),
         child: Center(
-          child: Text(
-            buttonText,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-              fontSize: 12,
-              color: AppColors.neutral90,
-                fontFamily: 'Poppins'
-            ),
-          ),
+          child: isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    strokeWidth: 2.0,
+                  ),
+                )
+              : Text(
+                  buttonText,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                      color: AppColors.neutral90,
+                      fontFamily: 'Poppins'),
+                ),
         ),
       ),
     );
