@@ -3,6 +3,7 @@ import 'package:elderwise/data/api/responses/emergency_alert_response.dart';
 import 'package:elderwise/domain/repositories/emergency_alert_repository.dart';
 import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_event.dart';
 import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_state.dart';
+import 'package:flutter/material.dart';
 
 class EmergencyAlertBloc
     extends Bloc<EmergencyAlertEvent, EmergencyAlertState> {
@@ -19,6 +20,7 @@ class EmergencyAlertBloc
     emit(EmergencyAlertLoading());
     try {
       final response = await repository.getEmergencyAlertByID(event.alertId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(EmergencyAlertSuccess(
             EmergencyAlertResponseDTO.fromJson(response.data)));
@@ -36,6 +38,7 @@ class EmergencyAlertBloc
     try {
       final response =
           await repository.createEmergencyAlert(event.alertRequest);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(EmergencyAlertSuccess(
             EmergencyAlertResponseDTO.fromJson(response.data)));
@@ -53,6 +56,7 @@ class EmergencyAlertBloc
     try {
       final response = await repository.updateEmergencyAlert(
           event.alertId, event.alertRequest);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(EmergencyAlertSuccess(
             EmergencyAlertResponseDTO.fromJson(response.data)));

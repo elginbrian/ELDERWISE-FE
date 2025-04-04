@@ -3,6 +3,7 @@ import 'package:elderwise/data/api/responses/agenda_response.dart';
 import 'package:elderwise/domain/repositories/agenda_repository.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_state.dart';
+import 'package:flutter/material.dart';
 
 class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
   final AgendaRepository agendaRepository;
@@ -19,6 +20,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     emit(AgendaLoading());
     try {
       final response = await agendaRepository.getAgendaByID(event.agendaId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
       } else {
@@ -34,6 +36,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     emit(AgendaLoading());
     try {
       final response = await agendaRepository.createAgenda(event.agendaRequest);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
       } else {
@@ -50,6 +53,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     try {
       final response = await agendaRepository.updateAgenda(
           event.agendaId, event.agendaRequest);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
       } else {
@@ -65,6 +69,7 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     emit(AgendaLoading());
     try {
       final response = await agendaRepository.deleteAgenda(event.agendaId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
       } else {

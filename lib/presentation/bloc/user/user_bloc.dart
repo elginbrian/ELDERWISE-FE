@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:elderwise/domain/repositories/user_repository.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:flutter/material.dart';
 
 class UserBloc extends Bloc<UserEvent, UserState> {
   final UserRepository userRepository;
@@ -16,6 +17,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final response = await userRepository.getUserByID(event.userId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(UserSuccess(response));
       } else {
@@ -31,6 +33,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final response = await userRepository.getUserCaregivers(event.userId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(UserSuccess(response));
       } else {
@@ -46,6 +49,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     emit(UserLoading());
     try {
       final response = await userRepository.getUserElders(event.userId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(UserSuccess(response));
       } else {
