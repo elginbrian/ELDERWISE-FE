@@ -13,7 +13,7 @@ class ElderRepositoryImpl implements ElderRepository {
   @override
   Future<ResponseWrapper> getElderByID(String elderId) async {
     final response = await dio.get(ApiConfig.getElder(elderId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -21,7 +21,7 @@ class ElderRepositoryImpl implements ElderRepository {
   Future<ResponseWrapper> createElder(Elder elderRequest) async {
     final response =
         await dio.post(ApiConfig.createElder, data: elderRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -30,35 +30,35 @@ class ElderRepositoryImpl implements ElderRepository {
       String elderId, Elder elderRequest) async {
     final response = await dio.put(ApiConfig.updateElder(elderId),
         data: elderRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getElderAreas(String elderId) async {
     final response = await dio.get(ApiConfig.getElderAreas(elderId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getElderLocationHistory(String elderId) async {
     final response = await dio.get(ApiConfig.getElderLocationHistory(elderId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getElderAgendas(String elderId) async {
     final response = await dio.get(ApiConfig.getElderAgendas(elderId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getElderEmergencyAlerts(String elderId) async {
     final response = await dio.get(ApiConfig.getElderEmergencyAlerts(elderId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

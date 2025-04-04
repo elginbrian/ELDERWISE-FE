@@ -1,4 +1,5 @@
 import 'package:elderwise/domain/entities/area.dart';
+import 'package:flutter/material.dart';
 
 class AreaResponseDTO {
   final Area area;
@@ -7,10 +8,26 @@ class AreaResponseDTO {
     required this.area,
   });
 
-  factory AreaResponseDTO.fromJson(Map<String, dynamic> json) {
-    return AreaResponseDTO(
-      area: Area.fromJson(json['area'] as Map<String, dynamic>),
-    );
+  factory AreaResponseDTO.fromJson(dynamic json) {
+    debugPrint('AreaResponseDTO.fromJson called with: ${json.runtimeType}');
+
+    try {
+      if (json is Map<String, dynamic>) {
+        if (json.containsKey('area') && json['area'] is Map<String, dynamic>) {
+          return AreaResponseDTO(
+            area: Area.fromJson(json['area'] as Map<String, dynamic>),
+          );
+        } else {
+          throw FormatException(
+              'Missing or invalid area field in response: $json');
+        }
+      } else {
+        throw FormatException('Unsupported JSON format for area: $json');
+      }
+    } catch (e) {
+      debugPrint('Error in AreaResponseDTO.fromJson: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -27,14 +44,34 @@ class AreasResponseDTO {
     required this.areas,
   });
 
-  factory AreasResponseDTO.fromJson(Map<String, dynamic> json) {
-    var areasJson = json['areas'] as List<dynamic>? ?? [];
-    List<Area> areasList = areasJson
-        .map((item) => Area.fromJson(item as Map<String, dynamic>))
-        .toList();
-    return AreasResponseDTO(
-      areas: areasList,
-    );
+  factory AreasResponseDTO.fromJson(dynamic json) {
+    debugPrint('AreasResponseDTO.fromJson called with: ${json.runtimeType}');
+
+    try {
+      if (json is Map<String, dynamic>) {
+        if (json.containsKey('areas')) {
+          var areasJson = json['areas'] as List<dynamic>? ?? [];
+          List<Area> areasList = areasJson.map((item) {
+            if (item is Map<String, dynamic>) {
+              return Area.fromJson(item);
+            } else {
+              throw FormatException('Invalid area item format: $item');
+            }
+          }).toList();
+
+          return AreasResponseDTO(
+            areas: areasList,
+          );
+        } else {
+          throw FormatException('Missing areas field in response: $json');
+        }
+      } else {
+        throw FormatException('Unsupported JSON format for areas list: $json');
+      }
+    } catch (e) {
+      debugPrint('Error in AreasResponseDTO.fromJson: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

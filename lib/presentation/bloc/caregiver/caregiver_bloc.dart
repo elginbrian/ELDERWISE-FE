@@ -20,13 +20,24 @@ class CaregiverBloc extends Bloc<CaregiverEvent, CaregiverState> {
     try {
       final response =
           await caregiverRepository.getCaregiverByID(event.caregiverId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(CaregiverSuccess(CaregiverResponseDTO.fromJson(response.data)));
+        try {
+          emit(CaregiverSuccess(CaregiverResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in caregiver data processing: $e');
+          emit(CaregiverFailure('Error processing caregiver data'));
+        }
       } else {
         emit(CaregiverFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get caregiver exception: $e');
       emit(CaregiverFailure(e.toString()));
     }
   }
@@ -37,13 +48,24 @@ class CaregiverBloc extends Bloc<CaregiverEvent, CaregiverState> {
     try {
       final response =
           await caregiverRepository.createCaregiver(event.caregiver);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(CaregiverSuccess(CaregiverResponseDTO.fromJson(response.data)));
+        try {
+          emit(CaregiverSuccess(CaregiverResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in caregiver data processing: $e');
+          emit(CaregiverFailure('Error processing caregiver data'));
+        }
       } else {
         emit(CaregiverFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Create caregiver exception: $e');
       emit(CaregiverFailure(e.toString()));
     }
   }
@@ -54,13 +76,24 @@ class CaregiverBloc extends Bloc<CaregiverEvent, CaregiverState> {
     try {
       final response = await caregiverRepository.updateCaregiver(
           event.caregiverId, event.caregiver);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(CaregiverSuccess(CaregiverResponseDTO.fromJson(response.data)));
+        try {
+          emit(CaregiverSuccess(CaregiverResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in caregiver data processing: $e');
+          emit(CaregiverFailure('Error processing caregiver data'));
+        }
       } else {
         emit(CaregiverFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Update caregiver exception: $e');
       emit(CaregiverFailure(e.toString()));
     }
   }

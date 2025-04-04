@@ -12,21 +12,21 @@ class UserRepositoryImpl implements UserRepository {
   @override
   Future<ResponseWrapper> getUserByID(String userId) async {
     final response = await dio.get(ApiConfig.getUser(userId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getUserCaregivers(String userId) async {
     final response = await dio.get(ApiConfig.getUserCaregivers(userId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
   @override
   Future<ResponseWrapper> getUserElders(String userId) async {
     final response = await dio.get(ApiConfig.getUserElders(userId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }
