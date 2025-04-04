@@ -7,6 +7,7 @@ import 'package:elderwise/data/api/responses/location_history_response.dart';
 import 'package:elderwise/domain/repositories/elder_repository.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_event.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_state.dart';
+import 'package:flutter/material.dart';
 
 class ElderBloc extends Bloc<ElderEvent, ElderState> {
   final ElderRepository elderRepository;
@@ -26,6 +27,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.getElderByID(event.elderId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
       } else {
@@ -41,6 +43,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.createElder(event.elder);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
       } else {
@@ -57,6 +60,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     try {
       final response =
           await elderRepository.updateElder(event.elderId, event.elder);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
       } else {
@@ -72,6 +76,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.getElderAreas(event.elderId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AreasSuccess(AreasResponseDTO.fromJson(response.data)));
       } else {
@@ -88,6 +93,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     try {
       final response =
           await elderRepository.getElderLocationHistory(event.elderId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(LocationHistorySuccess(
             LocationHistoryResponseDTO.fromJson(response.data)));
@@ -104,6 +110,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.getElderAgendas(event.elderId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AgendasSuccess(AgendasResponseDTO.fromJson(response.data)));
       } else {
@@ -120,6 +127,7 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     try {
       final response =
           await elderRepository.getElderEmergencyAlerts(event.elderId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(EmergencyAlertSuccess(
             EmergencyAlertResponseDTO.fromJson(response.data)));

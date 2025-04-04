@@ -3,6 +3,7 @@ import 'package:elderwise/data/api/responses/location_history_response.dart';
 import 'package:elderwise/domain/repositories/location_history_repository.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_event.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_state.dart';
+import 'package:flutter/material.dart';
 
 class LocationHistoryBloc
     extends Bloc<LocationHistoryEvent, LocationHistoryState> {
@@ -19,6 +20,7 @@ class LocationHistoryBloc
     try {
       final response =
           await repository.getLocationHistoryByID(event.locationHistoryId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(LocationHistorySuccess(
             LocationHistoryResponseDTO.fromJson(response.data)));
@@ -36,6 +38,7 @@ class LocationHistoryBloc
     try {
       final response =
           await repository.getLocationHistoryPoints(event.locationHistoryId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(LocationHistoryPointsSuccess(
             LocationHistoryPointsResponseDTO.fromJson(response.data)));

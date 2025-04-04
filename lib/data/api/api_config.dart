@@ -1,49 +1,37 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-enum Environment {
-  production,
-  local,
-  development,
-}
+import 'package:elderwise/data/api/app_config.dart';
 
 class ApiConfig {
-  static Environment currentEnv = (() {
-    final env = dotenv.env['APP_ENV']?.toLowerCase();
-    switch (env) {
-      case 'production':
-        return Environment.production;
-      case 'local':
-        return Environment.local;
-      case 'development':
-        return Environment.development;
-      default:
-        return Environment.development;
-    }
-  })();
+  static String get currentEnv => appConfig.environment;
 
-  static String get baseUrl {
-    switch (currentEnv) {
-      case Environment.production:
-        return "https://elderwise-prod.elginbrian.com/api/v1";
-      case Environment.local:
-        final port = dotenv.env['LOCAL_PORT'] ?? '3000';
-        return "http://10.10.10.2:$port/api/v1";
-      case Environment.development:
-        return "https://elderwise-dev.elginbrian.com/api/v1";
+  static String get baseUrl => appConfig.apiBaseUrl;
+
+  static Dio get dio {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ),
+    );
+
+    if (currentEnv == 'development') {
+      dio.interceptors.add(LogInterceptor(
+        request: true,
+        requestHeader: true,
+        requestBody: true,
+        responseHeader: true,
+        responseBody: true,
+        error: true,
+      ));
     }
+
+    return dio;
   }
-
-  static Dio get dio => Dio(
-        BaseOptions(
-          baseUrl: baseUrl,
-          connectTimeout: const Duration(milliseconds: 5000),
-          receiveTimeout: const Duration(milliseconds: 3000),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
 
   static String register = "/auth/register";
   static String login = "/auth/login";

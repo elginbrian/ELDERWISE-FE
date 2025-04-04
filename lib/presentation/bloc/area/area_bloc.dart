@@ -3,6 +3,7 @@ import 'package:elderwise/data/api/responses/area_response.dart';
 import 'package:elderwise/domain/repositories/area_repository.dart';
 import 'package:elderwise/presentation/bloc/area/area_event.dart';
 import 'package:elderwise/presentation/bloc/area/area_state.dart';
+import 'package:flutter/material.dart';
 
 class AreaBloc extends Bloc<AreaEvent, AreaState> {
   final AreaRepository areaRepository;
@@ -19,6 +20,7 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     emit(AreaLoading());
     try {
       final response = await areaRepository.getAreaByID(event.areaId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
       } else {
@@ -34,6 +36,7 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     emit(AreaLoading());
     try {
       final response = await areaRepository.createArea(event.areaRequest);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
       } else {
@@ -50,6 +53,7 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     try {
       final response =
           await areaRepository.updateArea(event.areaId, event.areaRequest);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
       } else {
@@ -65,6 +69,7 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     emit(AreaLoading());
     try {
       final response = await areaRepository.deleteArea(event.areaId);
+      debugPrint(response.data.toString());
       if (response.success) {
         emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
       } else {
@@ -81,8 +86,10 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     try {
       final response =
           await areaRepository.getAreasByCaregiver(event.caregiverId);
+      debugPrint(response.data.toString());
       if (response.success) {
-        emit(AreasSuccess(AreasResponseDTO.fromJson(response.data)));
+        final areasData = {'areas': response.data['areas']};
+        emit(AreasSuccess(AreasResponseDTO.fromJson(areasData)));
       } else {
         emit(AreaFailure(response.message));
       }
