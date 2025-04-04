@@ -1,9 +1,6 @@
-import 'package:elderwise/data/api/app_config.dart';
+import 'package:elderwise/data/api/env_config.dart';
 import 'package:elderwise/presentation/widgets/web_layout.dart';
 import 'package:flutter/foundation.dart';
-import 'package:elderwise/presentation/screens/auth_screen/login_screen.dart';
-import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
-import 'package:elderwise/presentation/themes/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:elderwise/di/container.dart';
@@ -65,7 +62,8 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         if (kIsWeb) {
           return WebLayout(
-            localBackgroundImagePath: 'assets/default_background.jpg',
+            localBackgroundImagePath:
+                'lib/presentation/screens/assets/images/web_background.jpg',
             child: child ?? const SizedBox(),
           );
         }

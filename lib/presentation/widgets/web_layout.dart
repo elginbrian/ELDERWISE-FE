@@ -1,3 +1,4 @@
+import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
 
 class WebLayout extends StatelessWidget {
@@ -35,9 +36,9 @@ class WebLayout extends StatelessWidget {
             width: constraints.maxHeight * 0.5,
             height: constraints.maxHeight * 0.95,
             decoration: BoxDecoration(
-              color: Colors.grey[800]?.withOpacity(0.8),
+              color: AppColors.primaryHover.withOpacity(0.8),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFF222222), width: 1),
+              border: Border.all(color: AppColors.primaryPressed, width: 1),
             ),
             padding: const EdgeInsets.all(4),
             child: ClipRRect(
