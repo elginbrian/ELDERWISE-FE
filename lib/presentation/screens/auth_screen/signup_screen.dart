@@ -137,7 +137,7 @@ Widget build(BuildContext context) {
                           children: [
                             CustomFormField(
                               hintText: "Username",
-                              icon: 'home.png',
+                              icon: 'username.png',
                               validator: (value) => value == null || value.isEmpty
                                   ? 'Username tidak boleh kosong'
                                   : null,
@@ -145,7 +145,7 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 24),
                             CustomFormField(
                               hintText: "Email",
-                              icon: 'home.png',
+                              icon: 'email.png',
                               controller: _emailController,
                               keyboardType: TextInputType.emailAddress,
                               validator: (value) => value == null || value.isEmpty
@@ -157,7 +157,7 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 24),
                             CustomFormField(
                               hintText: "Password",
-                              icon: 'home.png',
+                              icon: 'password.png',
                               controller: _passwordController,
                               obscureText: true,
                               validator: (value) => value == null || value.isEmpty
