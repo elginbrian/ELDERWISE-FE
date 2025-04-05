@@ -3,6 +3,7 @@ import 'package:elderwise/data/api/api_config.dart';
 import 'package:elderwise/data/api/responses/response_wrapper.dart';
 import 'package:elderwise/domain/entities/caregiver.dart';
 import 'package:elderwise/domain/repositories/caregiver_repository.dart';
+import 'package:flutter/material.dart';
 
 class CaregiverRepositoryImpl implements CaregiverRepository {
   final Dio dio;
@@ -12,6 +13,7 @@ class CaregiverRepositoryImpl implements CaregiverRepository {
   @override
   Future<ResponseWrapper> getCaregiverByID(String caregiverId) async {
     final response = await dio.get(ApiConfig.getCaregiver(caregiverId));
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -21,6 +23,7 @@ class CaregiverRepositoryImpl implements CaregiverRepository {
       ApiConfig.createCaregiver,
       data: caregiverRequest.toJson(),
     );
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -31,6 +34,7 @@ class CaregiverRepositoryImpl implements CaregiverRepository {
       ApiConfig.updateCaregiver(caregiverId),
       data: caregiverRequest.toJson(),
     );
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

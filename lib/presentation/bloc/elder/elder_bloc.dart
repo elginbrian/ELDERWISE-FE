@@ -7,6 +7,7 @@ import 'package:elderwise/data/api/responses/location_history_response.dart';
 import 'package:elderwise/domain/repositories/elder_repository.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_event.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_state.dart';
+import 'package:flutter/material.dart';
 
 class ElderBloc extends Bloc<ElderEvent, ElderState> {
   final ElderRepository elderRepository;
@@ -26,12 +27,24 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.getElderByID(event.elderId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
+        try {
+          emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in elder data processing: $e');
+          emit(ElderFailure('Error processing elder data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get elder exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }
@@ -41,12 +54,24 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.createElder(event.elder);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
+        try {
+          emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in elder data processing: $e');
+          emit(ElderFailure('Error processing elder data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Create elder exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }
@@ -57,12 +82,24 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     try {
       final response =
           await elderRepository.updateElder(event.elderId, event.elder);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
+        try {
+          emit(ElderSuccess(ElderResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in elder data processing: $e');
+          emit(ElderFailure('Error processing elder data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Update elder exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }
@@ -72,12 +109,24 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.getElderAreas(event.elderId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AreasSuccess(AreasResponseDTO.fromJson(response.data)));
+        try {
+          emit(AreasSuccess(AreasResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in areas data processing: $e');
+          emit(ElderFailure('Error processing areas data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get elder areas exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }
@@ -88,13 +137,25 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     try {
       final response =
           await elderRepository.getElderLocationHistory(event.elderId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(LocationHistorySuccess(
-            LocationHistoryResponseDTO.fromJson(response.data)));
+        try {
+          emit(LocationHistorySuccess(
+              LocationHistoryResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in location history data processing: $e');
+          emit(ElderFailure('Error processing location history data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get elder location history exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }
@@ -104,12 +165,24 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     emit(ElderLoading());
     try {
       final response = await elderRepository.getElderAgendas(event.elderId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AgendasSuccess(AgendasResponseDTO.fromJson(response.data)));
+        try {
+          emit(AgendasSuccess(AgendasResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in agendas data processing: $e');
+          emit(ElderFailure('Error processing agendas data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get elder agendas exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }
@@ -120,13 +193,25 @@ class ElderBloc extends Bloc<ElderEvent, ElderState> {
     try {
       final response =
           await elderRepository.getElderEmergencyAlerts(event.elderId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(EmergencyAlertSuccess(
-            EmergencyAlertResponseDTO.fromJson(response.data)));
+        try {
+          emit(EmergencyAlertSuccess(
+              EmergencyAlertResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in emergency alerts data processing: $e');
+          emit(ElderFailure('Error processing emergency alerts data'));
+        }
       } else {
         emit(ElderFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get elder emergency alerts exception: $e');
       emit(ElderFailure(e.toString()));
     }
   }

@@ -53,9 +53,9 @@ class CustomFormField extends StatelessWidget {
           ),
           prefixIcon: icon != null
               ? Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-            child: Image.asset(iconImages + icon!, height: 18),
-          )
+                  padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                  child: Image.asset(iconImages + icon!, height: 18),
+                )
               : null,
           contentPadding: icon != null
               ? const EdgeInsets.symmetric(vertical: 0, horizontal: 0)
@@ -71,6 +71,20 @@ class CustomFormField extends StatelessWidget {
             borderRadius: BorderRadius.circular(32),
             borderSide: const BorderSide(
               color: AppColors.neutral80,
+              width: 1,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(32),
+            borderSide: BorderSide(
+              color: borderColor, // Gunakan warna border yang sama
+              width: 1,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(32),
+            borderSide: const BorderSide(
+              color: AppColors.neutral80, // Gunakan warna border fokus yang sama
               width: 1,
             ),
           ),

@@ -3,12 +3,14 @@ import 'package:elderwise/data/api/responses/emergency_alert_response.dart';
 import 'package:elderwise/domain/repositories/emergency_alert_repository.dart';
 import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_event.dart';
 import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_state.dart';
+import 'package:flutter/material.dart';
 
 class EmergencyAlertBloc
     extends Bloc<EmergencyAlertEvent, EmergencyAlertState> {
-  final EmergencyAlertRepository repository;
+  final EmergencyAlertRepository emergencyAlertRepository;
 
-  EmergencyAlertBloc(this.repository) : super(EmergencyAlertInitial()) {
+  EmergencyAlertBloc(this.emergencyAlertRepository)
+      : super(EmergencyAlertInitial()) {
     on<GetEmergencyAlertEvent>(_onGetEmergencyAlert);
     on<CreateEmergencyAlertEvent>(_onCreateEmergencyAlert);
     on<UpdateEmergencyAlertEvent>(_onUpdateEmergencyAlert);
@@ -18,14 +20,27 @@ class EmergencyAlertBloc
       GetEmergencyAlertEvent event, Emitter<EmergencyAlertState> emit) async {
     emit(EmergencyAlertLoading());
     try {
-      final response = await repository.getEmergencyAlertByID(event.alertId);
+      final response =
+          await emergencyAlertRepository.getEmergencyAlertByID(event.alertId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(EmergencyAlertSuccess(
-            EmergencyAlertResponseDTO.fromJson(response.data)));
+        try {
+          emit(EmergencyAlertSuccess(
+              EmergencyAlertResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in emergency alert data processing: $e');
+          emit(EmergencyAlertFailure('Error processing emergency alert data'));
+        }
       } else {
         emit(EmergencyAlertFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get emergency alert exception: $e');
       emit(EmergencyAlertFailure(e.toString()));
     }
   }
@@ -34,15 +49,27 @@ class EmergencyAlertBloc
       Emitter<EmergencyAlertState> emit) async {
     emit(EmergencyAlertLoading());
     try {
-      final response =
-          await repository.createEmergencyAlert(event.alertRequest);
+      final response = await emergencyAlertRepository
+          .createEmergencyAlert(event.alertRequest);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(EmergencyAlertSuccess(
-            EmergencyAlertResponseDTO.fromJson(response.data)));
+        try {
+          emit(EmergencyAlertSuccess(
+              EmergencyAlertResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in emergency alert data processing: $e');
+          emit(EmergencyAlertFailure('Error processing emergency alert data'));
+        }
       } else {
         emit(EmergencyAlertFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Create emergency alert exception: $e');
       emit(EmergencyAlertFailure(e.toString()));
     }
   }
@@ -51,15 +78,27 @@ class EmergencyAlertBloc
       Emitter<EmergencyAlertState> emit) async {
     emit(EmergencyAlertLoading());
     try {
-      final response = await repository.updateEmergencyAlert(
+      final response = await emergencyAlertRepository.updateEmergencyAlert(
           event.alertId, event.alertRequest);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(EmergencyAlertSuccess(
-            EmergencyAlertResponseDTO.fromJson(response.data)));
+        try {
+          emit(EmergencyAlertSuccess(
+              EmergencyAlertResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in emergency alert data processing: $e');
+          emit(EmergencyAlertFailure('Error processing emergency alert data'));
+        }
       } else {
         emit(EmergencyAlertFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Update emergency alert exception: $e');
       emit(EmergencyAlertFailure(e.toString()));
     }
   }
