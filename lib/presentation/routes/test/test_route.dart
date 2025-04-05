@@ -1,4 +1,5 @@
 import 'package:elderwise/presentation/screens/auth_screen/login_screen.dart';
+import 'package:elderwise/presentation/screens/auth_screen/onboarding.dart';
 import 'package:elderwise/presentation/screens/auth_screen/signup_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,7 +8,7 @@ final GoRouter testRouter = GoRouter(
   routes: [
     GoRoute(
       path: '/login',
-      builder: (context, state) => SignupScreen(),
+      builder: (context, state) => Onboarding(),
     ),
   ],
 );

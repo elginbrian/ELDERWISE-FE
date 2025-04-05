@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 16),
                       CustomFormField(
                         hintText: "Email",
-                        icon: 'home.png',
+                        icon: 'email.png',
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) =>
@@ -151,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       CustomFormField(
                         hintText: "Password",
-                        icon: 'home.png',
+                        icon: 'password.png',
                         controller: _passwordController,
                         obscureText: true,
                         validator: (value) =>
