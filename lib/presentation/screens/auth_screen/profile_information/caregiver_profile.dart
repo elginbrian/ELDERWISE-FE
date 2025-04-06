@@ -33,7 +33,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
           child: Column(
             children: [
               Text(
-                "Profile Caregiver",
+                "Profil Caregiver",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,

@@ -1,4 +1,5 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
+import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ List<String> navTitles = [
 
 final List<Widget> screens = [
   ProfileScreen(),
+  MainProfileScreen(),
   ProfileScreen(),
-  ProfileScreen(),
-  ProfileScreen(),
+  MainProfileScreen(),
 ];

@@ -33,7 +33,7 @@ class _ElderProfileState extends State<ElderProfile> {
     return Column(
       children: [
         const Text(
-          "Profile Elder",
+          "Profil Elder",
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,

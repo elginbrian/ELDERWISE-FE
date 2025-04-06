@@ -63,7 +63,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
-              "Profile Elder",
+              "Foto Profil",
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
