@@ -1,11 +1,9 @@
-import 'package:elderwise/domain/entities/caregiver.dart';
-import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/auth_screen/profile_information/caregiver_profile.dart';
 import 'package:elderwise/presentation/screens/auth_screen/profile_information/elder_profile.dart';
 import 'package:elderwise/presentation/screens/auth_screen/profile_information/photo_profile.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
-import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class StepperScreen extends StatefulWidget {
   const StepperScreen({super.key});
@@ -17,181 +15,174 @@ class StepperScreen extends StatefulWidget {
 class _StepperScreenState extends State<StepperScreen> {
   int currentStep = 0;
 
+  final List<String> stepTitles = [
+    "Profile Elder",
+    "Profile Caregiver",
+    "Profile Photo"
+  ];
+
+  void nextStep() {
+    if (currentStep < 2) {
+      setState(() => currentStep += 1);
+    } else {
+      context.go('/home');
+    }
+  }
+
+  void skipStep() {
+    if (currentStep < 2) {
+      setState(() => currentStep += 1);
+    } else {
+      context.go('/home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.secondarySurface,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(70.0),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: AppBar(
-              elevation: 0,
-              backgroundColor: Colors.white,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 24),
-                child: IconButton(
-                  splashColor: Colors.transparent,
-                  highlightColor: Colors.transparent, 
-                  hoverColor:
-                      Colors.transparent,
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: AppColors.neutral90),
-                  onPressed: () {
-                    if (currentStep > 0) {
-                      setState(() => currentStep -= 1);
-                    }
-                  },
+    return WillPopScope(
+      // Handle system back button presses
+      onWillPop: () async {
+        if (currentStep > 0) {
+          setState(() => currentStep -= 1);
+          return false; // Don't allow default back behavior
+        }
+        return true; // Allow default back navigation
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.secondarySurface,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(70.0),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 16.0),
+              child: AppBar(
+                elevation: 0,
+                backgroundColor: Colors.white,
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 24),
+                  child: IconButton(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                    icon: const Icon(Icons.arrow_back_ios,
+                        color: AppColors.neutral90),
+                    onPressed: () {
+                      if (currentStep > 0) {
+                        setState(() => currentStep -= 1);
+                      } else {
+                        // Use GoRouter to navigate back on first step
+                        // Replace '/login' with the appropriate previous route
+                        context.go('/login');
+                      }
+                    },
+                  ),
                 ),
-              ),
-              title: const Text(
-                "Atur Profile",
-                style:
-                    TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+                title: Text(
+                  stepTitles[currentStep],
+                  style: const TextStyle(
+                      color: Colors.black87, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ),
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 24.0, horizontal: 32.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentStep == 0
-                          ? AppColors.primaryMain
-                          : Colors.grey.shade300,
-                      border: Border.all(
-                        color: currentStep == 0
-                            ? AppColors.primaryMain
-                            : Colors.grey.shade300,
-                        width: 2.0,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "1",
-                        style: TextStyle(
-                          color: currentStep == 0 ? Colors.white : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 40,
-                    height: 2,
-                    color: Colors.grey.shade300,
-                  ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentStep == 1
-                          ? AppColors.primaryMain
-                          : Colors.grey.shade300,
-                      border: Border.all(
-                        color: currentStep == 1
-                            ? AppColors.primaryMain
-                            : Colors.grey.shade300,
-                        width: 2.0,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "2",
-                        style: TextStyle(
-                          color: currentStep == 1 ? Colors.white : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    width: 40,
-                    height: 2,
-                    color: Colors.grey.shade300,
-                  ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: currentStep == 2
-                          ? AppColors.primaryMain
-                          : Colors.grey.shade300,
-                      border: Border.all(
-                        color: currentStep == 2
-                            ? AppColors.primaryMain
-                            : Colors.grey.shade300,
-                        width: 2.0,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        "3",
-                        style: TextStyle(
-                          color: currentStep == 2 ? Colors.white : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: IndexedStack(
-                index: currentStep,
-                children: const [
-                  ElderProfile(),
-                  CaregiverProfile(),
-                  PhotoProfile(),
-                ],
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
               children: [
-                MainButton(
-                  buttonText: "Selanjutnya",
-                  onTap: () {
-                    if (currentStep < 2) {
-                      setState(() => currentStep += 1);
-                    } else {}
-                  },
-                  color: AppColors.primaryMain,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(5, (index) {
+                      if (index % 2 == 0) {
+                        return _buildStepIndicator(index ~/ 2);
+                      } else {
+                        return _buildConnector((index - 1) ~/ 2 < currentStep);
+                      }
+                    }),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                MainButton(
-                  buttonText: "Lewati",
-                  onTap: () {
-                      if (currentStep < 2) {
-                      setState(() => currentStep += 1);
-                    } else {}
-                  },
-                  color: Colors.white,
+
+                // Step content - now contains its own buttons
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.all(16),
+                    child: IndexedStack(
+                      index: currentStep,
+                      children: [
+                        ElderProfile(
+                          onNext: nextStep,
+                          onSkip: skipStep,
+                          isFinalStep: false,
+                        ),
+                        CaregiverProfile(
+                          onNext: nextStep,
+                          onSkip: skipStep,
+                          isFinalStep: false,
+                        ),
+                        PhotoProfile(
+                          onNext: nextStep,
+                          onSkip: skipStep,
+                          isFinalStep: true,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStepIndicator(int step) {
+    bool isCompleted = step < currentStep;
+    bool isCurrent = step == currentStep;
+
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isCompleted || isCurrent
+            ? AppColors.primaryMain
+            : Colors.grey.shade300,
+        border: Border.all(
+          color: isCompleted || isCurrent
+              ? AppColors.primaryMain
+              : Colors.grey.shade300,
+          width: 2.0,
+        ),
+      ),
+      child: Center(
+        child: isCompleted
+            ? const Icon(Icons.check, color: Colors.white, size: 20)
+            : Text(
+                "${step + 1}",
+                style: TextStyle(
+                  color: isCurrent ? Colors.white : Colors.grey,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildConnector(bool isActive) {
+    return Container(
+      width: 40,
+      height: 2,
+      color: isActive ? AppColors.primaryMain : Colors.grey.shade300,
     );
   }
 }

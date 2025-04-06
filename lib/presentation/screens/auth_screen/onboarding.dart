@@ -1,6 +1,7 @@
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class Onboarding extends StatefulWidget {
   const Onboarding({super.key});
@@ -9,7 +10,8 @@ class Onboarding extends StatefulWidget {
   State<Onboarding> createState() => _OnboardingState();
 }
 
-class _OnboardingState extends State<Onboarding> with SingleTickerProviderStateMixin {
+class _OnboardingState extends State<Onboarding>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
   late Animation<double> _opacityAnimation;
@@ -120,7 +122,9 @@ class _OnboardingState extends State<Onboarding> with SingleTickerProviderStateM
                     opacity: _opacityAnimation,
                     child: MainButton(
                       buttonText: "Selanjutnya",
-                      onTap: () {},
+                      onTap: () {
+                        context.go('/login');
+                      },
                       color: AppColors.neutral10,
                     ),
                   ),

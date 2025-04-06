@@ -168,8 +168,8 @@ class _LoginScreenState extends State<LoginScreen> {
           });
 
           if (state is LoginSuccess) {
-            // Navigate to home or dashboard
-            context.go('/home');
+            // Navigate to stepper for profile information
+            context.go('/fill-information');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(

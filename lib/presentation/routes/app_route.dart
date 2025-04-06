@@ -6,15 +6,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/login',
+  initialLocation: '/onboarding',
   routes: [
     GoRoute(
+        path: '/onboarding', builder: (context, state) => const Onboarding()),
+    GoRoute(
       path: '/login',
-      builder: (context, state) => LoginScreen(),
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: '/signup',
-      builder: (context, state) => SignupScreen(),
+      builder: (context, state) => const SignupScreen(),
+    ),
+    GoRoute(
+        path: '/fill-information',
+        builder: (context, state) => const StepperScreen()),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const Scaffold(
+        body: Center(child: Text('Home Screen - Under Development')),
+      ),
     ),
   ],
 );
