@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:elderwise/data/api/responses/auth_response.dart';
+import 'package:elderwise/data/api/responses/user_response.dart';
+import 'package:elderwise/domain/entities/user.dart';
 import 'package:elderwise/domain/repositories/auth_repository.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_event.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
@@ -12,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
     on<GoogleSignInEvent>(_onGoogleSignIn);
+    on<GetCurrentUserEvent>(_onGetCurrentUser);
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
@@ -97,6 +100,48 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(LoginSuccess(result));
     } catch (e) {
       debugPrint('Google sign in exception: $e');
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onGetCurrentUser(
+    GetCurrentUserEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final response = await _authRepository.getCurrentUser();
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
+      if (response.success) {
+        try {
+          if (response.data is Map<String, dynamic>) {
+            if (response.data.containsKey('user')) {
+              final userResponseDTO = UserResponseDTO.fromJson(response.data);
+              emit(CurrentUserSuccess(userResponseDTO));
+              return;
+            }
+
+            final userResponseDTO = UserResponseDTO(
+                user: User.fromJson(response.data as Map<String, dynamic>));
+            emit(CurrentUserSuccess(userResponseDTO));
+          } else {
+            debugPrint('Could not process user data. Data: ${response.data}');
+            emit(AuthFailure('Unable to process user data'));
+          }
+        } catch (e) {
+          debugPrint('Error in user data processing: $e');
+          emit(AuthFailure('Error processing user data'));
+        }
+      } else {
+        emit(AuthFailure(response.message));
+      }
+    } catch (e) {
+      debugPrint('Get current user exception: $e');
       emit(AuthFailure(e.toString()));
     }
   }

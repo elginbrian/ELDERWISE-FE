@@ -97,4 +97,26 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Failed to sign in with Google: $e');
     }
   }
+
+  @override
+  Future<ResponseWrapper> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+
+    if (token == null) {
+      throw Exception('No authentication token found');
+    }
+
+    final response = await dio.get(
+      ApiConfig.getCurrentUser,
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ),
+    );
+
+    debugPrint("Repository - Current User: ${response.data}");
+    return ResponseWrapper.fromJson(response.data);
+  }
 }

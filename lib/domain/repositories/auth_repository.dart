@@ -6,4 +6,5 @@ abstract class AuthRepository {
   Future<ResponseWrapper> register(RegisterRequestDTO request);
   Future<ResponseWrapper> login(LoginRequestDTO request);
   Future<LoginResponseDTO> googleSignIn(GoogleAuthRequestDTO request);
+  Future<ResponseWrapper> getCurrentUser();
 }

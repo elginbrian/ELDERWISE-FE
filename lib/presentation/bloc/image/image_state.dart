@@ -30,3 +30,9 @@ class ImageFailure extends ImageState {
 
   ImageFailure(this.error);
 }
+
+class ImageProcessSuccess extends ImageState {
+  final UploadedImage image;
+
+  ImageProcessSuccess(this.image);
+}

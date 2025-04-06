@@ -41,10 +41,14 @@ class _PhotoProfileState extends State<PhotoProfile> {
   String? _caregiverId;
   bool _elderPhotoUploaded = false;
   bool _caregiverPhotoUploaded = false;
+  bool _needElderUpload = false;
+  bool _needCaregiverUpload = false;
 
   @override
   void initState() {
     super.initState();
+    assert(widget.userId.isNotEmpty, 'User ID must be provided');
+
     final elderState = context.read<ElderBloc>().state;
     final caregiverState = context.read<CaregiverBloc>().state;
 
@@ -76,23 +80,50 @@ class _PhotoProfileState extends State<PhotoProfile> {
       _isUploading = true;
       _elderPhotoUploaded = false;
       _caregiverPhotoUploaded = false;
+      _needElderUpload = false;
+      _needCaregiverUpload = false;
     });
 
+    bool needsUpload = false;
+
     if (_elderImage != null && _elderId != null) {
+      needsUpload = true;
+      setState(() {
+        _needElderUpload = true;
+      });
       _uploadElderPhoto();
     } else {
-      _elderPhotoUploaded = true;
+      setState(() {
+        _elderPhotoUploaded = true;
+      });
     }
 
     if (_caregiverImage != null && _caregiverId != null) {
+      needsUpload = true;
+      setState(() {
+        _needCaregiverUpload = true;
+      });
       _uploadCaregiverPhoto();
     } else {
-      _caregiverPhotoUploaded = true;
+      setState(() {
+        _caregiverPhotoUploaded = true;
+      });
     }
 
-    if ((_elderImage == null || _elderId == null) &&
-        (_caregiverImage == null || _caregiverId == null)) {
+    if (!needsUpload) {
       _completeProcess();
+    } else {
+      Future.delayed(const Duration(seconds: 30), () {
+        if (mounted && _isUploading) {
+          setState(() {
+            _isUploading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Upload timed out. Please try again.')),
+          );
+        }
+      });
     }
   }
 
@@ -121,16 +152,29 @@ class _PhotoProfileState extends State<PhotoProfile> {
   }
 
   void _checkCompletionStatus() {
-    if (_elderPhotoUploaded && _caregiverPhotoUploaded) {
+    bool isComplete = true;
+
+    // Only check uploads that were actually requested
+    if (_needElderUpload && !_elderPhotoUploaded) {
+      isComplete = false;
+    }
+
+    if (_needCaregiverUpload && !_caregiverPhotoUploaded) {
+      isComplete = false;
+    }
+
+    if (isComplete) {
       _completeProcess();
     }
   }
 
   void _completeProcess() {
-    setState(() {
-      _isUploading = false;
-    });
-    widget.onNext();
+    if (mounted) {
+      setState(() {
+        _isUploading = false;
+      });
+      widget.onNext();
+    }
   }
 
   Widget _buildProfileImage({
@@ -207,12 +251,12 @@ class _PhotoProfileState extends State<PhotoProfile> {
         BlocListener<ImageBloc, ImageState>(
           listener: (context, state) {
             if (state is ImageUploadSuccess) {
-              if (state.uploadedImage.entityType.toString() == 'elder') {
+              if (state.uploadedImage.entityType == EntityType.elder) {
                 setState(() {
                   _elderPhotoUploaded = true;
                 });
-              } else if (state.uploadedImage.entityType.toString() ==
-                  'caregiver') {
+              } else if (state.uploadedImage.entityType ==
+                  EntityType.caregiver) {
                 setState(() {
                   _caregiverPhotoUploaded = true;
                 });
@@ -223,8 +267,16 @@ class _PhotoProfileState extends State<PhotoProfile> {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Image upload error: ${state.error}')),
               );
+
               setState(() {
                 _isUploading = false;
+
+                if (_needElderUpload && !_elderPhotoUploaded) {
+                  _elderPhotoUploaded = true;
+                }
+                if (_needCaregiverUpload && !_caregiverPhotoUploaded) {
+                  _caregiverPhotoUploaded = true;
+                }
               });
             }
           },
@@ -256,93 +308,82 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
               final hasCaregiverProfile = caregiverState is CaregiverSuccess;
 
-              return Stack(
-                children: [
-                  SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Add top padding to center vertically when screen is large enough
-                        SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.05),
+              final bool isLoading = _isUploading ||
+                  elderState is ElderLoading ||
+                  caregiverState is CaregiverLoading ||
+                  context.watch<ImageBloc>().state is ImageLoading;
 
-                        // Center the profile images
-                        Center(
-                          child: Column(
-                            children: [
-                              _buildProfileImage(
-                                imageFile: _elderImage,
-                                onTap: () => _pickImageFromGallery(true),
-                                title: "Elder",
-                                isAvailable: hasElderProfile,
-                              ),
-                              const SizedBox(height: 32),
-                              _buildProfileImage(
-                                imageFile: _caregiverImage,
-                                onTap: () => _pickImageFromGallery(false),
-                                title: "Caregiver",
-                                isAvailable: hasCaregiverProfile,
-                              ),
-                            ],
+              return SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Add top padding to center vertically when screen is large enough
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+
+                    // Center the profile images
+                    Center(
+                      child: Column(
+                        children: [
+                          _buildProfileImage(
+                            imageFile: _elderImage,
+                            onTap: () => _pickImageFromGallery(true),
+                            title: "Elder",
+                            isAvailable: hasElderProfile,
                           ),
-                        ),
-
-                        // Add spacing before buttons
-                        const SizedBox(height: 36),
-
-                        // Remove the extra padding to match other screens
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            MainButton(
-                              buttonText: widget.isFinalStep
-                                  ? "Selesai"
-                                  : "Selanjutnya",
-                              onTap: _isUploading
-                                  ? () {}
-                                  : () {
-                                      if ((_elderImage != null &&
-                                              hasElderProfile) ||
-                                          (_caregiverImage != null &&
-                                              hasCaregiverProfile)) {
-                                        _savePhotos();
-                                      } else {
-                                        widget.onNext();
-                                      }
-                                    },
-                              color: (_elderImage != null ||
-                                      _caregiverImage != null ||
-                                      !_isUploading)
-                                  ? AppColors.primaryMain
-                                  : AppColors.neutral30,
-                            ),
-                            const SizedBox(height: 12),
-                            MainButton(
-                              buttonText: "Lewati",
-                              onTap: _isUploading ? () {} : widget.onSkip,
-                              color: Colors.white,
-                            ),
-                          ],
-                        ),
-
-                        // Add some bottom padding
-                        const SizedBox(height: 16),
-                      ],
-                    ),
-                  ),
-                  // Loading overlay
-                  if (_isUploading ||
-                      elderState is ElderLoading ||
-                      caregiverState is CaregiverLoading ||
-                      context.watch<ImageBloc>().state is ImageLoading)
-                    Container(
-                      color: Colors.black.withOpacity(0.3),
-                      child: const Center(
-                        child: CircularProgressIndicator(),
+                          const SizedBox(height: 32),
+                          _buildProfileImage(
+                            imageFile: _caregiverImage,
+                            onTap: () => _pickImageFromGallery(false),
+                            title: "Caregiver",
+                            isAvailable: hasCaregiverProfile,
+                          ),
+                        ],
                       ),
                     ),
-                ],
+
+                    // Add spacing before buttons
+                    const SizedBox(height: 36),
+
+                    // Remove the extra padding to match other screens
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        MainButton(
+                          buttonText:
+                              widget.isFinalStep ? "Selesai" : "Selanjutnya",
+                          onTap: isLoading
+                              ? () {}
+                              : () {
+                                  if ((_elderImage != null &&
+                                          hasElderProfile) ||
+                                      (_caregiverImage != null &&
+                                          hasCaregiverProfile)) {
+                                    _savePhotos();
+                                  } else {
+                                    widget.onNext();
+                                  }
+                                },
+                          color: (_elderImage != null ||
+                                  _caregiverImage != null ||
+                                  !isLoading)
+                              ? AppColors.primaryMain
+                              : AppColors.neutral30,
+                          isLoading: isLoading,
+                        ),
+                        const SizedBox(height: 12),
+                        MainButton(
+                          buttonText: "Lewati",
+                          onTap: isLoading ? () {} : widget.onSkip,
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+
+                    // Add some bottom padding
+                    const SizedBox(height: 16),
+                  ],
+                ),
               );
             },
           );
