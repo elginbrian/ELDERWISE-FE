@@ -1,6 +1,8 @@
 import 'package:elderwise/data/api/requests/auth_request.dart';
+import 'package:elderwise/data/services/firebase_auth_service.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_bloc.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_event.dart';
+import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
@@ -9,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   @override
   void dispose() {
@@ -33,13 +37,13 @@ class _LoginScreenState extends State<LoginScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-        LoginEvent(
-          LoginRequestDTO(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          ),
-        ),
-      );
+            LoginEvent(
+              LoginRequestDTO(
+                email: _emailController.text.trim(),
+                password: _passwordController.text,
+              ),
+            ),
+          );
     }
   }
 
@@ -94,17 +98,107 @@ class _LoginScreenState extends State<LoginScreen> {
     return emailRegExp.hasMatch(email);
   }
 
-  @override
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _firebaseAuthService.signInWithGoogle();
+      final user = userCredential.user;
+
+      if (user != null) {
+        debugPrint('Firebase Google sign in successful: ${user.email}');
+
+        // Send the Google user data to your backend
+        context.read<AuthBloc>().add(
+              GoogleSignInEvent(
+                GoogleAuthRequestDTO(
+                  email: user.email ?? '',
+                  name: user.displayName ?? '',
+                  photoUrl: user.photoURL,
+                  googleId: user.uid,
+                  idToken: await user.getIdToken(),
+                ),
+              ),
+            );
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Google sign in failed. Please try again.',
+              style: TextStyle(color: AppColors.neutral100),
+            ),
+            backgroundColor: AppColors.primaryMain,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Google sign in error: $e');
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _getFormattedErrorMessage(e.toString()),
+            style: const TextStyle(color: AppColors.neutral100),
+          ),
+          backgroundColor: AppColors.primaryMain,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 32),
-          child: Stack(
-            children: [
-              Column(
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoading) {
+          setState(() {
+            _isLoading = true;
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+          });
+
+          if (state is LoginSuccess) {
+            // Navigate to stepper for profile information
+            context.go('/fill-information');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Login berhasil!',
+                  style: TextStyle(color: AppColors.neutral100),
+                ),
+                backgroundColor: AppColors.primaryMain,
+              ),
+            );
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  _getFormattedErrorMessage(state.error),
+                  style: const TextStyle(color: AppColors.neutral100),
+                ),
+                backgroundColor: AppColors.primaryMain,
+              ),
+            );
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 32),
+              child: Column(
                 children: [
                   Image.asset(
                     'lib/presentation/screens/assets/images/banner.png',
@@ -118,19 +212,17 @@ class _LoginScreenState extends State<LoginScreen> {
                         const Text(
                           "Selamat Datang",
                           style: TextStyle(
-                              fontSize: 32,
-                              fontWeight: FontWeight.w700,
-                              fontFamily: 'Poppins',
-                              color: AppColors.neutral90
+                            fontSize: 32,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Poppins',
                           ),
                         ),
                         const Text(
                           "Login menggunakan akun anda",
                           style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                              color: AppColors.neutral90
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
                           ),
                         ),
                         const SizedBox(height: 32),
@@ -141,26 +233,26 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 16),
                               CustomFormField(
                                 hintText: "Email",
-                                icon: 'email.png',
+                                icon: 'home.png',
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) =>
-                                value == null || value.isEmpty
-                                    ? 'Email tidak boleh kosong'
-                                    : (!_isValidEmail(value)
-                                    ? 'Format email tidak valid'
-                                    : null),
+                                    value == null || value.isEmpty
+                                        ? 'Email tidak boleh kosong'
+                                        : (!_isValidEmail(value)
+                                            ? 'Format email tidak valid'
+                                            : null),
                               ),
                               const SizedBox(height: 24),
                               CustomFormField(
                                 hintText: "Password",
-                                icon: 'password.png',
+                                icon: 'home.png',
                                 controller: _passwordController,
                                 obscureText: true,
                                 validator: (value) =>
-                                value == null || value.isEmpty
-                                    ? 'Password tidak boleh kosong'
-                                    : null,
+                                    value == null || value.isEmpty
+                                        ? 'Password tidak boleh kosong'
+                                        : null,
                               ),
                               const SizedBox(height: 48),
                               MainButton(
@@ -172,10 +264,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               Row(
                                 children: const [
                                   Expanded(
-                                      child: Divider(color: AppColors.neutral80)),
+                                      child:
+                                          Divider(color: AppColors.neutral80)),
                                   Padding(
                                     padding:
-                                    EdgeInsets.symmetric(horizontal: 8.0),
+                                        EdgeInsets.symmetric(horizontal: 8.0),
                                     child: Text(
                                       "Atau lanjutkan dengan",
                                       style: TextStyle(
@@ -185,26 +278,29 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                   Expanded(
-                                      child: Divider(color: AppColors.neutral80)),
+                                      child:
+                                          Divider(color: AppColors.neutral80)),
                                 ],
                               ),
                               const SizedBox(height: 32),
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                width: 48,
-                                decoration: BoxDecoration(
-                                  color: AppColors.neutral10,
-                                  borderRadius: BorderRadius.circular(32),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      offset: const Offset(0, 3),
-                                      blurRadius: 4,
-                                    ),
-                                  ],
+                              GestureDetector(
+                                onTap: _isLoading ? null : _handleGoogleSignIn,
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  width: 48,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutral10,
+                                    borderRadius: BorderRadius.circular(32),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        offset: const Offset(0, 3),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Image.asset('${iconImages}google.png'),
                                 ),
-                                child:
-                                Image.asset('${iconImages}google.png'),
                               ),
                             ],
                           ),
@@ -234,8 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                // Navigasi ke halaman daftar (ganti dengan rute yang sesuai)
-                                Navigator.pushReplacementNamed(context, '/signup');
+                                context.go('/signup');
                               },
                           ),
                         ],
@@ -244,24 +339,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ],
               ),
-              Positioned(
-                top: 32 ,
-                left: 16,
-                child: FloatingActionButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  backgroundColor: Colors.transparent,
-                  elevation: 0,
-                  hoverElevation: 0,
-                  focusElevation: 0,
-                  highlightElevation: 0,
-                  splashColor: Colors.transparent,
-                  child: Icon(Icons.keyboard_arrow_left,
-                      color: AppColors.neutral100, size: 36),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

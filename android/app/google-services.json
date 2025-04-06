@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "787805800356",
+    "project_id": "elderwise-find-it",
+    "storage_bucket": "elderwise-find-it.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:787805800356:android:0eb0286d1a48768773a331",
+        "android_client_info": {
+          "package_name": "com.example.elderwise"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLYmkJtj1qdQsl_sY-Q4auykNnZzS6TyQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

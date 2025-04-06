@@ -6,17 +6,18 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:flutter/material.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
+  final AuthRepository _authRepository;
 
-  AuthBloc(this.authRepository) : super(AuthInitial()) {
+  AuthBloc(this._authRepository) : super(AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<RegisterEvent>(_onRegister);
+    on<GoogleSignInEvent>(_onGoogleSignIn);
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final response = await authRepository.login(event.loginRequest);
+      final response = await _authRepository.login(event.loginRequest);
 
       debugPrint('Complete response structure: ${response.runtimeType}');
       debugPrint('Response success: ${response.success}');
@@ -55,7 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onRegister(RegisterEvent event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
-      final response = await authRepository.register(event.registerRequest);
+      final response = await _authRepository.register(event.registerRequest);
 
       debugPrint('Complete response structure: ${response.runtimeType}');
       debugPrint('Response success: ${response.success}');
@@ -82,6 +83,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       debugPrint('Register exception: $e');
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onGoogleSignIn(
+    GoogleSignInEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final result = await _authRepository.googleSignIn(event.request);
+      emit(LoginSuccess(result));
+    } catch (e) {
+      debugPrint('Google sign in exception: $e');
       emit(AuthFailure(e.toString()));
     }
   }

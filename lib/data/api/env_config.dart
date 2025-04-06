@@ -12,6 +12,10 @@ class AppConfig {
     'DEV_API_URL': 'https://elderwise-dev.elginbrian.com/api/v1',
     'PROD_API_URL': 'https://elderwise-dev.elginbrian.com/api/v1',
     'LOCAL_PORT': '3000',
+    'SUPABASE_URL': 'https://ucayizjdmgxgwweshzag.supabase.co',
+    'SUPABASE_ANON_KEY':
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjYXlpempkbWd4Z3d3ZXNoemFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NjQwMTgsImV4cCI6MjA1OTM0MDAxOH0.pwFn0khq87rxYRim1lQezFMbot34dSp1xq-8h6XFV0o',
+    'SUPABASE_BUCKET_NAME': 'elderwise-images',
   };
 
   Future<void> initialize() async {
@@ -57,6 +61,16 @@ class AppConfig {
     }
     return 'http://localhost:8080/api/v1';
   }
+
+  String get supabaseUrl => get('SUPABASE_URL',
+      defaultValue: 'https://ucayizjdmgxgwweshzag.supabase.co');
+
+  String get supabaseAnonKey => get('SUPABASE_ANON_KEY',
+      defaultValue:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjYXlpempkbWd4Z3d3ZXNoemFnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NjQwMTgsImV4cCI6MjA1OTM0MDAxOH0.pwFn0khq87rxYRim1lQezFMbot34dSp1xq-8h6XFV0o');
+
+  String get supabaseBucketName =>
+      get('SUPABASE_BUCKET_NAME', defaultValue: 'elderwise-images');
 }
 
 final appConfig = AppConfig();

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:elderwise/data/api/api_config.dart';
 import 'package:elderwise/data/api/requests/auth_request.dart';
+import 'package:elderwise/data/api/responses/auth_response.dart';
 import 'package:elderwise/data/api/responses/response_wrapper.dart';
 import 'package:elderwise/domain/repositories/auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -31,5 +32,69 @@ class AuthRepositoryImpl implements AuthRepository {
       }
     }
     return responseWrapper;
+  }
+
+  @override
+  Future<LoginResponseDTO> googleSignIn(GoogleAuthRequestDTO request) async {
+    try {
+      try {
+        final loginResponse = await dio.post(
+          ApiConfig.login,
+          data:
+              LoginRequestDTO(email: request.email, password: request.googleId)
+                  .toJson(),
+        );
+        debugPrint("Google Auth - Login attempt: ${loginResponse.data}");
+
+        final loginWrapper = ResponseWrapper.fromJson(loginResponse.data);
+
+        if (loginWrapper.success) {
+          final token = loginWrapper.data['token'] as String?;
+          if (token != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('auth_token', token);
+            return LoginResponseDTO(token: token);
+          }
+        }
+
+        debugPrint("Google Auth - Login failed, trying registration");
+      } catch (e) {
+        debugPrint("Google Auth - Login error: $e");
+      }
+
+      final registerResponse = await dio.post(
+        ApiConfig.register,
+        data:
+            RegisterRequestDTO(email: request.email, password: request.googleId)
+                .toJson(),
+      );
+      debugPrint("Google Auth - Register response: ${registerResponse.data}");
+
+      final registerWrapper = ResponseWrapper.fromJson(registerResponse.data);
+
+      if (registerWrapper.success) {
+        final loginAfterRegisterResponse = await dio.post(
+          ApiConfig.login,
+          data: {'email': request.email, 'google_id': request.googleId},
+        );
+
+        final loginAfterRegisterWrapper =
+            ResponseWrapper.fromJson(loginAfterRegisterResponse.data);
+
+        if (loginAfterRegisterWrapper.success) {
+          final token = loginAfterRegisterWrapper.data['token'] as String?;
+          if (token != null) {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('auth_token', token);
+            return LoginResponseDTO(token: token);
+          }
+        }
+      }
+
+      throw Exception(registerWrapper.message);
+    } catch (e) {
+      debugPrint("Google SignIn error: $e");
+      throw Exception('Failed to sign in with Google: $e');
+    }
   }
 }
