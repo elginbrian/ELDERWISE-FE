@@ -13,11 +13,17 @@ import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_bloc
 import 'package:elderwise/presentation/bloc/image/image_bloc.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
-import 'package:elderwise/presentation/routes/test/test_route.dart';
+import 'package:elderwise/presentation/routes/app_route.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   await appConfig.initialize();
 
@@ -68,12 +74,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Elderwise Demo',
+      title: 'Elderwise',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      routerConfig: testRouter,
+      routerConfig: appRouter,
       builder: (context, child) {
         if (kIsWeb) {
           return WebLayout(
