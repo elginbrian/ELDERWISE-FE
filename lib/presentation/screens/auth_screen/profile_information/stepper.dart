@@ -40,13 +40,12 @@ class _StepperScreenState extends State<StepperScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      // Handle system back button presses
       onWillPop: () async {
         if (currentStep > 0) {
           setState(() => currentStep -= 1);
-          return false; // Don't allow default back behavior
+          return false;
         }
-        return true; // Allow default back navigation
+        return true;
       },
       child: Scaffold(
         backgroundColor: AppColors.secondarySurface,
@@ -70,8 +69,6 @@ class _StepperScreenState extends State<StepperScreen> {
                       if (currentStep > 0) {
                         setState(() => currentStep -= 1);
                       } else {
-                        // Use GoRouter to navigate back on first step
-                        // Replace '/login' with the appropriate previous route
                         context.go('/login');
                       }
                     },
@@ -104,16 +101,15 @@ class _StepperScreenState extends State<StepperScreen> {
                     }),
                   ),
                 ),
-
-                // Step content - now contains its own buttons
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(top: 8),
+                    padding:
+                        const EdgeInsets.only(left: 16, right: 16, top: 16),
                     child: IndexedStack(
                       index: currentStep,
                       children: [
@@ -121,16 +117,19 @@ class _StepperScreenState extends State<StepperScreen> {
                           onNext: nextStep,
                           onSkip: skipStep,
                           isFinalStep: false,
+                          userId: '',
                         ),
                         CaregiverProfile(
                           onNext: nextStep,
                           onSkip: skipStep,
                           isFinalStep: false,
+                          userId: '',
                         ),
                         PhotoProfile(
                           onNext: nextStep,
                           onSkip: skipStep,
                           isFinalStep: true,
+                          userId: '',
                         ),
                       ],
                     ),
