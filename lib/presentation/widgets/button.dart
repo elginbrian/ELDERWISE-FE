@@ -9,12 +9,14 @@ class MainButton extends StatelessWidget {
   final String buttonText;
   final VoidCallback onTap;
   final bool isLoading;
+  final Color? color;
 
   const MainButton({
     super.key,
     required this.buttonText,
     required this.onTap,
     this.isLoading = false,
+    this.color = AppColors.primaryMain, 
   });
 
   @override
@@ -26,7 +28,7 @@ class MainButton extends StatelessWidget {
         height: 40,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
-          color: AppColors.primaryMain,
+          color: color ?? AppColors.primaryMain,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -49,10 +51,11 @@ class MainButton extends StatelessWidget {
                   buttonText,
                   textAlign: TextAlign.center,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
-                      color: AppColors.neutral90,
-                      fontFamily: 'Poppins'),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 12,
+                    color: AppColors.neutral90,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
         ),
       ),
