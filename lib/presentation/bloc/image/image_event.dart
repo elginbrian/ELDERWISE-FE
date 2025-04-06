@@ -34,3 +34,21 @@ class DeleteImageEvent extends ImageEvent {
 
   DeleteImageEvent(this.path);
 }
+
+class ProcessEntityImageEvent extends ImageEvent {
+  final String imageUrl;
+  final String entityId;
+  final EntityType entityType;
+  final String? userId;
+  final String? imagePath;
+  final String? imageId;
+
+  ProcessEntityImageEvent({
+    required this.imageUrl,
+    required this.entityId,
+    required this.entityType,
+    this.userId,
+    this.imagePath,
+    this.imageId,
+  });
+}

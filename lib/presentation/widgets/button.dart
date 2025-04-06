@@ -16,7 +16,7 @@ class MainButton extends StatelessWidget {
     required this.buttonText,
     required this.onTap,
     this.isLoading = false,
-    this.color = AppColors.primaryMain, 
+    this.color = AppColors.primaryMain,
   });
 
   @override

@@ -35,6 +35,7 @@ class ApiConfig {
 
   static String register = "/auth/register";
   static String login = "/auth/login";
+  static String getCurrentUser = "/auth/me";
 
   static String getUser(String userId) => "/users/$userId";
   static String getUserCaregivers(String userId) => "/users/$userId/caregivers";
@@ -77,4 +78,6 @@ class ApiConfig {
   static String createEmergencyAlert = "/emergency-alerts";
   static String updateEmergencyAlert(String alertId) =>
       "/emergency-alerts/$alertId";
+
+  static String processEntityImage = "/storage/images";
 }

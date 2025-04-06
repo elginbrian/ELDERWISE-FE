@@ -17,4 +17,13 @@ abstract class ImageRepository {
   });
 
   Future<bool> deleteImage(String path);
+
+  Future<UploadedImage> processEntityImage({
+    required String imageUrl,
+    required String entityId,
+    required EntityType entityType,
+    String? userId,
+    String? imagePath,
+    String? imageId,
+  });
 }

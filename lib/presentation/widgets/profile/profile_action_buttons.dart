@@ -7,6 +7,7 @@ class ProfileActionButtons extends StatelessWidget {
   final VoidCallback onNext;
   final VoidCallback onSkip;
   final bool isFinalStep;
+  final bool isLoading;
 
   const ProfileActionButtons({
     super.key,
@@ -14,6 +15,7 @@ class ProfileActionButtons extends StatelessWidget {
     required this.onNext,
     required this.onSkip,
     this.isFinalStep = false,
+    this.isLoading = false,
   });
 
   @override
@@ -25,6 +27,7 @@ class ProfileActionButtons extends StatelessWidget {
           buttonText: isFinalStep ? "Selesai" : "Selanjutnya",
           onTap: isFormValid ? onNext : () {},
           color: isFormValid ? AppColors.primaryMain : AppColors.neutral30,
+          isLoading: isLoading,
         ),
         const SizedBox(height: 12),
         MainButton(

@@ -77,17 +77,31 @@ class _ElderProfileState extends State<ElderProfile> {
   void _submitForm() {
     if (!_isFormValid) return;
 
+    // Ensure the birthdate has timezone information
+    final DateTime birthdate = _selectedDate ?? DateTime.now();
+    // Convert to UTC and ensure it has the correct format
+    final DateTime formattedBirthdate = DateTime.utc(
+      birthdate.year,
+      birthdate.month,
+      birthdate.day,
+      0,
+      0,
+      0,
+      0,
+      0,
+    );
+
     final elder = Elder(
       elderId: Uuid().v4(),
       userId: widget.userId,
       name: namaController.text,
       gender: genderController.text,
-      birthdate: _selectedDate ?? DateTime.now(),
+      birthdate: formattedBirthdate,
       bodyHeight: (int.tryParse(tinggiController.text) ?? 0).toDouble(),
       bodyWeight: (int.tryParse(beratController.text) ?? 0).toDouble(),
       photoUrl: '',
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      createdAt: DateTime.now().toUtc(),
+      updatedAt: DateTime.now().toUtc(),
     );
 
     context.read<ElderBloc>().add(CreateElderEvent(elder));
@@ -118,73 +132,64 @@ class _ElderProfileState extends State<ElderProfile> {
         }
       },
       builder: (context, state) {
-        return Stack(
-          children: [
-            Form(
-              key: _formKey,
-              onChanged: _validateForm,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CustomProfileField(
-                      title: 'Nama Lengkap',
-                      hintText: 'Masukkan nama elder',
-                      controller: namaController,
-                      icon: Icons.person,
-                      onChanged: (_) => _validateForm(),
-                      validator: (value) => value?.isEmpty ?? true
-                          ? 'Nama tidak boleh kosong'
-                          : null,
-                    ),
-                    GenderSelector(
-                      controller: genderController,
-                      selectedGender: _selectedGender,
-                      onGenderSelected: _selectGender,
-                      genderOptions: _genderOptions,
-                    ),
-                    DatePickerField(
-                      controller: tanggalLahirController,
-                      selectedDate: _selectedDate,
-                      onDateSelected: _selectDate,
-                      placeholder: 'Pilih tanggal lahir elder',
-                    ),
-                    MeasurementField(
-                      title: 'Tinggi Badan',
-                      hint: 'Masukkan tinggi badan',
-                      controller: tinggiController,
-                      unit: 'cm',
-                      onChanged: (_) => _validateForm(),
-                    ),
-                    MeasurementField(
-                      title: 'Berat Badan',
-                      hint: 'Masukkan berat badan',
-                      controller: beratController,
-                      unit: 'kg',
-                      onChanged: (_) => _validateForm(),
-                    ),
-                    const SizedBox(height: 24),
-                    ProfileActionButtons(
-                      isFormValid: _isFormValid,
-                      onNext: () {
-                        _submitForm();
-                        if (widget.isFinalStep) widget.onNext();
-                      },
-                      onSkip: widget.onSkip,
-                      isFinalStep: widget.isFinalStep,
-                    ),
-                  ],
+        final bool isLoading = state is ElderLoading;
+
+        return Form(
+          key: _formKey,
+          onChanged: _validateForm,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CustomProfileField(
+                  title: 'Nama Lengkap',
+                  hintText: 'Masukkan nama elder',
+                  controller: namaController,
+                  icon: Icons.person,
+                  onChanged: (_) => _validateForm(),
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Nama tidak boleh kosong' : null,
                 ),
-              ),
+                GenderSelector(
+                  controller: genderController,
+                  selectedGender: _selectedGender,
+                  onGenderSelected: _selectGender,
+                  genderOptions: _genderOptions,
+                ),
+                DatePickerField(
+                  controller: tanggalLahirController,
+                  selectedDate: _selectedDate,
+                  onDateSelected: _selectDate,
+                  placeholder: 'Pilih tanggal lahir elder',
+                ),
+                MeasurementField(
+                  title: 'Tinggi Badan',
+                  hint: 'Masukkan tinggi badan',
+                  controller: tinggiController,
+                  unit: 'cm',
+                  onChanged: (_) => _validateForm(),
+                ),
+                MeasurementField(
+                  title: 'Berat Badan',
+                  hint: 'Masukkan berat badan',
+                  controller: beratController,
+                  unit: 'kg',
+                  onChanged: (_) => _validateForm(),
+                ),
+                const SizedBox(height: 24),
+                ProfileActionButtons(
+                  isFormValid: _isFormValid,
+                  onNext: () {
+                    _submitForm();
+                    if (widget.isFinalStep) widget.onNext();
+                  },
+                  onSkip: widget.onSkip,
+                  isFinalStep: widget.isFinalStep,
+                  isLoading: isLoading,
+                ),
+              ],
             ),
-            if (state is ElderLoading)
-              Container(
-                color: Colors.black.withOpacity(0.3),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-          ],
+          ),
         );
       },
     );

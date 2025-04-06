@@ -14,6 +14,7 @@ class RegisterEvent extends AuthEvent {
 
 class GoogleSignInEvent extends AuthEvent {
   final GoogleAuthRequestDTO request;
-
   GoogleSignInEvent(this.request);
 }
+
+class GetCurrentUserEvent extends AuthEvent {}

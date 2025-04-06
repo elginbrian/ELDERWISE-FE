@@ -92,17 +92,29 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
   void _submitForm() {
     if (!_isFormValid) return;
 
+    final DateTime birthdate = _selectedDate ?? DateTime.now();
+    final DateTime formattedBirthdate = DateTime.utc(
+      birthdate.year,
+      birthdate.month,
+      birthdate.day,
+      0,
+      0,
+      0,
+      0,
+      0,
+    );
+
     final caregiver = Caregiver(
       caregiverId: Uuid().v4(),
       userId: widget.userId,
       name: namaController.text,
       gender: genderController.text,
-      birthdate: _selectedDate ?? DateTime.now(),
+      birthdate: formattedBirthdate,
       phoneNumber: teleponController.text,
       profileUrl: '',
       relationship: relationshipController.text,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      createdAt: DateTime.now().toUtc(),
+      updatedAt: DateTime.now().toUtc(),
     );
 
     context.read<CaregiverBloc>().add(CreateCaregiverEvent(caregiver));
@@ -133,90 +145,72 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
         }
       },
       builder: (context, state) {
-        return Stack(
-          children: [
-            Form(
-              key: _formKey,
-              onChanged: _validateForm,
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    CustomProfileField(
-                      title: 'Nama Lengkap',
-                      hintText: 'Masukkan nama anda',
-                      controller: namaController,
-                      onChanged: (_) => _validateForm(),
-                      icon: Icons.person,
-                      validator: (value) => value?.isEmpty ?? true
-                          ? 'Nama tidak boleh kosong'
-                          : null,
-                    ),
+        final bool isLoading = state is CaregiverLoading;
 
-                    GenderSelector(
-                      controller: genderController,
-                      selectedGender: _selectedGender,
-                      onGenderSelected: _selectGender,
-                    ),
-
-                    DatePickerField(
-                      controller: tanggalLahirController,
-                      selectedDate: _selectedDate,
-                      onDateSelected: _selectDate,
-                      placeholder: 'Pilih tanggal lahir anda',
-                    ),
-
-                    // Phone number field
-                    CustomProfileField(
-                      title: 'No. Telepon',
-                      hintText: 'Masukkan nomor telepon anda',
-                      icon: Icons.phone,
-                      controller: teleponController,
-                      keyboardType: TextInputType.phone,
-                      onChanged: (_) => _validateForm(),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Nomor telepon tidak boleh kosong';
-                        }
-                        if (!RegExp(r'^\d+$').hasMatch(value)) {
-                          return 'Nomor telepon hanya boleh berisi angka';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    // Relationship Dropdown
-                    RelationshipSelector(
-                      controller: relationshipController,
-                      selectedRelationship: _selectedRelationship,
-                      onRelationshipSelected: _selectRelationship,
-                      relationshipOptions: _relationshipOptions,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    ProfileActionButtons(
-                      isFormValid: _isFormValid,
-                      onNext: () {
-                        _submitForm();
-                        if (widget.isFinalStep) widget.onNext();
-                      },
-                      onSkip: widget.onSkip,
-                      isFinalStep: widget.isFinalStep,
-                    ),
-                  ],
+        return Form(
+          key: _formKey,
+          onChanged: _validateForm,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                CustomProfileField(
+                  title: 'Nama Lengkap',
+                  hintText: 'Masukkan nama anda',
+                  controller: namaController,
+                  onChanged: (_) => _validateForm(),
+                  icon: Icons.person,
+                  validator: (value) =>
+                      value?.isEmpty ?? true ? 'Nama tidak boleh kosong' : null,
                 ),
-              ),
+                GenderSelector(
+                  controller: genderController,
+                  selectedGender: _selectedGender,
+                  onGenderSelected: _selectGender,
+                ),
+                DatePickerField(
+                  controller: tanggalLahirController,
+                  selectedDate: _selectedDate,
+                  onDateSelected: _selectDate,
+                  placeholder: 'Pilih tanggal lahir anda',
+                ),
+                CustomProfileField(
+                  title: 'No. Telepon',
+                  hintText: 'Masukkan nomor telepon anda',
+                  icon: Icons.phone,
+                  controller: teleponController,
+                  keyboardType: TextInputType.phone,
+                  onChanged: (_) => _validateForm(),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Nomor telepon tidak boleh kosong';
+                    }
+                    if (!RegExp(r'^\d+$').hasMatch(value)) {
+                      return 'Nomor telepon hanya boleh berisi angka';
+                    }
+                    return null;
+                  },
+                ),
+                RelationshipSelector(
+                  controller: relationshipController,
+                  selectedRelationship: _selectedRelationship,
+                  onRelationshipSelected: _selectRelationship,
+                  relationshipOptions: _relationshipOptions,
+                ),
+                const SizedBox(height: 24),
+                ProfileActionButtons(
+                  isFormValid: _isFormValid,
+                  onNext: () {
+                    _submitForm();
+                    if (widget.isFinalStep) widget.onNext();
+                  },
+                  onSkip: widget.onSkip,
+                  isFinalStep: widget.isFinalStep,
+                  isLoading: isLoading,
+                ),
+              ],
             ),
-            // Show loading indicator
-            if (state is CaregiverLoading)
-              Container(
-                color: Colors.black.withOpacity(0.3),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-          ],
+          ),
         );
       },
     );

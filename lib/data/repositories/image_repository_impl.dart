@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:elderwise/data/api/env_config.dart';
+import 'package:elderwise/data/api/api_config.dart';
 import 'package:elderwise/domain/entities/uploaded_image.dart';
 import 'package:elderwise/domain/enums/entity_type.dart';
 import 'package:elderwise/domain/repositories/image_repository.dart';
@@ -113,6 +114,61 @@ class ImageRepositoryImpl implements ImageRepository {
     } catch (e) {
       debugPrint("Error deleting image: $e");
       return false;
+    }
+  }
+
+  @override
+  Future<UploadedImage> processEntityImage({
+    required String imageUrl,
+    required String entityId,
+    required EntityType entityType,
+    String? userId,
+    String? imagePath,
+    String? imageId,
+  }) async {
+    if (userId == null || userId.isEmpty) {
+      throw Exception('User ID must be provided');
+    }
+    try {
+      final Map<String, dynamic> requestData = {
+        'url': imageUrl,
+        'entityId': entityId,
+        'entityType': entityType.toStringValue(),
+        'userId': userId,
+        if (imageId != null) 'id': imageId,
+        if (imagePath != null) 'path': imagePath,
+      };
+
+      debugPrint("Processing image with data: $requestData");
+
+      final response = await ApiConfig.dio.post(
+        ApiConfig.processEntityImage,
+        data: requestData,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseData = response.data;
+        final data = responseData['data'] ?? responseData;
+
+        return UploadedImage(
+          id: data['id'] ?? imageId ?? const Uuid().v4(),
+          url: data['url'] ?? imageUrl,
+          path: data['path'] ?? imagePath ?? '',
+          createdAt: data['created_at'] != null
+              ? DateTime.parse(data['created_at'])
+              : DateTime.now(),
+          userId: data['user_id'] ?? userId,
+          entityId: data['entity_id'] ?? entityId,
+          entityType: data['entity_type'] != null
+              ? EntityType.fromString(data['entity_type'])
+              : entityType,
+        );
+      } else {
+        throw Exception('Failed to process image: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint("Error processing entity image: $e");
+      throw Exception('Failed to process entity image: $e');
     }
   }
 }
