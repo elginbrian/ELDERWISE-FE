@@ -33,13 +33,13 @@ class _SignupScreenState extends State<SignupScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-            LoginEvent(
-              LoginRequestDTO(
-                email: _emailController.text.trim(),
-                password: _passwordController.text,
-              ),
-            ),
-          );
+        LoginEvent(
+          LoginRequestDTO(
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+          ),
+        ),
+      );
     }
   }
 
@@ -95,159 +95,170 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   @override
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.white,
-    body: SafeArea(
-      child: Column(
-        children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const SizedBox(), // Bagian atas, bisa diisi logo jika mau
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final topPadding = screenHeight * 0.2;
 
-                  // Konten utama (Daftar, Form, Google login)
-                  Column(
-                    children: [
-                      const SizedBox(height: 48),
-                      const Text(
-                        "Daftar",
-                        style: TextStyle(
+    return Scaffold(
+
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(height: topPadding),
+
+                Column(
+                  children: [
+                    const Text(
+                      "Daftar",
+                      style: TextStyle(
                           fontSize: 40,
                           fontWeight: FontWeight.w700,
                           fontFamily: 'Poppins',
-                        ),
-                      ),
-                      const Text(
-                        "Buat akun baru",
-                        style: TextStyle(
+                          color: AppColors.neutral90),
+                    ),
+                    const Text(
+                      "Buat akun baru",
+                      style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Poppins',
-                        ),
-                      ),
-                      const SizedBox(height: 48),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            CustomFormField(
-                              hintText: "Username",
-                              icon: 'username.png',
-                              validator: (value) => value == null || value.isEmpty
-                                  ? 'Username tidak boleh kosong'
-                                  : null,
-                            ),
-                            const SizedBox(height: 24),
-                            CustomFormField(
-                              hintText: "Email",
-                              icon: 'email.png',
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) => value == null || value.isEmpty
-                                  ? 'Email tidak boleh kosong'
-                                  : (!_isValidEmail(value)
-                                      ? 'Format email tidak valid'
-                                      : null),
-                            ),
-                            const SizedBox(height: 24),
-                            CustomFormField(
-                              hintText: "Password",
-                              icon: 'password.png',
-                              controller: _passwordController,
-                              obscureText: true,
-                              validator: (value) => value == null || value.isEmpty
-                                  ? 'Password tidak boleh kosong'
-                                  : null,
-                            ),
-                            const SizedBox(height: 48),
-                            MainButton(
-                              buttonText: "Register",
-                              onTap: _submitForm,
-                              isLoading: _isLoading,
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              children: const [
-                                Expanded(child: Divider(color: AppColors.neutral80)),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text(
-                                    "Atau lanjutkan dengan",
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                    ),
+                          color: AppColors.neutral90),
+                    ),
+                    const SizedBox(height: 48),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          CustomFormField(
+                            hintText: "Username",
+                            icon: 'username.png',
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Username tidak boleh kosong'
+                                : null,
+                          ),
+                          const SizedBox(height: 24),
+                          CustomFormField(
+                            hintText: "Email",
+                            icon: 'email.png',
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Email tidak boleh kosong'
+                                : (!_isValidEmail(value)
+                                ? 'Format email tidak valid'
+                                : null),
+                          ),
+                          const SizedBox(height: 24),
+                          CustomFormField(
+                            hintText: "Password",
+                            icon: 'password.png',
+                            controller: _passwordController,
+                            obscureText: true,
+                            validator: (value) => value == null || value.isEmpty
+                                ? 'Password tidak boleh kosong'
+                                : null,
+                          ),
+                          const SizedBox(height: 48),
+                          MainButton(
+                            buttonText: "Daftar",
+                            onTap: _submitForm,
+                            isLoading: _isLoading,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: const [
+                              Expanded(child: Divider(color: AppColors.neutral80)),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  "Atau lanjutkan dengan",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontFamily: 'Poppins',
                                   ),
                                 ),
-                                Expanded(child: Divider(color: AppColors.neutral80)),
+                              ),
+                              Expanded(child: Divider(color: AppColors.neutral80)),
+                            ],
+                          ),
+                          const SizedBox(height: 32),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            width: 48,
+                            decoration: BoxDecoration(
+                              color: AppColors.neutral10,
+                              borderRadius: BorderRadius.circular(32),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  offset: const Offset(0, 3),
+                                  blurRadius: 4,
+                                ),
                               ],
                             ),
-                            const SizedBox(height: 32),
-                            Container(
-                              padding: const EdgeInsets.all(10),
-                              width: 48,
-                              decoration: BoxDecoration(
-                                color: AppColors.neutral10,
-                                borderRadius: BorderRadius.circular(32),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    offset: const Offset(0, 3),
-                                    blurRadius: 4,
-                                  ),
-                                ],
-                              ),
-                              child: Image.asset('${iconImages}google.png'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  // Bagian bawah (RichText login link)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 32),
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "Sudah punya akun?",
-                            style: TextStyle(
-                              color: AppColors.neutral90,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                          TextSpan(
-                            text: " Masuk",
-                            style: TextStyle(
-                              color: AppColors.primaryMain,
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                            ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                Navigator.pop(context);
-                              },
+                            child: Image.asset('${iconImages}google.png'),
                           ),
                         ],
                       ),
                     ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 32),
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Sudah punya akun?",
+                          style: TextStyle(
+                            color: AppColors.neutral90,
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                          ),
+                        ),
+                        TextSpan(
+                          text: " Masuk",
+                          style: TextStyle(
+                            color: AppColors.primaryMain,
+                            fontSize: 12,
+                            fontFamily: 'Poppins',
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () {
+                              Navigator.pop(context);
+                            },
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
+            Positioned(
+              top: 32 ,
+              left: 16,
+              child: FloatingActionButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+                hoverElevation: 0,
+                focusElevation: 0,
+                highlightElevation: 0,
+                splashColor: Colors.transparent,
+                child: Icon(Icons.keyboard_arrow_left,
+                    color: AppColors.neutral100, size: 36),
+              ),
+            ),]
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }
