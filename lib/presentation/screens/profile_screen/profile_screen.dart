@@ -8,13 +8,13 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity, // Agar memenuhi seluruh layar
+        width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
             image: AssetImage(
                 'lib/presentation/screens/assets/images/bg_floral.png'),
-            fit: BoxFit.cover, // Menyesuaikan ukuran gambar agar memenuhi layar
+            fit: BoxFit.cover,
           ),
         ),
         child: Column(
