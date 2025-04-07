@@ -45,3 +45,27 @@ class LoginRequestDTO {
     };
   }
 }
+
+class GoogleAuthRequestDTO {
+  final String email;
+  final String name;
+  final String? photoUrl;
+  final String googleId;
+  final String? idToken;
+
+  GoogleAuthRequestDTO({
+    required this.email,
+    required this.name,
+    this.photoUrl,
+    required this.googleId,
+    this.idToken,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'email': email,
+        'name': name,
+        'photo_url': photoUrl,
+        'google_id': googleId,
+        'id_token': idToken,
+      };
+}
