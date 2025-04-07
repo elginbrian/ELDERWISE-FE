@@ -53,6 +53,7 @@ dependencies:
   firebase_auth: ^5.5.2
   google_sign_in: ^6.3.0
   intl: ^0.20.2
+  animated_toggle_switch: ^0.8.4
 
 dev_dependencies:
   flutter_test:
