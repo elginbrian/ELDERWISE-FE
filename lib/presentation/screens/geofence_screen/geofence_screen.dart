@@ -14,7 +14,17 @@ class GeofenceScreen extends StatefulWidget {
 class _GeofenceScreenState extends State<GeofenceScreen> {
   static const _initialCameraPosition = CameraPosition(
       target: LatLng(-7.9996, 112.629),
-  zoom: 16);
+  zoom: 13);
+
+  late GoogleMapController _googleMapController;
+
+  @override
+  void dispose(){
+    _googleMapController.dispose();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -82,7 +92,8 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                 child: GoogleMap(
                                   myLocationButtonEnabled: false,
                                     zoomControlsEnabled: false,
-                                    initialCameraPosition: _initialCameraPosition,)
+                                    initialCameraPosition: _initialCameraPosition,
+                                  onMapCreated: (controller) => _googleMapController = controller,)
                               )
                               ),
                               Column(
@@ -122,7 +133,9 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
                               Padding(
                                 padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 16),
-                                child: MainButton(buttonText: "Beri Peringatan", color: AppColors.neutral20, onTap: (){}),
+                                child: MainButton(buttonText: "Beri Peringatan", color: AppColors.neutral20, onTap: (){
+                                  _googleMapController.animateCamera(CameraUpdate.newCameraPosition(_initialCameraPosition));
+                                }),
                               )
                             ],
                           ),

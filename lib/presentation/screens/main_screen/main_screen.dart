@@ -1,5 +1,6 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
@@ -100,6 +101,6 @@ List<String> navTitles = [
 final List<Widget> screens = [
   ProfileScreen(),
   GeofenceScreen(),
-  ProfileScreen(),
+  SetFenceScreen(),
   MainProfileScreen(),
 ];
