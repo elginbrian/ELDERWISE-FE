@@ -7,6 +7,7 @@ class DatePickerField extends StatefulWidget {
   final DateTime? selectedDate;
   final Function(DateTime) onDateSelected;
   final String placeholder;
+  final bool readOnly;
 
   const DatePickerField({
     super.key,
@@ -14,6 +15,7 @@ class DatePickerField extends StatefulWidget {
     required this.selectedDate,
     required this.onDateSelected,
     this.placeholder = 'Pilih tanggal lahir',
+    this.readOnly = false,
   });
 
   @override
@@ -24,6 +26,8 @@ class _DatePickerFieldState extends State<DatePickerField> {
   bool _touched = false;
 
   Future<void> _selectDate(BuildContext context) async {
+    if (widget.readOnly) return; // Don't open date picker if readOnly
+
     setState(() {
       _touched = true;
     });
@@ -115,7 +119,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
             ),
           ),
         ),
-        if (_touched && widget.controller.text.isEmpty)
+        if (_touched && widget.controller.text.isEmpty && !widget.readOnly)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(

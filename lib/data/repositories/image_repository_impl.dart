@@ -157,11 +157,9 @@ class ImageRepositoryImpl implements ImageRepository {
           createdAt: data['created_at'] != null
               ? DateTime.parse(data['created_at'])
               : DateTime.now(),
-          userId: data['user_id'] ?? userId,
-          entityId: data['entity_id'] ?? entityId,
-          entityType: data['entity_type'] != null
-              ? EntityType.fromString(data['entity_type'])
-              : entityType,
+          userId: userId,
+          entityId: entityId,
+          entityType: entityType,
         );
       } else {
         throw Exception('Failed to process image: ${response.statusCode}');
