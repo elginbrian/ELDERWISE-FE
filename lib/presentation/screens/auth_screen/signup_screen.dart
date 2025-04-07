@@ -1,6 +1,8 @@
 import 'package:elderwise/data/api/requests/auth_request.dart';
+import 'package:elderwise/data/services/firebase_auth_service.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_bloc.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_event.dart';
+import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
@@ -9,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -19,12 +22,15 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  final FirebaseAuthService _firebaseAuthService = FirebaseAuthService();
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -33,13 +39,13 @@ class _SignupScreenState extends State<SignupScreen> {
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-        LoginEvent(
-          LoginRequestDTO(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          ),
-        ),
-      );
+            RegisterEvent(
+              RegisterRequestDTO(
+                email: _emailController.text.trim(),
+                password: _passwordController.text,
+              ),
+            ),
+          );
     }
   }
 
@@ -94,100 +100,200 @@ class _SignupScreenState extends State<SignupScreen> {
     return emailRegExp.hasMatch(email);
   }
 
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final userCredential = await _firebaseAuthService.signInWithGoogle();
+      final user = userCredential.user;
+
+      if (user != null) {
+        debugPrint('Firebase Google sign in successful: ${user.email}');
+
+        context.read<AuthBloc>().add(
+              GoogleSignInEvent(
+                GoogleAuthRequestDTO(
+                  email: user.email ?? '',
+                  name: user.displayName ?? '',
+                  photoUrl: user.photoURL,
+                  googleId: user.uid,
+                  idToken: await user.getIdToken(),
+                ),
+              ),
+            );
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Google sign in failed. Please try again.',
+              style: TextStyle(color: AppColors.neutral100),
+            ),
+            backgroundColor: AppColors.primaryMain,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Google sign in error: $e');
+      setState(() {
+        _isLoading = false;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _getFormattedErrorMessage(e.toString()),
+            style: const TextStyle(color: AppColors.neutral100),
+          ),
+          backgroundColor: AppColors.primaryMain,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final topPadding = screenHeight * 0.2;
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoading) {
+          setState(() {
+            _isLoading = true;
+          });
+        } else {
+          setState(() {
+            _isLoading = false;
+          });
 
-    return Scaffold(
-
-      backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Stack(
-          children: [Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                SizedBox(height: topPadding),
-
-                Column(
-                  children: [
-                    const Text(
-                      "Daftar",
-                      style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Poppins',
-                          color: AppColors.neutral90),
+          if (state is RegisterSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Registrasi berhasil! Silakan login.',
+                  style: TextStyle(color: AppColors.neutral100),
+                ),
+                backgroundColor: AppColors.primaryMain,
+              ),
+            );
+            context.go('/login');
+          } else if (state is AuthFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(_getFormattedErrorMessage(state.error),
+                    style: TextStyle(color: AppColors.neutral100)),
+                backgroundColor: AppColors.primaryMain,
+              ),
+            );
+          } else if (state is LoginSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Login berhasil!',
+                  style: TextStyle(color: AppColors.neutral100),
+                ),
+                backgroundColor: AppColors.primaryMain,
+              ),
+            );
+            context.go('/fill-information');
+          }
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "Daftar",
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Poppins',
+                      color: Colors.black,
                     ),
-                    const Text(
-                      "Buat akun baru",
-                      style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins',
-                          color: AppColors.neutral90),
+                    textAlign: TextAlign.center,
+                  ),
+                  const Text(
+                    "Buat akun baru",
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
                     ),
-                    const SizedBox(height: 48),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          CustomFormField(
-                            hintText: "Username",
-                            icon: 'username.png',
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Username tidak boleh kosong'
-                                : null,
-                          ),
-                          const SizedBox(height: 24),
-                          CustomFormField(
-                            hintText: "Email",
-                            icon: 'email.png',
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Email tidak boleh kosong'
-                                : (!_isValidEmail(value)
-                                ? 'Format email tidak valid'
-                                : null),
-                          ),
-                          const SizedBox(height: 24),
-                          CustomFormField(
-                            hintText: "Password",
-                            icon: 'password.png',
-                            controller: _passwordController,
-                            obscureText: true,
-                            validator: (value) => value == null || value.isEmpty
-                                ? 'Password tidak boleh kosong'
-                                : null,
-                          ),
-                          const SizedBox(height: 48),
-                          MainButton(
-                            buttonText: "Daftar",
-                            onTap: _submitForm,
-                            isLoading: _isLoading,
-                          ),
-                          const SizedBox(height: 24),
-                          Row(
-                            children: const [
-                              Expanded(child: Divider(color: AppColors.neutral80)),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                child: Text(
-                                  "Atau lanjutkan dengan",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: 'Poppins',
-                                  ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 48),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        CustomFormField(
+                          hintText: "Username",
+                          icon: 'home.png',
+                          controller: _usernameController,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Username tidak boleh kosong'
+                              : null,
+                        ),
+                        const SizedBox(height: 24),
+                        CustomFormField(
+                          hintText: "Email",
+                          icon: 'home.png',
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Email tidak boleh kosong'
+                              : (!_isValidEmail(value)
+                                  ? 'Format email tidak valid'
+                                  : null),
+                        ),
+                        const SizedBox(height: 24),
+                        CustomFormField(
+                          hintText: "Password",
+                          icon: 'home.png',
+                          controller: _passwordController,
+                          obscureText: true,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Password tidak boleh kosong'
+                              : null,
+                        ),
+                        const SizedBox(height: 48),
+                        MainButton(
+                          buttonText: "Register",
+                          onTap: _submitForm,
+                          isLoading: _isLoading,
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: const [
+                            Expanded(
+                                child: Divider(color: AppColors.neutral80)),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                "Atau lanjutkan dengan",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontFamily: 'Poppins',
                                 ),
                               ),
-                              Expanded(child: Divider(color: AppColors.neutral80)),
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-                          Container(
+                            ),
+                            Expanded(
+                                child: Divider(color: AppColors.neutral80)),
+                          ],
+                        ),
+                        const SizedBox(height: 32),
+                        GestureDetector(
+                          onTap: _isLoading ? null : _handleGoogleSignIn,
+                          child: Container(
                             padding: const EdgeInsets.all(10),
                             width: 48,
                             decoration: BoxDecoration(
@@ -203,14 +309,12 @@ class _SignupScreenState extends State<SignupScreen> {
                             ),
                             child: Image.asset('${iconImages}google.png'),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: RichText(
+                  ),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                  RichText(
                     text: TextSpan(
                       children: [
                         TextSpan(
@@ -230,33 +334,17 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           recognizer: TapGestureRecognizer()
                             ..onTap = () {
-                              Navigator.pop(context);
+                              context.go('/login');
                             },
                         ),
                       ],
                     ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-            Positioned(
-              top: 32 ,
-              left: 16,
-              child: FloatingActionButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                hoverElevation: 0,
-                focusElevation: 0,
-                highlightElevation: 0,
-                splashColor: Colors.transparent,
-                child: Icon(Icons.keyboard_arrow_left,
-                    color: AppColors.neutral100, size: 36),
-              ),
-            ),]
         ),
       ),
     );

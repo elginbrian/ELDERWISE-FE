@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:elderwise/data/api/env_config.dart';
+import 'package:elderwise/data/api/interceptor.dart';
 
 class ApiConfig {
   static String get currentEnv => appConfig.environment;
@@ -19,6 +20,8 @@ class ApiConfig {
       ),
     );
 
+    dio.interceptors.add(TokenInterceptor(dio: dio));
+
     if (currentEnv == 'development') {
       dio.interceptors.add(LogInterceptor(
         request: true,
@@ -35,6 +38,7 @@ class ApiConfig {
 
   static String register = "/auth/register";
   static String login = "/auth/login";
+  static String getCurrentUser = "/auth/me";
 
   static String getUser(String userId) => "/users/$userId";
   static String getUserCaregivers(String userId) => "/users/$userId/caregivers";
@@ -77,4 +81,6 @@ class ApiConfig {
   static String createEmergencyAlert = "/emergency-alerts";
   static String updateEmergencyAlert(String alertId) =>
       "/emergency-alerts/$alertId";
+
+  static String processEntityImage = "/storage/images";
 }
