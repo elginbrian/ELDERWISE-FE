@@ -112,7 +112,6 @@ class _SignupScreenState extends State<SignupScreen> {
       if (user != null) {
         debugPrint('Firebase Google sign in successful: ${user.email}');
 
-        // Send the Google user data to your backend
         context.read<AuthBloc>().add(
               GoogleSignInEvent(
                 GoogleAuthRequestDTO(
@@ -189,7 +188,6 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             );
           } else if (state is LoginSuccess) {
-            // Handle successful Google sign-in/login
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text(
@@ -199,7 +197,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 backgroundColor: AppColors.primaryMain,
               ),
             );
-            context.go('/home'); // Navigate to home screen
+            context.go('/fill-information');
           }
         }
       },

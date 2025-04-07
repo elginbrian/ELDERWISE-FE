@@ -6,6 +6,7 @@ class RelationshipSelector extends StatefulWidget {
   final String? selectedRelationship;
   final Function(String) onRelationshipSelected;
   final List<String> relationshipOptions;
+  final bool readOnly;
 
   const RelationshipSelector({
     super.key,
@@ -13,6 +14,7 @@ class RelationshipSelector extends StatefulWidget {
     required this.selectedRelationship,
     required this.onRelationshipSelected,
     required this.relationshipOptions,
+    this.readOnly = false,
   });
 
   @override
@@ -51,97 +53,120 @@ class _RelationshipSelectorState extends State<RelationshipSelector> {
                 padding: EdgeInsets.only(left: 16.0, right: 8.0),
                 child: Icon(Icons.people, size: 20, color: AppColors.neutral80),
               ),
-              // Custom dropdown implementation
-              Expanded(
-                child: DropdownButtonHideUnderline(
-                  child: ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButton<String>(
-                      value: widget.selectedRelationship,
-                      isDense: false,
-                      isExpanded: true,
-                      icon: const Padding(
-                        padding: EdgeInsets.only(right: 12.0),
-                        child: Icon(Icons.arrow_drop_down,
-                            color: AppColors.neutral80),
-                      ),
-                      elevation: 2,
-                      dropdownColor: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'Poppins',
-                        color: AppColors.neutral90,
-                      ),
-                      hint: const Text(
-                        'Pilih hubungan anda',
+              // Display text or dropdown based on readOnly value
+              widget.readOnly
+                  ? Expanded(
+                      child: Text(
+                        widget.controller.text.isNotEmpty
+                            ? widget.controller.text
+                            : 'Pilih hubungan anda',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Poppins',
-                          color: AppColors.neutral80,
+                          color: widget.controller.text.isNotEmpty
+                              ? AppColors.neutral90
+                              : AppColors.neutral80,
                         ),
                       ),
-                      itemHeight: 48,
-                      underline: const SizedBox(),
-                      onTap: () {
-                        setState(() {
-                          _touched = true;
-                        });
-                      },
-                      onChanged: (String? value) {
-                        if (value != null) {
-                          widget.onRelationshipSelected(value);
-                          setState(() {
-                            _touched = true;
-                          });
-                        }
-                      },
-                      selectedItemBuilder: (BuildContext context) {
-                        return widget.relationshipOptions
-                            .map<Widget>((String item) {
-                          return Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              item,
-                              style: const TextStyle(
+                    )
+                  : Expanded(
+                      child: DropdownButtonHideUnderline(
+                        child: ButtonTheme(
+                          alignedDropdown: true,
+                          child: DropdownButton<String>(
+                            value: widget.selectedRelationship,
+                            isDense: false,
+                            isExpanded: true,
+                            icon: const Padding(
+                              padding: EdgeInsets.only(right: 12.0),
+                              child: Icon(Icons.arrow_drop_down,
+                                  color: AppColors.neutral80),
+                            ),
+                            elevation: 2,
+                            dropdownColor: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Poppins',
+                              color: AppColors.neutral90,
+                            ),
+                            hint: const Text(
+                              'Pilih hubungan anda',
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 fontFamily: 'Poppins',
-                                color: AppColors.neutral90,
+                                color: AppColors.neutral80,
                               ),
                             ),
-                          );
-                        }).toList();
-                      },
-                      items: widget.relationshipOptions
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: 'Poppins',
-                                color: AppColors.neutral90,
-                              ),
-                            ),
+                            itemHeight: 48,
+                            underline: const SizedBox(),
+                            onTap: () {
+                              setState(() {
+                                _touched = true;
+                              });
+                            },
+                            onChanged: (String? value) {
+                              if (value != null) {
+                                widget.onRelationshipSelected(value);
+                                setState(() {
+                                  _touched = true;
+                                });
+                              }
+                            },
+                            selectedItemBuilder: (BuildContext context) {
+                              return widget.relationshipOptions
+                                  .map<Widget>((String item) {
+                                return Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    item,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Poppins',
+                                      color: AppColors.neutral90,
+                                    ),
+                                  ),
+                                );
+                              }).toList();
+                            },
+                            items: widget.relationshipOptions
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Poppins',
+                                      color: AppColors.neutral90,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ),
                     ),
-                  ),
+              // Display dropdown icon in readOnly mode for consistent appearance
+              if (widget.readOnly)
+                const Padding(
+                  padding: EdgeInsets.only(right: 12.0),
+                  child:
+                      Icon(Icons.arrow_drop_down, color: AppColors.neutral80),
                 ),
-              ),
             ],
           ),
         ),
-        if (_touched && widget.controller.text.isEmpty)
+        if (_touched && widget.controller.text.isEmpty && !widget.readOnly)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(

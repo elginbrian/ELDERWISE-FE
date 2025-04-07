@@ -7,6 +7,9 @@ import 'package:elderwise/presentation/bloc/elder/elder_state.dart';
 import 'package:elderwise/presentation/bloc/image/image_bloc.dart';
 import 'package:elderwise/presentation/bloc/image/image_event.dart';
 import 'package:elderwise/presentation/bloc/image/image_state.dart';
+import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
+import 'package:elderwise/presentation/bloc/user/user_event.dart';
+import 'package:elderwise/presentation/bloc/user/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -43,6 +46,14 @@ class _PhotoProfileState extends State<PhotoProfile> {
   bool _caregiverPhotoUploaded = false;
   bool _needElderUpload = false;
   bool _needCaregiverUpload = false;
+  String? _elderPhotoUrl;
+  String? _caregiverPhotoUrl;
+
+  // Add state tracking for user data loading
+  bool _isCheckingElderUser = true;
+  bool _isCheckingCaregiverUser = true;
+  bool _hasElderProfile = false;
+  bool _hasCaregiverProfile = false;
 
   @override
   void initState() {
@@ -54,11 +65,55 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
     if (elderState is ElderSuccess) {
       _elderId = elderState.elder.elder.elderId;
+      _elderPhotoUrl = elderState.elder.elder.photoUrl;
+      _hasElderProfile = true;
     }
 
     if (caregiverState is CaregiverSuccess) {
       _caregiverId = caregiverState.caregiver.caregiver.caregiverId;
+      _caregiverPhotoUrl = caregiverState.caregiver.caregiver.profileUrl;
+      _hasCaregiverProfile = true;
     }
+
+    // Fetch user profiles using UserBloc
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserBloc>().add(GetUserEldersEvent(widget.userId));
+      context.read<UserBloc>().add(GetUserCaregiversEvent(widget.userId));
+    });
+  }
+
+  void _populateElderData(dynamic elderData) {
+    if (elderData == null || elderData.isEmpty) return;
+
+    final elder = elderData[0];
+
+    setState(() {
+      _hasElderProfile = true;
+      _elderId = elder['elder_id'] ?? elder['id'] ?? '';
+
+      // Get photo URL if available
+      if (elder['photo_url'] != null) {
+        _elderPhotoUrl = elder['photo_url'];
+      }
+    });
+  }
+
+  void _populateCaregiverData(dynamic caregiverData) {
+    if (caregiverData == null || caregiverData.isEmpty) return;
+
+    final caregiver = caregiverData[0];
+
+    setState(() {
+      _hasCaregiverProfile = true;
+      _caregiverId = caregiver['caregiver_id'] ?? caregiver['id'] ?? '';
+
+      // Get profile URL if available (using different field names)
+      if (caregiver['profile_url'] != null) {
+        _caregiverPhotoUrl = caregiver['profile_url'];
+      } else if (caregiver['profileUrl'] != null) {
+        _caregiverPhotoUrl = caregiver['profileUrl'];
+      }
+    });
   }
 
   Future<void> _pickImageFromGallery(bool isElder) async {
@@ -128,6 +183,19 @@ class _PhotoProfileState extends State<PhotoProfile> {
   }
 
   void _uploadElderPhoto() {
+    if (_elderId == null || _elderId!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Elder ID is missing. Cannot upload photo.')),
+      );
+      setState(() {
+        _elderPhotoUploaded =
+            true; // Mark as uploaded to allow process to continue
+        _checkCompletionStatus();
+      });
+      return;
+    }
+
     final fileName =
         '${widget.userId}_elder_${path.basename(_elderImage!.path)}';
     context.read<ImageBloc>().add(UploadImageEvent(
@@ -140,6 +208,19 @@ class _PhotoProfileState extends State<PhotoProfile> {
   }
 
   void _uploadCaregiverPhoto() {
+    if (_caregiverId == null || _caregiverId!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Caregiver ID is missing. Cannot upload photo.')),
+      );
+      setState(() {
+        _caregiverPhotoUploaded =
+            true; // Mark as uploaded to allow process to continue
+        _checkCompletionStatus();
+      });
+      return;
+    }
+
     final fileName =
         '${widget.userId}_caregiver_${path.basename(_caregiverImage!.path)}';
     context.read<ImageBloc>().add(UploadImageEvent(
@@ -182,6 +263,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
     required VoidCallback onTap,
     required String title,
     required bool isAvailable,
+    String? photoUrl,
   }) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -206,7 +288,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
               border: Border.all(
                 color: !isAvailable
                     ? AppColors.neutral30
-                    : imageFile != null
+                    : imageFile != null || photoUrl != null
                         ? AppColors.primaryMain
                         : AppColors.neutral70,
                 width: 2,
@@ -216,27 +298,94 @@ class _PhotoProfileState extends State<PhotoProfile> {
               borderRadius: BorderRadius.circular(75),
               child: imageFile != null
                   ? Image.file(imageFile, fit: BoxFit.cover)
-                  : Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Image.asset("${iconImages}plus.png",
-                            color: isAvailable ? null : AppColors.neutral30),
-                        Positioned(
-                          bottom: 30,
-                          child: Text(
-                            isAvailable
-                                ? "Tap to add photo"
-                                : "Profile not created",
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: isAvailable
-                                  ? AppColors.neutral70
-                                  : AppColors.neutral30,
+                  : photoUrl != null && photoUrl.isNotEmpty
+                      ? Image.network(
+                          photoUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        (loadingProgress.expectedTotalBytes ??
+                                            1)
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                if (isAvailable)
+                                  const Icon(
+                                    Icons.add_a_photo,
+                                    size: 40,
+                                    color: AppColors.neutral80,
+                                  )
+                                else
+                                  Image.asset("${iconImages}plus.png",
+                                      color: AppColors.neutral30),
+                                Positioned(
+                                  bottom: 30,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: Text(
+                                      "Error loading image",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w400,
+                                        fontFamily: 'Poppins',
+                                        color: isAvailable
+                                            ? AppColors.neutral80
+                                            : AppColors.neutral30,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        )
+                      : Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            if (isAvailable)
+                              const Icon(
+                                Icons.add_a_photo,
+                                size: 40,
+                                color: AppColors.neutral80,
+                              )
+                            else
+                              Image.asset("${iconImages}plus.png",
+                                  color: AppColors.neutral30),
+                            Positioned(
+                              bottom: 30,
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
+                                child: Text(
+                                  isAvailable
+                                      ? "Tap untuk tambah foto"
+                                      : "Profil belum dibuat",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Poppins',
+                                    color: isAvailable
+                                        ? AppColors.neutral80
+                                        : AppColors.neutral30,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                          ],
                         ),
-                      ],
-                    ),
             ),
           ),
         ),
@@ -286,6 +435,8 @@ class _PhotoProfileState extends State<PhotoProfile> {
             if (state is ElderSuccess) {
               setState(() {
                 _elderId = state.elder.elder.elderId;
+                _elderPhotoUrl = state.elder.elder.photoUrl;
+                _hasElderProfile = true;
               });
             }
           },
@@ -295,97 +446,133 @@ class _PhotoProfileState extends State<PhotoProfile> {
             if (state is CaregiverSuccess) {
               setState(() {
                 _caregiverId = state.caregiver.caregiver.caregiverId;
+                _caregiverPhotoUrl = state.caregiver.caregiver.profileUrl;
+                _hasCaregiverProfile = true;
               });
             }
           },
         ),
+        // Add user bloc listeners
+        BlocListener<UserBloc, UserState>(
+          listener: (context, state) {
+            if (state is UserSuccess) {
+              // Check what type of response we received
+              if (state.response.data != null && state.response.data is Map) {
+                // Check if it's elder data
+                if (state.response.data.containsKey('elders')) {
+                  setState(() => _isCheckingElderUser = false);
+                  _populateElderData(state.response.data['elders']);
+                }
+
+                // Check if it's caregiver data
+                if (state.response.data.containsKey('caregivers')) {
+                  setState(() => _isCheckingCaregiverUser = false);
+                  _populateCaregiverData(state.response.data['caregivers']);
+                }
+              }
+            } else if (state is UserFailure) {
+              setState(() {
+                _isCheckingElderUser = false;
+                _isCheckingCaregiverUser = false;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text('Failed to fetch profile data: ${state.error}')),
+              );
+            }
+          },
+        ),
       ],
-      child: BlocBuilder<ElderBloc, ElderState>(
-        builder: (context, elderState) {
-          return BlocBuilder<CaregiverBloc, CaregiverState>(
-            builder: (context, caregiverState) {
-              final hasElderProfile = elderState is ElderSuccess;
+      child: BlocBuilder<UserBloc, UserState>(
+        builder: (context, userState) {
+          final isUserLoading = userState is UserLoading;
+          final isLoading = _isUploading ||
+              isUserLoading ||
+              _isCheckingElderUser ||
+              _isCheckingCaregiverUser ||
+              context.watch<ImageBloc>().state is ImageLoading;
 
-              final hasCaregiverProfile = caregiverState is CaregiverSuccess;
+          if ((isUserLoading ||
+                  _isCheckingElderUser ||
+                  _isCheckingCaregiverUser) &&
+              !_hasElderProfile &&
+              !_hasCaregiverProfile) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-              final bool isLoading = _isUploading ||
-                  elderState is ElderLoading ||
-                  caregiverState is CaregiverLoading ||
-                  context.watch<ImageBloc>().state is ImageLoading;
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Add top padding to center vertically when screen is large enough
+                SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-              return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Center the profile images
+                Center(
+                  child: Column(
+                    children: [
+                      _buildProfileImage(
+                        imageFile: _elderImage,
+                        onTap: () => _pickImageFromGallery(true),
+                        title: "Elder",
+                        isAvailable: _hasElderProfile,
+                        photoUrl: _elderPhotoUrl,
+                      ),
+                      const SizedBox(height: 32),
+                      _buildProfileImage(
+                        imageFile: _caregiverImage,
+                        onTap: () => _pickImageFromGallery(false),
+                        title: "Caregiver",
+                        isAvailable: _hasCaregiverProfile,
+                        photoUrl: _caregiverPhotoUrl,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Add spacing before buttons
+                const SizedBox(height: 36),
+
+                // Button section
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Add top padding to center vertically when screen is large enough
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-
-                    // Center the profile images
-                    Center(
-                      child: Column(
-                        children: [
-                          _buildProfileImage(
-                            imageFile: _elderImage,
-                            onTap: () => _pickImageFromGallery(true),
-                            title: "Elder",
-                            isAvailable: hasElderProfile,
-                          ),
-                          const SizedBox(height: 32),
-                          _buildProfileImage(
-                            imageFile: _caregiverImage,
-                            onTap: () => _pickImageFromGallery(false),
-                            title: "Caregiver",
-                            isAvailable: hasCaregiverProfile,
-                          ),
-                        ],
-                      ),
+                    MainButton(
+                      buttonText:
+                          widget.isFinalStep ? "Selesai" : "Selanjutnya",
+                      onTap: isLoading
+                          ? () {}
+                          : () {
+                              if ((_elderImage != null && _hasElderProfile) ||
+                                  (_caregiverImage != null &&
+                                      _hasCaregiverProfile)) {
+                                _savePhotos();
+                              } else {
+                                widget.onNext();
+                              }
+                            },
+                      color: (_elderImage != null ||
+                              _caregiverImage != null ||
+                              !isLoading)
+                          ? AppColors.primaryMain
+                          : AppColors.neutral30,
+                      isLoading: isLoading,
                     ),
-
-                    // Add spacing before buttons
-                    const SizedBox(height: 36),
-
-                    // Remove the extra padding to match other screens
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        MainButton(
-                          buttonText:
-                              widget.isFinalStep ? "Selesai" : "Selanjutnya",
-                          onTap: isLoading
-                              ? () {}
-                              : () {
-                                  if ((_elderImage != null &&
-                                          hasElderProfile) ||
-                                      (_caregiverImage != null &&
-                                          hasCaregiverProfile)) {
-                                    _savePhotos();
-                                  } else {
-                                    widget.onNext();
-                                  }
-                                },
-                          color: (_elderImage != null ||
-                                  _caregiverImage != null ||
-                                  !isLoading)
-                              ? AppColors.primaryMain
-                              : AppColors.neutral30,
-                          isLoading: isLoading,
-                        ),
-                        const SizedBox(height: 12),
-                        MainButton(
-                          buttonText: "Lewati",
-                          onTap: isLoading ? () {} : widget.onSkip,
-                          color: Colors.white,
-                        ),
-                      ],
+                    const SizedBox(height: 12),
+                    MainButton(
+                      buttonText: "Lewati",
+                      onTap: isLoading ? () {} : widget.onSkip,
+                      color: Colors.white,
                     ),
-
-                    // Add some bottom padding
-                    const SizedBox(height: 16),
                   ],
                 ),
-              );
-            },
+
+                // Add some bottom padding
+                const SizedBox(height: 16),
+              ],
+            ),
           );
         },
       ),

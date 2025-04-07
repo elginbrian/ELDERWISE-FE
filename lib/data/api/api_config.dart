@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:elderwise/data/api/env_config.dart';
+import 'package:elderwise/data/api/interceptor.dart';
 
 class ApiConfig {
   static String get currentEnv => appConfig.environment;
@@ -18,6 +19,8 @@ class ApiConfig {
         },
       ),
     );
+
+    dio.interceptors.add(TokenInterceptor(dio: dio));
 
     if (currentEnv == 'development') {
       dio.interceptors.add(LogInterceptor(
