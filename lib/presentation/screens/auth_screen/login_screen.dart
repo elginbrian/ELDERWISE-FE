@@ -110,7 +110,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         debugPrint('Firebase Google sign in successful: ${user.email}');
 
-        // Send the Google user data to your backend
         context.read<AuthBloc>().add(
               GoogleSignInEvent(
                 GoogleAuthRequestDTO(
@@ -168,7 +167,6 @@ class _LoginScreenState extends State<LoginScreen> {
           });
 
           if (state is LoginSuccess) {
-            // Navigate to stepper for profile information
             context.go('/fill-information');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

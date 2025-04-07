@@ -2,6 +2,9 @@ import 'package:elderwise/domain/entities/elder.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_bloc.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_event.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_state.dart';
+import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
+import 'package:elderwise/presentation/bloc/user/user_event.dart';
+import 'package:elderwise/presentation/bloc/user/user_state.dart';
 import 'package:elderwise/presentation/widgets/profile/custom_profile_field.dart';
 import 'package:elderwise/presentation/widgets/profile/date_picker_field.dart';
 import 'package:elderwise/presentation/widgets/profile/gender_selector.dart';
@@ -39,6 +42,9 @@ class _ElderProfileState extends State<ElderProfile> {
   bool _isFormValid = false;
   DateTime? _selectedDate;
   String? _selectedGender;
+  String? _elderId;
+  bool _isEditing = false;
+  bool _isCheckingUser = true;
 
   final List<String> _genderOptions = ['Laki-laki', 'Perempuan'];
 
@@ -47,6 +53,10 @@ class _ElderProfileState extends State<ElderProfile> {
     super.initState();
     genderController.addListener(_validateForm);
     tanggalLahirController.addListener(_validateForm);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserBloc>().add(GetUserEldersEvent(widget.userId));
+    });
   }
 
   void _validateForm() {
@@ -74,6 +84,71 @@ class _ElderProfileState extends State<ElderProfile> {
     _validateForm();
   }
 
+  void _populateFormWithElderData(dynamic elderData) {
+    if (elderData == null || elderData.isEmpty) return;
+
+    final elder = elderData[0];
+
+    debugPrint('Elder data received: $elder');
+
+    setState(() {
+      _elderId = elder['elder_id'] ?? elder['id'] ?? '';
+      _isEditing = true;
+
+      namaController.text = elder['name'] ?? '';
+
+      if (elder['gender'] != null) {
+        _selectedGender = elder['gender'];
+        genderController.text = elder['gender'];
+      }
+
+      if (elder['birthdate'] != null) {
+        try {
+          _selectedDate = DateTime.parse(elder['birthdate']);
+          tanggalLahirController.text =
+              "${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}";
+        } catch (e) {
+          debugPrint('Error parsing birthdate: $e');
+        }
+      }
+
+      // Try both snake_case and camelCase field names for body height
+      final bodyHeight = elder['body_height'] ?? elder['bodyHeight'];
+      if (bodyHeight != null) {
+        try {
+          final double height = bodyHeight is num
+              ? (bodyHeight as num).toDouble()
+              : double.parse(bodyHeight.toString());
+          tinggiController.text = height.round().toString();
+          debugPrint('Successfully set height: ${tinggiController.text}');
+        } catch (e) {
+          debugPrint('Error parsing body height: $e');
+          tinggiController.text = '';
+        }
+      } else {
+        debugPrint('Body height field not found in data');
+      }
+
+      final bodyWeight = elder['body_weight'] ?? elder['bodyWeight'];
+      if (bodyWeight != null) {
+        try {
+          final double weight = bodyWeight is num
+              ? (bodyWeight as num).toDouble()
+              : double.parse(bodyWeight.toString());
+          beratController.text = weight.round().toString();
+          debugPrint('Successfully set weight: ${beratController.text}');
+        } catch (e) {
+          debugPrint('Error parsing body weight: $e');
+          beratController.text = '';
+        }
+      } else {
+        debugPrint('Body weight field not found in data');
+      }
+    });
+
+    _validateForm();
+  }
+
   void _submitForm() {
     if (!_isFormValid) return;
 
@@ -92,7 +167,7 @@ class _ElderProfileState extends State<ElderProfile> {
     );
 
     final elder = Elder(
-      elderId: Uuid().v4(),
+      elderId: _isEditing ? _elderId! : Uuid().v4(),
       userId: widget.userId,
       name: namaController.text,
       gender: genderController.text,
@@ -104,7 +179,11 @@ class _ElderProfileState extends State<ElderProfile> {
       updatedAt: DateTime.now().toUtc(),
     );
 
-    context.read<ElderBloc>().add(CreateElderEvent(elder));
+    if (_isEditing) {
+      context.read<ElderBloc>().add(UpdateElderEvent(_elderId!, elder));
+    } else {
+      context.read<ElderBloc>().add(CreateElderEvent(elder));
+    }
   }
 
   @override
@@ -119,79 +198,111 @@ class _ElderProfileState extends State<ElderProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ElderBloc, ElderState>(
-      listener: (context, state) {
-        if (state is ElderSuccess) {
-          if (!widget.isFinalStep) {
-            widget.onNext();
-          }
-        } else if (state is ElderFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: ${state.error}')),
-          );
-        }
-      },
-      builder: (context, state) {
-        final bool isLoading = state is ElderLoading;
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<UserBloc, UserState>(
+          listener: (context, state) {
+            if (state is UserSuccess) {
+              setState(() => _isCheckingUser = false);
 
-        return Form(
-          key: _formKey,
-          onChanged: _validateForm,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                CustomProfileField(
-                  title: 'Nama Lengkap',
-                  hintText: 'Masukkan nama elder',
-                  controller: namaController,
-                  icon: Icons.person,
-                  onChanged: (_) => _validateForm(),
-                  validator: (value) =>
-                      value?.isEmpty ?? true ? 'Nama tidak boleh kosong' : null,
-                ),
-                GenderSelector(
-                  controller: genderController,
-                  selectedGender: _selectedGender,
-                  onGenderSelected: _selectGender,
-                  genderOptions: _genderOptions,
-                ),
-                DatePickerField(
-                  controller: tanggalLahirController,
-                  selectedDate: _selectedDate,
-                  onDateSelected: _selectDate,
-                  placeholder: 'Pilih tanggal lahir elder',
-                ),
-                MeasurementField(
-                  title: 'Tinggi Badan',
-                  hint: 'Masukkan tinggi badan',
-                  controller: tinggiController,
-                  unit: 'cm',
-                  onChanged: (_) => _validateForm(),
-                ),
-                MeasurementField(
-                  title: 'Berat Badan',
-                  hint: 'Masukkan berat badan',
-                  controller: beratController,
-                  unit: 'kg',
-                  onChanged: (_) => _validateForm(),
-                ),
-                const SizedBox(height: 24),
-                ProfileActionButtons(
-                  isFormValid: _isFormValid,
-                  onNext: () {
-                    _submitForm();
-                    if (widget.isFinalStep) widget.onNext();
-                  },
-                  onSkip: widget.onSkip,
-                  isFinalStep: widget.isFinalStep,
-                  isLoading: isLoading,
-                ),
-              ],
+              if (state.response.data != null &&
+                  state.response.data is Map &&
+                  state.response.data.containsKey('elders')) {
+                _populateFormWithElderData(state.response.data['elders']);
+              }
+            } else if (state is UserFailure) {
+              setState(() => _isCheckingUser = false);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content:
+                        Text('Failed to fetch elder data: ${state.error}')),
+              );
+            }
+          },
+        ),
+        BlocListener<ElderBloc, ElderState>(
+          listener: (context, state) {
+            if (state is ElderSuccess) {
+              if (!widget.isFinalStep) {
+                widget.onNext();
+              }
+            } else if (state is ElderFailure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${state.error}')),
+              );
+            }
+          },
+        ),
+      ],
+      child: BlocBuilder<ElderBloc, ElderState>(
+        builder: (context, elderState) {
+          final bool isLoading = elderState is ElderLoading || _isCheckingUser;
+
+          if (isLoading && _isCheckingUser) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Form(
+            key: _formKey,
+            onChanged: _validateForm,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CustomProfileField(
+                    title: 'Nama Lengkap',
+                    hintText: 'Masukkan nama elder',
+                    controller: namaController,
+                    icon: Icons.person,
+                    onChanged: (_) => _validateForm(),
+                    validator: (value) => value?.isEmpty ?? true
+                        ? 'Nama tidak boleh kosong'
+                        : null,
+                  ),
+                  GenderSelector(
+                    controller: genderController,
+                    selectedGender: _selectedGender,
+                    onGenderSelected: _selectGender,
+                    genderOptions: _genderOptions,
+                  ),
+                  DatePickerField(
+                    controller: tanggalLahirController,
+                    selectedDate: _selectedDate,
+                    onDateSelected: _selectDate,
+                    placeholder: 'Pilih tanggal lahir elder',
+                  ),
+                  MeasurementField(
+                    title: 'Tinggi Badan',
+                    hint: 'Masukkan tinggi badan',
+                    controller: tinggiController,
+                    unit: 'cm',
+                    onChanged: (_) => _validateForm(),
+                  ),
+                  MeasurementField(
+                    title: 'Berat Badan',
+                    hint: 'Masukkan berat badan',
+                    controller: beratController,
+                    unit: 'kg',
+                    onChanged: (_) => _validateForm(),
+                  ),
+                  const SizedBox(height: 24),
+                  ProfileActionButtons(
+                    isFormValid: _isFormValid,
+                    onNext: () {
+                      _submitForm();
+                      if (widget.isFinalStep) widget.onNext();
+                    },
+                    onSkip: widget.onSkip,
+                    isFinalStep: widget.isFinalStep,
+                    isLoading: isLoading,
+                    buttonText: _isEditing ? 'Update' : 'Simpan',
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

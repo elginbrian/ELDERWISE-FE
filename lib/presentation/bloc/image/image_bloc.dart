@@ -1,4 +1,6 @@
 import 'package:bloc/bloc.dart';
+import 'package:elderwise/domain/entities/uploaded_image.dart';
+import 'package:elderwise/domain/enums/entity_type.dart';
 import 'package:elderwise/domain/repositories/image_repository.dart';
 import 'package:elderwise/presentation/bloc/image/image_event.dart';
 import 'package:elderwise/presentation/bloc/image/image_state.dart';
@@ -86,10 +88,35 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
         imageId: event.imageId,
       );
 
-      emit(ImageProcessSuccess(processedImage));
+      final verifiedImage = _verifyImageData(
+          processedImage, event.userId, event.entityId, event.entityType);
+
+      emit(ImageProcessSuccess(verifiedImage));
     } catch (e) {
       debugPrint('Process entity image exception: $e');
       emit(ImageFailure(e.toString()));
     }
+  }
+
+  UploadedImage _verifyImageData(
+    UploadedImage image,
+    String? userId,
+    String entityId,
+    EntityType entityType,
+  ) {
+    if (image.userId == null ||
+        image.entityId == null ||
+        image.entityType == null) {
+      return UploadedImage(
+        id: image.id,
+        url: image.url,
+        path: image.path,
+        createdAt: image.createdAt,
+        userId: userId,
+        entityId: entityId,
+        entityType: entityType,
+      );
+    }
+    return image;
   }
 }

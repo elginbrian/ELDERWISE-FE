@@ -6,6 +6,7 @@ class GenderSelector extends StatefulWidget {
   final String? selectedGender;
   final Function(String) onGenderSelected;
   final List<String> genderOptions;
+  final bool readOnly;
 
   const GenderSelector({
     super.key,
@@ -13,6 +14,7 @@ class GenderSelector extends StatefulWidget {
     required this.selectedGender,
     required this.onGenderSelected,
     this.genderOptions = const ['Laki-laki', 'Perempuan'],
+    this.readOnly = false,
   });
 
   @override
@@ -51,97 +53,121 @@ class _GenderSelectorState extends State<GenderSelector> {
                 padding: EdgeInsets.only(left: 16.0, right: 8.0),
                 child: Icon(Icons.wc, size: 20, color: AppColors.neutral80),
               ),
-              // Custom dropdown implementation for better control
-              Expanded(
-                child: DropdownButtonHideUnderline(
-                  child: ButtonTheme(
-                    alignedDropdown: true,
-                    child: DropdownButton<String>(
-                      value: widget.selectedGender,
-                      isDense: false,
-                      isExpanded: true,
-                      icon: const Padding(
-                        padding: EdgeInsets.only(right: 12.0),
-                        child: Icon(Icons.arrow_drop_down,
-                            color: AppColors.neutral80),
-                      ),
-                      elevation: 2,
-                      dropdownColor: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        fontFamily: 'Poppins',
-                        color: AppColors.neutral90,
-                      ),
-                      hint: const Text(
-                        'Pilih jenis kelamin',
+              // If readOnly, show text instead of dropdown
+              widget.readOnly
+                  ? Expanded(
+                      child: Text(
+                        widget.controller.text.isNotEmpty
+                            ? widget.controller.text
+                            : 'Pilih jenis kelamin',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           fontFamily: 'Poppins',
-                          color: AppColors.neutral80,
+                          color: widget.controller.text.isNotEmpty
+                              ? AppColors.neutral90
+                              : AppColors.neutral80,
                         ),
                       ),
-                      // Adjust the alignment and padding of dropdown items
-                      itemHeight: 48,
-                      underline: const SizedBox(),
-                      onTap: () {
-                        setState(() {
-                          _touched = true;
-                        });
-                      },
-                      onChanged: (String? value) {
-                        if (value != null) {
-                          widget.onGenderSelected(value);
-                          setState(() {
-                            _touched = true;
-                          });
-                        }
-                      },
-                      selectedItemBuilder: (BuildContext context) {
-                        return widget.genderOptions.map<Widget>((String item) {
-                          return Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              item,
-                              style: const TextStyle(
+                    )
+                  : Expanded(
+                      child: DropdownButtonHideUnderline(
+                        child: ButtonTheme(
+                          alignedDropdown: true,
+                          child: DropdownButton<String>(
+                            value: widget.selectedGender,
+                            isDense: false,
+                            isExpanded: true,
+                            icon: const Padding(
+                              padding: EdgeInsets.only(right: 12.0),
+                              child: Icon(Icons.arrow_drop_down,
+                                  color: AppColors.neutral80),
+                            ),
+                            elevation: 2,
+                            dropdownColor: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Poppins',
+                              color: AppColors.neutral90,
+                            ),
+                            hint: const Text(
+                              'Pilih jenis kelamin',
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w400,
                                 fontFamily: 'Poppins',
-                                color: AppColors.neutral90,
+                                color: AppColors.neutral80,
                               ),
                             ),
-                          );
-                        }).toList();
-                      },
-                      items: widget.genderOptions
-                          .map<DropdownMenuItem<String>>((String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              value,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                fontFamily: 'Poppins',
-                                color: AppColors.neutral90,
-                              ),
-                            ),
+                            // Adjust the alignment and padding of dropdown items
+                            itemHeight: 48,
+                            underline: const SizedBox(),
+                            onTap: () {
+                              setState(() {
+                                _touched = true;
+                              });
+                            },
+                            onChanged: (String? value) {
+                              if (value != null) {
+                                widget.onGenderSelected(value);
+                                setState(() {
+                                  _touched = true;
+                                });
+                              }
+                            },
+                            selectedItemBuilder: (BuildContext context) {
+                              return widget.genderOptions
+                                  .map<Widget>((String item) {
+                                return Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    item,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Poppins',
+                                      color: AppColors.neutral90,
+                                    ),
+                                  ),
+                                );
+                              }).toList();
+                            },
+                            items: widget.genderOptions
+                                .map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8.0),
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      fontFamily: 'Poppins',
+                                      color: AppColors.neutral90,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ),
                     ),
-                  ),
+              // Show dropdown icon in readOnly mode to maintain visual consistency
+              if (widget.readOnly)
+                const Padding(
+                  padding: EdgeInsets.only(right: 12.0),
+                  child:
+                      Icon(Icons.arrow_drop_down, color: AppColors.neutral80),
                 ),
-              ),
             ],
           ),
         ),
-        if (_touched && widget.controller.text.isEmpty)
+        if (_touched && widget.controller.text.isEmpty && !widget.readOnly)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(

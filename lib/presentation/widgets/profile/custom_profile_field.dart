@@ -13,6 +13,7 @@ class CustomProfileField extends StatefulWidget {
   final String? Function(String?)? validator;
   final bool obscureText;
   final IconData? icon;
+  final bool readOnly;
 
   const CustomProfileField({
     super.key,
@@ -26,6 +27,7 @@ class CustomProfileField extends StatefulWidget {
     this.validator,
     this.obscureText = false,
     this.icon,
+    this.readOnly = false,
   });
 
   @override
@@ -72,83 +74,129 @@ class _CustomProfileFieldState extends State<CustomProfileField> {
           ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: widget.controller,
-          obscureText: widget.obscureText,
-          focusNode: _focusNode,
-          onTap: () {
-            if (!_touched) {
-              setState(() {
-                _touched = true;
-              });
-            }
-          },
-          inputFormatters: widget.keyboardType == TextInputType.number
-              ? [FilteringTextInputFormatter.digitsOnly]
-              : null,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w400,
-            fontFamily: 'Poppins',
-            color: AppColors.neutral90,
-          ),
-          decoration: InputDecoration(
-            hintText: widget.hintText,
-            hintStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              fontFamily: 'Poppins',
-              color: AppColors.neutral80,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-              child: widget.icon != null
-                  ? Icon(widget.icon, size: 20, color: AppColors.neutral80)
-                  : widget.assetImage != null
-                      ? ImageIcon(
-                          AssetImage('assets/icons/${widget.assetImage}'),
-                          color: AppColors.neutral80)
-                      : Icon(Icons.person,
-                          size: 20, color: AppColors.neutral80),
-            ),
-            contentPadding: const EdgeInsets.only(right: 16),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(32),
-              borderSide:
-                  const BorderSide(color: AppColors.neutral80, width: 1),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(32),
-              borderSide:
-                  const BorderSide(color: AppColors.neutral80, width: 1),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(32),
-              borderSide:
-                  const BorderSide(color: AppColors.neutral80, width: 1),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(32),
-              borderSide:
-                  const BorderSide(color: AppColors.neutral80, width: 1),
-            ),
-          ),
-          keyboardType: widget.keyboardType,
-          onChanged: (value) {
-            if (widget.onChanged != null) {
-              widget.onChanged!(value);
-            }
-            if (!_touched) {
-              setState(() {
-                _touched = true;
-              });
-            }
-          },
-          validator: widget.validator,
-        ),
-        if (_touched && (widget.controller?.text.isEmpty ?? true))
+        widget.readOnly
+            ? Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.neutral80),
+                  borderRadius: BorderRadius.circular(32),
+                  color: Colors.white,
+                ),
+                child: Row(
+                  children: [
+                    // Icon
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                      child: widget.icon != null
+                          ? Icon(widget.icon,
+                              size: 20, color: AppColors.neutral80)
+                          : widget.assetImage != null
+                              ? ImageIcon(
+                                  AssetImage(
+                                      'assets/icons/${widget.assetImage}'),
+                                  color: AppColors.neutral80)
+                              : Icon(Icons.person,
+                                  size: 20, color: AppColors.neutral80),
+                    ),
+                    // Text content
+                    Expanded(
+                      child: Text(
+                        widget.controller?.text.isNotEmpty == true
+                            ? widget.controller!.text
+                            : widget.hintText,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Poppins',
+                          color: widget.controller?.text.isNotEmpty == true
+                              ? AppColors.neutral90
+                              : AppColors.neutral80,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : TextFormField(
+                controller: widget.controller,
+                obscureText: widget.obscureText,
+                focusNode: _focusNode,
+                onTap: () {
+                  if (!_touched) {
+                    setState(() {
+                      _touched = true;
+                    });
+                  }
+                },
+                inputFormatters: widget.keyboardType == TextInputType.number
+                    ? [FilteringTextInputFormatter.digitsOnly]
+                    : null,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  fontFamily: 'Poppins',
+                  color: AppColors.neutral90,
+                ),
+                decoration: InputDecoration(
+                  hintText: widget.hintText,
+                  hintStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Poppins',
+                    color: AppColors.neutral80,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                    child: widget.icon != null
+                        ? Icon(widget.icon,
+                            size: 20, color: AppColors.neutral80)
+                        : widget.assetImage != null
+                            ? ImageIcon(
+                                AssetImage('assets/icons/${widget.assetImage}'),
+                                color: AppColors.neutral80)
+                            : Icon(Icons.person,
+                                size: 20, color: AppColors.neutral80),
+                  ),
+                  contentPadding: const EdgeInsets.only(right: 16),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32),
+                    borderSide:
+                        const BorderSide(color: AppColors.neutral80, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32),
+                    borderSide:
+                        const BorderSide(color: AppColors.neutral80, width: 1),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32),
+                    borderSide:
+                        const BorderSide(color: AppColors.neutral80, width: 1),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(32),
+                    borderSide:
+                        const BorderSide(color: AppColors.neutral80, width: 1),
+                  ),
+                ),
+                keyboardType: widget.keyboardType,
+                onChanged: (value) {
+                  if (widget.onChanged != null) {
+                    widget.onChanged!(value);
+                  }
+                  if (!_touched) {
+                    setState(() {
+                      _touched = true;
+                    });
+                  }
+                },
+                validator: widget.validator,
+              ),
+        if (_touched &&
+            (widget.controller?.text.isEmpty ?? true) &&
+            !widget.readOnly)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(

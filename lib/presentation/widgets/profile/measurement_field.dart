@@ -7,7 +7,8 @@ class MeasurementField extends StatefulWidget {
   final String hint;
   final TextEditingController controller;
   final String unit;
-  final Function(String) onChanged;
+  final Function(String)? onChanged;
+  final bool readOnly;
 
   const MeasurementField({
     super.key,
@@ -15,7 +16,8 @@ class MeasurementField extends StatefulWidget {
     required this.hint,
     required this.controller,
     required this.unit,
-    required this.onChanged,
+    this.onChanged,
+    this.readOnly = false,
   });
 
   @override
@@ -80,52 +82,84 @@ class _MeasurementFieldState extends State<MeasurementField> {
                   color: AppColors.neutral80,
                 ),
               ),
-              Expanded(
-                child: TextFormField(
-                  controller: widget.controller,
-                  focusNode: _focusNode,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              widget.readOnly
+                  ? Expanded(
+                      child: Text(
+                        widget.controller.text.isNotEmpty
+                            ? widget.controller.text
+                            : widget.hint,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Poppins',
+                          color: widget.controller.text.isNotEmpty
+                              ? AppColors.neutral90
+                              : AppColors.neutral80,
+                        ),
+                      ),
+                    )
+                  : Expanded(
+                      child: TextFormField(
+                        controller: widget.controller,
+                        focusNode: _focusNode,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Poppins',
+                          color: AppColors.neutral90,
+                        ),
+                        onTap: () {
+                          if (!_touched) {
+                            setState(() {
+                              _touched = true;
+                            });
+                          }
+                        },
+                        decoration: InputDecoration(
+                          hintText: widget.hint,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                          hintStyle: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Poppins',
+                            color: AppColors.neutral80,
+                          ),
+                        ),
+                        onChanged: (value) {
+                          if (widget.onChanged != null) {
+                            widget.onChanged!(value);
+                          }
+                          if (!_touched) {
+                            setState(() {
+                              _touched = true;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+
+              // Unit display
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  widget.unit,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Poppins',
-                    color: AppColors.neutral90,
+                    color: AppColors.neutral80,
                   ),
-                  onTap: () {
-                    if (!_touched) {
-                      setState(() {
-                        _touched = true;
-                      });
-                    }
-                  },
-                  decoration: InputDecoration(
-                    hintText: widget.hint,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    hintStyle: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Poppins',
-                      color: AppColors.neutral80,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    widget.onChanged(value);
-                    if (!_touched) {
-                      setState(() {
-                        _touched = true;
-                      });
-                    }
-                  },
                 ),
               ),
-
-              const SizedBox(width: 16),
             ],
           ),
         ),
-        if (_touched && widget.controller.text.isEmpty)
+        if (_touched && widget.controller.text.isEmpty && !widget.readOnly)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(

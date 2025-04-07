@@ -52,13 +52,17 @@ class _MainScreenState extends State<MainScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    selectedIndex == index ? navIconsActive[index] : navIcons[index],
+                    selectedIndex == index
+                        ? navIconsActive[index]
+                        : navIcons[index],
                     const SizedBox(height: 4),
-                    Text(
-                      navTitles[index],
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 8,
-                        color: selectedIndex == index ? AppColors.primaryMain : AppColors.neutral90,)
-                    ),
+                    Text(navTitles[index],
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontSize: 8,
+                              color: selectedIndex == index
+                                  ? AppColors.primaryMain
+                                  : AppColors.neutral90,
+                            )),
                   ],
                 ),
               );
@@ -71,17 +75,17 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 List<Image> navIcons = [
-  Image.asset(iconImages + 'home.png', width: 20, height: 20),
-  Image.asset(iconImages + 'clock.png', width: 20, height: 20),
-  Image.asset(iconImages + 'map.png', width: 20, height: 20),
-  Image.asset(iconImages + 'profile.png', width: 20, height: 20),
+  Image.asset('${iconImages}home.png', width: 20, height: 20),
+  Image.asset('${iconImages}clock.png', width: 20, height: 20),
+  Image.asset('${iconImages}map.png', width: 20, height: 20),
+  Image.asset('${iconImages}profile.png', width: 20, height: 20),
 ];
 
 List<Image> navIconsActive = [
-  Image.asset(iconImages + 'home_active.png', width: 20, height: 20),
-  Image.asset(iconImages + 'clock_active.png', width: 20, height: 20),
-  Image.asset(iconImages + 'map_active.png', width: 20, height: 20),
-  Image.asset(iconImages + 'profile_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}home_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}clock_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}map_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}profile_active.png', width: 20, height: 20),
 ];
 
 List<String> navTitles = [
