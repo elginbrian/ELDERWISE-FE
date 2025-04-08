@@ -20,17 +20,27 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
       UploadImageEvent event, Emitter<ImageState> emit) async {
     emit(ImageLoading());
     try {
+      if (event.entityType == null) {
+        debugPrint('Warning: Entity type is required but was not provided');
+        emit(ImageFailure('Entity type is required'));
+        return;
+      }
+
+      // Add log to verify entity type
+      debugPrint(
+          'Uploading image with entity type: ${event.entityType?.toStringValue()}');
+
       final uploadedImage = await imageRepository.uploadImage(
         file: event.file,
         fileName: event.fileName,
         userId: event.userId,
         entityId: event.entityId,
-        entityType: event.entityType,
+        entityType: event.entityType!,
       );
 
       emit(ImageUploadSuccess(uploadedImage));
 
-      if (event.entityId != null && event.entityType != null) {
+      if (event.entityId != null) {
         add(ProcessEntityImageEvent(
           imageUrl: uploadedImage.url,
           entityId: event.entityId!,
@@ -79,6 +89,17 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
       ProcessEntityImageEvent event, Emitter<ImageState> emit) async {
     emit(ImageLoading());
     try {
+      // Validate and log entity type before sending to backend
+      final entityTypeString = event.entityType.toStringValue();
+      debugPrint(
+          'Processing entity image with type: ${event.entityType} (string value: $entityTypeString)');
+
+      if (!['elder', 'caregiver', 'user', 'agenda', 'area', 'general']
+          .contains(entityTypeString)) {
+        debugPrint(
+            'WARNING: EntityType $entityTypeString may not be recognized by backend');
+      }
+
       final processedImage = await imageRepository.processEntityImage(
         imageUrl: event.imageUrl,
         entityId: event.entityId,
@@ -87,6 +108,10 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
         imagePath: event.imagePath,
         imageId: event.imageId,
       );
+
+      // Log success
+      debugPrint(
+          'Image processed successfully with entity type: $entityTypeString');
 
       final verifiedImage = _verifyImageData(
           processedImage, event.userId, event.entityId, event.entityType);

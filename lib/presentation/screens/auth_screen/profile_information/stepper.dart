@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 
 class StepperScreen extends StatefulWidget {
   const StepperScreen({super.key});
@@ -61,9 +62,7 @@ class _StepperScreenState extends State<StepperScreen> {
             isLoading = false;
           });
         } else if (state is AuthFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to get user: ${state.error}')),
-          );
+          ToastHelper.showErrorToast(context, state.error);
           setState(() {
             isLoading = false;
           });

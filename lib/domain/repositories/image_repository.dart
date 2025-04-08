@@ -8,7 +8,7 @@ abstract class ImageRepository {
     required String fileName,
     String? userId,
     String? entityId,
-    EntityType? entityType,
+    required EntityType entityType,
   });
 
   Future<List<UploadedImage>> getImagesByEntity({

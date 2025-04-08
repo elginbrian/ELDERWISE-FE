@@ -98,12 +98,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-      // Handle body height with fallbacks
       final bodyHeight = elder['body_height'] ?? elder['bodyHeight'];
       if (bodyHeight != null) {
         try {
           final double height = bodyHeight is num
-              ? (bodyHeight as num).toDouble()
+              ? bodyHeight.toDouble()
               : double.parse(bodyHeight.toString());
           _elderHeightController.text = height.round().toString();
         } catch (e) {
@@ -111,12 +110,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-      // Handle body weight with fallbacks
       final bodyWeight = elder['body_weight'] ?? elder['bodyWeight'];
       if (bodyWeight != null) {
         try {
           final double weight = bodyWeight is num
-              ? (bodyWeight as num).toDouble()
+              ? bodyWeight.toDouble()
               : double.parse(bodyWeight.toString());
           _elderWeightController.text = weight.round().toString();
         } catch (e) {
@@ -124,7 +122,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-      // Get photo URL
       if (elder['photo_url'] != null) {
         _elderPhotoUrl = elder['photo_url'];
       }
@@ -138,7 +135,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _caregiverData = caregiver;
 
-      // Populate caregiver fields
       _caregiverNameController.text = caregiver['name'] ?? '';
       _caregiverGenderController.text = caregiver['gender'] ?? '';
 
@@ -152,7 +148,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
       }
 
-      // Handle phone number with fallbacks
       final phoneNumber = caregiver['phone_number'] ?? caregiver['phoneNumber'];
       if (phoneNumber != null) {
         _caregiverPhoneController.text = phoneNumber.toString();
@@ -160,7 +155,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       _caregiverRelationshipController.text = caregiver['relationship'] ?? '';
 
-      // Get profile URL
       if (caregiver['profile_url'] != null) {
         _caregiverPhotoUrl = caregiver['profile_url'];
       } else if (caregiver['profileUrl'] != null) {
@@ -315,7 +309,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               left: 0,
               child: FloatingActionButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  Navigator.pop(context); // This returns to the previous screen
                 },
                 backgroundColor: Colors.transparent,
                 elevation: 0,

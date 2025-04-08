@@ -1,8 +1,6 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
-import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
-import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
 
@@ -77,6 +75,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
+// Navigation bar icons and titles
 List<Image> navIcons = [
   Image.asset('${iconImages}home.png', width: 20, height: 20),
   Image.asset('${iconImages}clock.png', width: 20, height: 20),
@@ -93,14 +92,84 @@ List<Image> navIconsActive = [
 
 List<String> navTitles = [
   "Home",
-  "Clock",
-  "Map",
+  "Agenda",
+  "Maps",
   "Profile",
 ];
 
+// Define placeholder screens for empty tabs
+class HomePlaceholderScreen extends StatelessWidget {
+  const HomePlaceholderScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.home, size: 64, color: AppColors.primaryMain),
+            SizedBox(height: 16),
+            Text(
+              "Home Screen",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryMain,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Coming Soon",
+              style: TextStyle(fontSize: 16, color: AppColors.neutral90),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AgendaPlaceholderScreen extends StatelessWidget {
+  const AgendaPlaceholderScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.calendar_today, size: 64, color: AppColors.primaryMain),
+            SizedBox(height: 16),
+            Text(
+              "Agenda Screen",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryMain,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Coming Soon",
+              style: TextStyle(fontSize: 16, color: AppColors.neutral90),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Screens for each tab
 final List<Widget> screens = [
-  ProfileScreen(),
-  GeofenceScreen(),
-  SetFenceScreen(),
-  MainProfileScreen(),
+  // Home tab (empty placeholder for now)
+  const HomePlaceholderScreen(),
+  // Agenda tab (empty placeholder for now)
+  const AgendaPlaceholderScreen(),
+  // Maps tab shows the geofence map
+  const GeofenceScreen(),
+  // Profile tab shows the main profile screen
+  const MainProfileScreen(),
 ];
