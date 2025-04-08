@@ -76,13 +76,19 @@ class Caregiver {
       'caregiver_id': caregiverId,
       'user_id': userId,
       'name': name,
-      'birthdate': birthdate.toIso8601String(),
+      'birthdate': _formatDateForJson(birthdate),
       'gender': gender,
       'phone_number': phoneNumber,
       'profile_url': profileUrl,
       'relationship': relationship,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'created_at': _formatDateForJson(createdAt),
+      'updated_at': _formatDateForJson(updatedAt),
     };
+  }
+
+  String _formatDateForJson(DateTime date) {
+    // Already contains 'Z' if in UTC, so don't add another one
+    final iso = date.toIso8601String();
+    return iso.endsWith('Z') ? iso : iso + 'Z';
   }
 }
