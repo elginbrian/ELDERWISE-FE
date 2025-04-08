@@ -1,4 +1,6 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
@@ -36,6 +38,7 @@ class _MainScreenState extends State<MainScreen> {
         decoration: BoxDecoration(
           color: AppColors.neutral10,
           borderRadius: BorderRadius.circular(32),
+          // border: Border.all(color: AppColors.primaryMain)
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
@@ -97,7 +100,7 @@ List<String> navTitles = [
 
 final List<Widget> screens = [
   ProfileScreen(),
-  MainProfileScreen(),
-  ProfileScreen(),
+  GeofenceScreen(),
+  SetFenceScreen(),
   MainProfileScreen(),
 ];
