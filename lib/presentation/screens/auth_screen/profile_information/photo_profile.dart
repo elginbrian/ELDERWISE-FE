@@ -189,8 +189,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
             content: Text('Elder ID is missing. Cannot upload photo.')),
       );
       setState(() {
-        _elderPhotoUploaded =
-            true; // Mark as uploaded to allow process to continue
+        _elderPhotoUploaded = true;
         _checkCompletionStatus();
       });
       return;
@@ -214,8 +213,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
             content: Text('Caregiver ID is missing. Cannot upload photo.')),
       );
       setState(() {
-        _caregiverPhotoUploaded =
-            true; // Mark as uploaded to allow process to continue
+        _caregiverPhotoUploaded = true;
         _checkCompletionStatus();
       });
       return;
@@ -228,7 +226,8 @@ class _PhotoProfileState extends State<PhotoProfile> {
           fileName: fileName,
           userId: widget.userId,
           entityId: _caregiverId!,
-          entityType: EntityType.caregiver,
+          entityType:
+              EntityType.caregiver, // Already correct, EntityType is provided
         ));
   }
 

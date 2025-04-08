@@ -26,16 +26,14 @@ class ImageRepositoryImpl implements ImageRepository {
     required String fileName,
     String? userId,
     String? entityId,
-    EntityType? entityType,
+    required EntityType entityType,
   }) async {
     try {
       final uuid = const Uuid().v4();
       final fileExt = path.extension(fileName);
       final uniqueFileName = '$uuid$fileExt';
 
-      final String filePath = entityType != null
-          ? '${entityType.toStringValue()}/$uniqueFileName'
-          : 'general/$uniqueFileName';
+      final String filePath = '${entityType.toStringValue()}/$uniqueFileName';
 
       final mimeType = lookupMimeType(fileName) ?? 'application/octet-stream';
 

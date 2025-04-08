@@ -20,17 +20,23 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
       UploadImageEvent event, Emitter<ImageState> emit) async {
     emit(ImageLoading());
     try {
+      if (event.entityType == null) {
+        debugPrint('Warning: Entity type is required but was not provided');
+        emit(ImageFailure('Entity type is required'));
+        return;
+      }
+
       final uploadedImage = await imageRepository.uploadImage(
         file: event.file,
         fileName: event.fileName,
         userId: event.userId,
         entityId: event.entityId,
-        entityType: event.entityType,
+        entityType: event.entityType!,
       );
 
       emit(ImageUploadSuccess(uploadedImage));
 
-      if (event.entityId != null && event.entityType != null) {
+      if (event.entityId != null) {
         add(ProcessEntityImageEvent(
           imageUrl: uploadedImage.url,
           entityId: event.entityId!,
