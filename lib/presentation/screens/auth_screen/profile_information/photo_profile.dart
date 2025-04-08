@@ -196,12 +196,18 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
     final fileName =
         '${widget.userId}_elder_${path.basename(_elderImage!.path)}';
+    final entityType = EntityType.elder;
+
+    debugPrint(
+        'Uploading elder photo with EntityType: ${entityType.toStringValue()}');
+    debugPrint('Elder ID: $_elderId');
+
     context.read<ImageBloc>().add(UploadImageEvent(
           file: _elderImage!,
           fileName: fileName,
           userId: widget.userId,
           entityId: _elderId!,
-          entityType: EntityType.elder,
+          entityType: entityType,
         ));
   }
 
@@ -218,13 +224,18 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
     final fileName =
         '${widget.userId}_caregiver_${path.basename(_caregiverImage!.path)}';
+    final entityType = EntityType.caregiver;
+
+    debugPrint(
+        'Uploading caregiver photo with EntityType: ${entityType.toStringValue()}');
+    debugPrint('Caregiver ID: $_caregiverId');
+
     context.read<ImageBloc>().add(UploadImageEvent(
           file: _caregiverImage!,
           fileName: fileName,
           userId: widget.userId,
           entityId: _caregiverId!,
-          entityType:
-              EntityType.caregiver, // Already correct, EntityType is provided
+          entityType: entityType,
         ));
   }
 

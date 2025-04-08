@@ -23,13 +23,14 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   String? _userId;
   dynamic _elderData;
   String? _elderPhotoUrl;
+  dynamic _caregiverData;
+  String? _caregiverPhotoUrl;
 
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Call GetCurrentUserEvent from AuthBloc
       context.read<AuthBloc>().add(GetCurrentUserEvent());
     });
   }
@@ -39,9 +40,9 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
       _userId = userId;
     });
 
-    // Fetch elder data
     if (_userId != null && _userId!.isNotEmpty) {
       context.read<UserBloc>().add(GetUserEldersEvent(_userId!));
+      context.read<UserBloc>().add(GetUserCaregiversEvent(_userId!));
     }
   }
 
@@ -55,6 +56,22 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
       // Get photo URL
       if (elder['photo_url'] != null) {
         _elderPhotoUrl = elder['photo_url'];
+      }
+    });
+  }
+
+  void _populateCaregiverData(dynamic caregiverData) {
+    if (caregiverData == null || caregiverData.isEmpty) return;
+
+    final caregiver = caregiverData[0];
+    setState(() {
+      _caregiverData = caregiver;
+
+      // Get photo URL - check different possible field names
+      if (caregiver['profile_url'] != null) {
+        _caregiverPhotoUrl = caregiver['profile_url'];
+      } else if (caregiver['photo_url'] != null) {
+        _caregiverPhotoUrl = caregiver['photo_url'];
       }
     });
   }
@@ -87,6 +104,11 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                 // Check if it's elder data
                 if (state.response.data.containsKey('elders')) {
                   _populateElderData(state.response.data['elders']);
+                }
+
+                // Check if it's caregiver data
+                if (state.response.data.containsKey('caregivers')) {
+                  _populateCaregiverData(state.response.data['caregivers']);
                 }
               }
             } else if (state is UserFailure) {
@@ -135,7 +157,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                 ),
                               ),
                             ),
-                            const Positioned(
+                            Positioned(
                               top: -10,
                               right: -20,
                               child: CircleAvatar(
@@ -143,9 +165,12 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                 backgroundColor: Colors.white,
                                 child: CircleAvatar(
                                   radius: 29,
-                                  backgroundImage: AssetImage(
-                                    'lib/presentation/screens/assets/images/onboard.png',
-                                  ),
+                                  backgroundImage: _caregiverPhotoUrl != null &&
+                                          _caregiverPhotoUrl!.isNotEmpty
+                                      ? NetworkImage(_caregiverPhotoUrl!)
+                                          as ImageProvider
+                                      : AssetImage(
+                                          'lib/presentation/screens/assets/images/onboard.png'),
                                 ),
                               ),
                             )
