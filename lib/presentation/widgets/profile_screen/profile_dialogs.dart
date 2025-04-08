@@ -40,19 +40,13 @@ class ConfirmationDialog extends StatelessWidget {
               const SizedBox(height: 32),
               MainButton(
                 buttonText: "Simpan",
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onConfirmed();
-                },
+                onTap: onConfirmed,
               ),
               const SizedBox(height: 16),
               MainButton(
                 buttonText: "Batal",
                 color: AppColors.secondarySurface,
-                onTap: () {
-                  Navigator.of(context).pop();
-                  onCancelled();
-                },
+                onTap: onCancelled,
               ),
             ],
           ),
@@ -97,78 +91,64 @@ class EditProfileDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.all(16),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: Stack(children: [
-          Container(
-            padding: const EdgeInsets.all(32),
-            decoration: BoxDecoration(
-              color: AppColors.neutral20,
-              borderRadius: BorderRadius.circular(32),
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 16, bottom: 32.0),
-                    child: Text(
-                      "Edit Profile",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                        color: AppColors.neutral90,
-                      ),
-                    ),
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.8,
+        ),
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          color: AppColors.neutral20,
+          borderRadius: BorderRadius.circular(32),
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 16, bottom: 32.0),
+                child: Text(
+                  "Edit Profile",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Poppins',
+                    color: AppColors.neutral90,
                   ),
-                  if (isElder)
-                    ElderProfileView(
-                      nameController: elderNameController,
-                      genderController: elderGenderController,
-                      birthdateController: elderBirthdateController,
-                      heightController: elderHeightController,
-                      weightController: elderWeightController,
-                      readOnly: false,
-                    )
-                  else
-                    CaregiverProfileView(
-                      nameController: caregiverNameController,
-                      genderController: caregiverGenderController,
-                      birthdateController: caregiverBirthdateController,
-                      phoneController: caregiverPhoneController,
-                      relationshipController: caregiverRelationshipController,
-                      readOnly: false,
-                    ),
-                  const SizedBox(height: 16),
-                  MainButton(
-                      buttonText: "Simpan",
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        onSave();
-                      })
-                ],
+                ),
               ),
-            ),
-          ),
-          Positioned(
-            top: 16,
-            left: 16,
-            child: GestureDetector(
-              onTap: () {
-                showConfirmationDialog(() {
+              if (isElder)
+                ElderProfileView(
+                  nameController: elderNameController,
+                  genderController: elderGenderController,
+                  birthdateController: elderBirthdateController,
+                  heightController: elderHeightController,
+                  weightController: elderWeightController,
+                  readOnly: false,
+                )
+              else
+                CaregiverProfileView(
+                  nameController: caregiverNameController,
+                  genderController: caregiverGenderController,
+                  birthdateController: caregiverBirthdateController,
+                  phoneController: caregiverPhoneController,
+                  relationshipController: caregiverRelationshipController,
+                  readOnly: false,
+                ),
+              const SizedBox(height: 16),
+              MainButton(
+                buttonText: "Simpan",
+                onTap: () => showConfirmationDialog(onSave),
+              ),
+              const SizedBox(height: 16),
+              MainButton(
+                buttonText: "Batal",
+                color: AppColors.secondarySurface,
+                onTap: () {
                   Navigator.of(context).pop();
-                });
-              },
-              child: const Icon(
-                Icons.cancel,
-                size: 28,
-                color: AppColors.neutral50,
+                },
               ),
-            ),
+            ],
           ),
-        ]),
+        ),
       ),
     );
   }

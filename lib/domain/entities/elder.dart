@@ -56,8 +56,12 @@ class Elder {
           name: json['name'] as String,
           birthdate: DateTime.parse(json['birthdate'] as String),
           gender: json['gender'] as String,
-          bodyHeight: (json['body_height'] as num).toDouble(),
-          bodyWeight: (json['body_weight'] as num).toDouble(),
+          bodyHeight: (json['body_height'] is num)
+              ? (json['body_height'] as num).toDouble()
+              : double.tryParse(json['body_height'].toString()) ?? 0.0,
+          bodyWeight: (json['body_weight'] is num)
+              ? (json['body_weight'] as num).toDouble()
+              : double.tryParse(json['body_weight'].toString()) ?? 0.0,
           photoUrl: json['photo_url'] as String,
           createdAt: DateTime.parse(json['created_at'] as String),
           updatedAt: DateTime.parse(json['updated_at'] as String),
@@ -76,13 +80,18 @@ class Elder {
       'elder_id': elderId,
       'user_id': userId,
       'name': name,
-      'birthdate': birthdate.toIso8601String(),
+      'birthdate': _formatDateForJson(birthdate),
       'gender': gender,
       'body_height': bodyHeight,
       'body_weight': bodyWeight,
       'photo_url': photoUrl,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'created_at': _formatDateForJson(createdAt),
+      'updated_at': _formatDateForJson(updatedAt),
     };
+  }
+
+  String _formatDateForJson(DateTime date) {
+    final iso = date.toUtc().toIso8601String();
+    return iso.endsWith('Z') ? iso : iso + 'Z';
   }
 }

@@ -20,6 +20,7 @@ class MainProfileScreen extends StatefulWidget {
 
 class _MainProfileScreenState extends State<MainProfileScreen> {
   bool _isLoading = true;
+  bool _dataFetched = false;
   String? _userId;
   dynamic _elderData;
   String? _elderPhotoUrl;
@@ -31,18 +32,31 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthBloc>().add(GetCurrentUserEvent());
+      // Pre-fetch data for a smoother experience
+      _prefetchData();
     });
   }
 
+  void _prefetchData() {
+    // Start by getting the current user
+    context.read<AuthBloc>().add(GetCurrentUserEvent());
+  }
+
   void _fetchUserData(String userId) {
+    // Don't fetch again if we already have data
+    if (_dataFetched) return;
+
     setState(() {
       _userId = userId;
     });
 
     if (_userId != null && _userId!.isNotEmpty) {
+      // Fetch data in parallel
       context.read<UserBloc>().add(GetUserEldersEvent(_userId!));
       context.read<UserBloc>().add(GetUserCaregiversEvent(_userId!));
+
+      // Mark that we've started fetching data
+      _dataFetched = true;
     }
   }
 
@@ -76,6 +90,33 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     });
   }
 
+  void _navigateToProfileScreen() {
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const ProfileScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+              position: animation.drive(tween), child: child);
+        },
+      ),
+    ).then((_) {
+      // Refresh data when returning from profile screen
+      if (_userId != null) {
+        setState(() {
+          _dataFetched = false;
+        });
+        _fetchUserData(_userId!);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -90,7 +131,8 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               _fetchUserData(userId);
             } else if (state is AuthFailure) {
               setState(() => _isLoading = false);
-              ToastHelper.showErrorToast(context, state.error);
+              ToastHelper.showErrorToast(context,
+                  ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
           },
         ),
@@ -113,164 +155,188 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               }
             } else if (state is UserFailure) {
               setState(() => _isLoading = false);
-              ToastHelper.showErrorToast(context, state.error);
+              ToastHelper.showErrorToast(context,
+                  ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
           },
         ),
       ],
       child: Scaffold(
-        body: _isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Container(
-                width: double.infinity,
-                height: double.infinity,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image: AssetImage(
-                      'lib/presentation/screens/assets/images/bg_floral.png',
-                    ),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: screenHeight * 0.15),
-                      child: Column(
-                        children: [
-                          Stack(clipBehavior: Clip.none, children: [
-                            Container(
-                              width: 180,
-                              height: 180,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border:
-                                    Border.all(color: Colors.white, width: 5),
-                                image: DecorationImage(
-                                  image: _elderPhotoUrl != null &&
-                                          _elderPhotoUrl!.isNotEmpty
-                                      ? NetworkImage(_elderPhotoUrl!)
-                                          as ImageProvider
-                                      : AssetImage(
-                                          'lib/presentation/screens/assets/images/banner.png'),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: -10,
-                              right: -20,
-                              child: CircleAvatar(
-                                radius: 32.5,
-                                backgroundColor: Colors.white,
-                                child: CircleAvatar(
-                                  radius: 29,
-                                  backgroundImage: _caregiverPhotoUrl != null &&
-                                          _caregiverPhotoUrl!.isNotEmpty
-                                      ? NetworkImage(_caregiverPhotoUrl!)
-                                          as ImageProvider
-                                      : AssetImage(
-                                          'lib/presentation/screens/assets/images/onboard.png'),
-                                ),
-                              ),
-                            )
-                          ]),
-                          const SizedBox(height: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                _elderData != null
-                                    ? _elderData['name'] ?? "Elder"
-                                    : "Elder",
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w700,
-                                  fontFamily: 'Poppins',
-                                  color: AppColors.neutral100,
-                                ),
-                              ),
-                              const Text(
-                                "Elder",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Poppins',
-                                  color: AppColors.neutral90,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _isLoading
+              ? _buildLoadingScreen()
+              : Container(
+                  key: const ValueKey('main_content'),
+                  width: double.infinity,
+                  height: double.infinity,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage(
+                        'lib/presentation/screens/assets/images/bg_floral.png',
                       ),
+                      fit: BoxFit.cover,
                     ),
-                    const SizedBox(height: 32),
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(32),
-                            width: double.infinity,
-                            decoration: const BoxDecoration(
-                              color: AppColors.neutral20,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(32.0),
-                                topRight: Radius.circular(32.0),
-                              ),
-                            ),
-                            child: Column(
+                  ),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: screenHeight * 0.15),
+                        child: Column(
+                          children: [
+                            _buildProfileImages(),
+                            const SizedBox(height: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                MainButton(
-                                  buttonText: "Profil Lengkap",
-                                  color: AppColors.secondarySurface,
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ProfileScreen(),
-                                      ),
-                                    );
-                                  },
-                                  textAlign: TextAlign.left,
-                                  iconAsset: 'username.png',
-                                ),
-                                const SizedBox(height: 16),
-                                MainButton(
-                                  buttonText: "Riwayat",
-                                  color: AppColors.secondarySurface,
-                                  onTap: () {},
-                                  textAlign: TextAlign.left,
-                                  iconAsset: 'username.png',
-                                ),
-                                const SizedBox(height: 24),
-                                MainButton(
-                                  buttonText: "Aktifkan Mode Elder?",
-                                  onTap: () {},
-                                ),
-                                const SizedBox(height: 16),
-                                TextButton(
-                                  onPressed: () {},
-                                  child: const Text(
-                                    "Keluar",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'Poppins',
-                                      color: AppColors.neutral90,
-                                    ),
+                                Text(
+                                  _elderData != null
+                                      ? _elderData['name'] ?? "Elder"
+                                      : "Elder",
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.w700,
+                                    fontFamily: 'Poppins',
+                                    color: AppColors.neutral100,
                                   ),
-                                )
+                                ),
+                                const Text(
+                                  "Elder",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    fontFamily: 'Poppins',
+                                    color: AppColors.neutral90,
+                                  ),
+                                ),
                               ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 32),
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(32),
+                              width: double.infinity,
+                              decoration: const BoxDecoration(
+                                color: AppColors.neutral20,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(32.0),
+                                  topRight: Radius.circular(32.0),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  MainButton(
+                                    buttonText: "Profil Lengkap",
+                                    color: AppColors.secondarySurface,
+                                    onTap: _navigateToProfileScreen,
+                                    textAlign: TextAlign.left,
+                                    iconAsset: 'username.png',
+                                  ),
+                                  const SizedBox(height: 16),
+                                  MainButton(
+                                    buttonText: "Riwayat",
+                                    color: AppColors.secondarySurface,
+                                    onTap: () {},
+                                    textAlign: TextAlign.left,
+                                    iconAsset: 'username.png',
+                                  ),
+                                  const SizedBox(height: 24),
+                                  MainButton(
+                                    buttonText: "Aktifkan Mode Elder?",
+                                    onTap: () {},
+                                  ),
+                                  const SizedBox(height: 16),
+                                  TextButton(
+                                    onPressed: () {},
+                                    child: const Text(
+                                      "Keluar",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Poppins',
+                                        color: AppColors.neutral90,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
+  }
+
+  Widget _buildLoadingScreen() {
+    return Container(
+      key: const ValueKey('loading_screen'),
+      color: AppColors.neutral20,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryMain),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Memuat profil Anda...",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Poppins',
+                color: Colors.grey[700],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileImages() {
+    return Stack(clipBehavior: Clip.none, children: [
+      Container(
+        width: 180,
+        height: 180,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.white, width: 5),
+          image: DecorationImage(
+            image: _elderPhotoUrl != null && _elderPhotoUrl!.isNotEmpty
+                ? NetworkImage(_elderPhotoUrl!) as ImageProvider
+                : const AssetImage(
+                    'lib/presentation/screens/assets/images/banner.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+      Positioned(
+        top: -10,
+        right: -20,
+        child: CircleAvatar(
+          radius: 32.5,
+          backgroundColor: Colors.white,
+          child: CircleAvatar(
+            radius: 29,
+            backgroundImage:
+                _caregiverPhotoUrl != null && _caregiverPhotoUrl!.isNotEmpty
+                    ? NetworkImage(_caregiverPhotoUrl!) as ImageProvider
+                    : const AssetImage(
+                        'lib/presentation/screens/assets/images/onboard.png'),
+          ),
+        ),
+      )
+    ]);
   }
 }
