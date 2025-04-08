@@ -13,6 +13,7 @@ import 'package:elderwise/presentation/widgets/profile/profile_action_buttons.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 
 class ElderProfile extends StatefulWidget {
   final VoidCallback onNext;
@@ -212,11 +213,7 @@ class _ElderProfileState extends State<ElderProfile> {
               }
             } else if (state is UserFailure) {
               setState(() => _isCheckingUser = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('Failed to fetch elder data: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
             }
           },
         ),
@@ -227,9 +224,7 @@ class _ElderProfileState extends State<ElderProfile> {
                 widget.onNext();
               }
             } else if (state is ElderFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
             }
           },
         ),

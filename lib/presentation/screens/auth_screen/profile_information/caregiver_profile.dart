@@ -13,6 +13,7 @@ import 'package:elderwise/presentation/widgets/profile/relationship_selector.dar
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 
 class CaregiverProfile extends StatefulWidget {
   final VoidCallback onNext;
@@ -216,11 +217,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
               }
             } else if (state is UserFailure) {
               setState(() => _isCheckingUser = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('Failed to fetch caregiver data: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
             }
           },
         ),
@@ -231,9 +228,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
                 widget.onNext();
               }
             } else if (state is CaregiverFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
             }
           },
         ),

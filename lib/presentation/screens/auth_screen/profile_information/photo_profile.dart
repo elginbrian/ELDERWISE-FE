@@ -17,6 +17,7 @@ import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:path/path.dart' as path;
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 
 class PhotoProfile extends StatefulWidget {
   final VoidCallback onNext;
@@ -184,10 +185,8 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
   void _uploadElderPhoto() {
     if (_elderId == null || _elderId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Elder ID is missing. Cannot upload photo.')),
-      );
+      ToastHelper.showErrorToast(
+          context, 'Elder ID is missing. Cannot upload photo.');
       setState(() {
         _elderPhotoUploaded = true;
         _checkCompletionStatus();
@@ -208,10 +207,8 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
   void _uploadCaregiverPhoto() {
     if (_caregiverId == null || _caregiverId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text('Caregiver ID is missing. Cannot upload photo.')),
-      );
+      ToastHelper.showErrorToast(
+          context, 'Caregiver ID is missing. Cannot upload photo.');
       setState(() {
         _caregiverPhotoUploaded = true;
         _checkCompletionStatus();
@@ -412,9 +409,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
               _checkCompletionStatus();
             } else if (state is ImageFailure) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Image upload error: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
 
               setState(() {
                 _isUploading = false;

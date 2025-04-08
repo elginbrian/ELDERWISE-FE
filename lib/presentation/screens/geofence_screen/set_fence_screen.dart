@@ -1,16 +1,20 @@
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/formfield.dart';
+import 'package:elderwise/presentation/widgets/geofence/fence_map_widget.dart';
+import 'package:elderwise/presentation/widgets/geofence/radius_slider_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class SetFenceScreen extends StatefulWidget {
   final double initialMandiriRadius;
   final double initialPantauRadius;
+  final LatLng? initialCenter;
 
   const SetFenceScreen({
     super.key,
     this.initialMandiriRadius = 5.0,
     this.initialPantauRadius = 10.0,
+    this.initialCenter,
   });
 
   @override
@@ -28,7 +32,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
 
   final Set<Circle> _circles = {};
   final Set<Marker> _markers = {};
-  LatLng _center = const LatLng(-7.9996, 112.629);
+  late LatLng _center;
 
   @override
   void initState() {
@@ -36,6 +40,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
     // Initialize with the passed values
     _mandiriRadius = widget.initialMandiriRadius;
     _pantauRadius = widget.initialPantauRadius;
+    _center = widget.initialCenter ?? const LatLng(-7.9996, 112.629);
     // Initialize circles and markers
     _updateCircles();
   }
@@ -121,6 +126,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                   'centerPoint': _formatCoordinates(_center),
                   'mandiriRadius': _mandiriRadius,
                   'pantauRadius': _pantauRadius,
+                  'centerLatLng': _center,
                 });
               },
               child: const Text(
@@ -134,7 +140,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
           )
         ],
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           children: [
@@ -150,21 +156,24 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                 borderRadius: BorderRadius.circular(24),
                 child: Stack(
                   children: [
-                    GoogleMap(
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: true,
-                      initialCameraPosition: _initialCameraPosition,
-                      circles: _circles,
-                      markers: _markers,
+                    FenceMapWidget(
+                      initialCameraPosition: CameraPosition(
+                        target: _center,
+                        zoom: 10,
+                      ),
                       onMapCreated: (controller) {
                         _googleMapController = controller;
                       },
+                      circles: _circles,
+                      markers: _markers,
+                      zoomControlsEnabled: true,
                       onTap: (LatLng position) {
                         setState(() {
                           _center = position;
                           _updateCircles();
                         });
                       },
+                      height: 300,
                     ),
                     // Instructions overlay
                     Positioned(
@@ -191,157 +200,42 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
             const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Area Mandiri",
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Container(
-                        width: 60,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.neutral90),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "${_mandiriRadius.toStringAsFixed(1)} KM",
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Lansia dapat dengan bebas beraktifitas secara mandiri dalam radius berikut:",
-                      textAlign: TextAlign.justify,
-                    ),
-                  ),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 8.0,
-                      thumbShape:
-                          const RoundSliderThumbShape(enabledThumbRadius: 12.0),
-                      overlayShape:
-                          const RoundSliderOverlayShape(overlayRadius: 20.0),
-                      activeTrackColor: AppColors.primaryMain,
-                      inactiveTrackColor: AppColors.neutral20,
-                      thumbColor: AppColors.primaryMain,
-                    ),
-                    child: Slider(
-                      min: 0.1,
-                      max: 15.0,
-                      divisions: 150,
-                      value: _mandiriRadius,
-                      onChanged: (value) {
-                        setState(() {
-                          _mandiriRadius = value;
-                          if (_pantauRadius < _mandiriRadius) {
-                            _pantauRadius = _mandiriRadius;
-                          }
-                          _updateCircles();
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("0.5 KM"),
-                        const Text("15 KM"),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
+              child: RadiusSliderWidget(
+                label: "Area Mandiri",
+                value: _mandiriRadius,
+                max: 15.0,
+                description:
+                    "Lansia dapat dengan bebas beraktifitas secara mandiri dalam radius berikut:",
+                onChanged: (value) {
+                  setState(() {
+                    _mandiriRadius = value;
+                    if (_pantauRadius < _mandiriRadius) {
+                      _pantauRadius = _mandiriRadius;
+                    }
+                    _updateCircles();
+                  });
+                },
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Area Pantau",
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Container(
-                        width: 60,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: AppColors.neutral90),
-                        ),
-                        child: Center(
-                          child: Text(
-                            "${_pantauRadius.toStringAsFixed(1)} KM",
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "Lansia dapat beraktifitas dengan pantauan dari caregiver dalam radius berikut:",
-                      textAlign: TextAlign.justify,
-                    ),
-                  ),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 8.0,
-                      thumbShape:
-                          const RoundSliderThumbShape(enabledThumbRadius: 12.0),
-                      overlayShape:
-                          const RoundSliderOverlayShape(overlayRadius: 20.0),
-                      activeTrackColor: AppColors.primaryMain,
-                      inactiveTrackColor: AppColors.neutral20,
-                      thumbColor: AppColors.primaryMain,
-                    ),
-                    child: Slider(
-                      min: 0.1,
-                      max: 20.0,
-                      divisions: 200,
-                      value: _pantauRadius,
-                      onChanged: (value) {
-                        setState(() {
-                          _pantauRadius = value;
-                          if (_pantauRadius < _mandiriRadius) {
-                            _mandiriRadius = _pantauRadius;
-                          }
-                          _updateCircles();
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("0.5 KM"),
-                        const Text("20 KM"),
-                      ],
-                    ),
-                  ),
-                ],
+              child: RadiusSliderWidget(
+                label: "Area Pantau",
+                value: _pantauRadius,
+                max: 20.0,
+                divisions: 200,
+                maxLabel: "20 KM",
+                description:
+                    "Lansia dapat beraktifitas dengan pantauan dari caregiver dalam radius berikut:",
+                onChanged: (value) {
+                  setState(() {
+                    _pantauRadius = value;
+                    if (_pantauRadius < _mandiriRadius) {
+                      _mandiriRadius = _pantauRadius;
+                    }
+                    _updateCircles();
+                  });
+                },
               ),
             ),
           ],

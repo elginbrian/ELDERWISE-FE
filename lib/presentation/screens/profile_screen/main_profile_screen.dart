@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../themes/colors.dart';
 import 'profile_screen.dart';
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 
 class MainProfileScreen extends StatefulWidget {
   const MainProfileScreen({super.key});
@@ -72,10 +73,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               _fetchUserData(userId);
             } else if (state is AuthFailure) {
               setState(() => _isLoading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text('Failed to fetch user data: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
             }
           },
         ),
@@ -93,11 +91,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               }
             } else if (state is UserFailure) {
               setState(() => _isLoading = false);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('Failed to fetch profile data: ${state.error}')),
-              );
+              ToastHelper.showErrorToast(context, state.error);
             }
           },
         ),
