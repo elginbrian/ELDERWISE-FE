@@ -1,4 +1,4 @@
-import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
@@ -12,22 +12,33 @@ class GeofenceScreen extends StatefulWidget {
 }
 
 class _GeofenceScreenState extends State<GeofenceScreen> {
-  static const _initialCameraPosition = CameraPosition(
-      target: LatLng(-7.9996, 112.629),
-  zoom: 13);
+  static const _initialCameraPosition =
+      CameraPosition(target: LatLng(-7.9996, 112.629), zoom: 13);
 
   late GoogleMapController _googleMapController;
 
+  // Add state to store fence information
+  String _centerPoint = "69 LU - 420 BT";
+  double _mandiriRadius = 10.0;
+  double _pantauRadius = 5.0;
+
   @override
-  void dispose(){
+  void dispose() {
     _googleMapController.dispose();
     super.dispose();
   }
 
+  void _updateFenceData(
+      {String? centerPoint, double? mandiriRadius, double? pantauRadius}) {
+    setState(() {
+      if (centerPoint != null) _centerPoint = centerPoint;
+      if (mandiriRadius != null) _mandiriRadius = mandiriRadius;
+      if (pantauRadius != null) _pantauRadius = pantauRadius;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -60,7 +71,28 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                       children: [
                         MainButton(
                           buttonText: "Atur Area",
-                          onTap: () {},
+                          onTap: () async {
+                            // Navigate to SetFenceScreen and await result
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SetFenceScreen(
+                                  initialMandiriRadius: _mandiriRadius,
+                                  initialPantauRadius: _pantauRadius,
+                                ),
+                              ),
+                            );
+
+                            // Process the result if it exists
+                            if (result != null &&
+                                result is Map<String, dynamic>) {
+                              _updateFenceData(
+                                centerPoint: result['centerPoint'],
+                                mandiriRadius: result['mandiriRadius'],
+                                pantauRadius: result['pantauRadius'],
+                              );
+                            }
+                          },
                         ),
                         const SizedBox(height: 32),
                         Container(
@@ -82,26 +114,27 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Container(
-                                width: double.infinity,
-                                height: 275,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(32),
-                                  topRight: Radius.circular(32),
-                                ),
-                                child: GoogleMap(
-                                  myLocationButtonEnabled: false,
-                                    zoomControlsEnabled: false,
-                                    initialCameraPosition: _initialCameraPosition,
-                                  onMapCreated: (controller) => _googleMapController = controller,)
-                              )
-                              ),
+                                  width: double.infinity,
+                                  height: 275,
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(32),
+                                        topRight: Radius.circular(32),
+                                      ),
+                                      child: GoogleMap(
+                                        myLocationButtonEnabled: false,
+                                        zoomControlsEnabled: false,
+                                        initialCameraPosition:
+                                            _initialCameraPosition,
+                                        onMapCreated: (controller) =>
+                                            _googleMapController = controller,
+                                      ))),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Titik Pusat       :  69 LU - 420 BT",
+                                    "Titik Pusat       :  $_centerPoint",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -109,33 +142,39 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       color: AppColors.neutral90,
                                     ),
                                   ),
-                                  SizedBox(height: 16,),
+                                  SizedBox(height: 16),
                                   Text(
-                                    "Area Mandiri  :  10 Km",
+                                    "Area Mandiri  :  ${_mandiriRadius.toStringAsFixed(1)} Km",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'Poppins',
                                       color: AppColors.neutral90,
                                     ),
-                                    ),SizedBox(height: 16,),
+                                  ),
+                                  SizedBox(height: 16),
                                   Text(
-                                      "Area Pantau   :  5 Km",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: 'Poppins',
-                                        color: AppColors.neutral90,
-                                      ),
+                                    "Area Pantau   :  ${_pantauRadius.toStringAsFixed(1)} Km",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Poppins',
+                                      color: AppColors.neutral90,
                                     ),
+                                  ),
                                 ],
                               ),
-
                               Padding(
-                                padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 16),
-                                child: MainButton(buttonText: "Beri Peringatan", color: AppColors.neutral20, onTap: (){
-                                  _googleMapController.animateCamera(CameraUpdate.newCameraPosition(_initialCameraPosition));
-                                }),
+                                padding: const EdgeInsets.only(
+                                    left: 16.0, right: 16, bottom: 16),
+                                child: MainButton(
+                                    buttonText: "Beri Peringatan",
+                                    color: AppColors.neutral20,
+                                    onTap: () {
+                                      _googleMapController.animateCamera(
+                                          CameraUpdate.newCameraPosition(
+                                              _initialCameraPosition));
+                                    }),
                               )
                             ],
                           ),
