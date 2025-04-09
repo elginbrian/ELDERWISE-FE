@@ -6,7 +6,9 @@ import 'package:elderwise/presentation/screens/auth_screen/profile_information/s
 import 'package:elderwise/presentation/screens/auth_screen/signup_screen.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
 import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
-import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
+import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -26,5 +28,12 @@ final GoRouter appRouter = GoRouter(
         path: '/fill-information',
         builder: (context, state) => const StepperScreen()),
     GoRoute(path: '/home', builder: (context, state) => const MainScreen()),
+    GoRoute(
+        path: '/profile', builder: (context, state) => const ProfileScreen()),
+    GoRoute(
+        path: '/geofence', builder: (context, state) => const GeofenceScreen()),
+    GoRoute(
+        path: '/set-fence',
+        builder: (context, state) => const SetFenceScreen()),
   ],
 );

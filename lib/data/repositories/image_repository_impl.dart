@@ -26,16 +26,14 @@ class ImageRepositoryImpl implements ImageRepository {
     required String fileName,
     String? userId,
     String? entityId,
-    EntityType? entityType,
+    required EntityType entityType,
   }) async {
     try {
       final uuid = const Uuid().v4();
       final fileExt = path.extension(fileName);
       final uniqueFileName = '$uuid$fileExt';
 
-      final String filePath = entityType != null
-          ? '${entityType.toStringValue()}/$uniqueFileName'
-          : 'general/$uniqueFileName';
+      final String filePath = '${entityType.toStringValue()}/$uniqueFileName';
 
       final mimeType = lookupMimeType(fileName) ?? 'application/octet-stream';
 
@@ -130,21 +128,31 @@ class ImageRepositoryImpl implements ImageRepository {
       throw Exception('User ID must be provided');
     }
     try {
+      // Get the exact entity type string expected by the backend
+      final String entityTypeString = entityType.toStringValue();
+
+      debugPrint("Entity type before request: $entityTypeString");
+      debugPrint("Entity type enum value: $entityType");
+
       final Map<String, dynamic> requestData = {
         'url': imageUrl,
         'entityId': entityId,
-        'entityType': entityType.toStringValue(),
+        'entityType': entityTypeString,
         'userId': userId,
         if (imageId != null) 'id': imageId,
         if (imagePath != null) 'path': imagePath,
       };
 
-      debugPrint("Processing image with data: $requestData");
+      // Print the final payload
+      debugPrint("Sending payload to backend: ${requestData.toString()}");
 
       final response = await ApiConfig.dio.post(
         ApiConfig.processEntityImage,
         data: requestData,
       );
+
+      // Log the raw response
+      debugPrint("Raw response: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseData = response.data;
@@ -162,7 +170,8 @@ class ImageRepositoryImpl implements ImageRepository {
           entityType: entityType,
         );
       } else {
-        throw Exception('Failed to process image: ${response.statusCode}');
+        throw Exception(
+            'Failed to process image: ${response.statusCode}, ${response.data}');
       }
     } catch (e) {
       debugPrint("Error processing entity image: $e");
