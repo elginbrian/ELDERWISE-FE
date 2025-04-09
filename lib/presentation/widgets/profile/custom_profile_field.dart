@@ -148,7 +148,7 @@ class _CustomProfileFieldState extends State<CustomProfileField> {
                   filled: true,
                   fillColor: Colors.white,
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16.0, right: 8.0),
+                    padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                     child: widget.icon != null
                         ? Icon(widget.icon,
                             size: 20, color: AppColors.neutral80)
