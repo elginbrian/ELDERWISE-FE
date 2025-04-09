@@ -26,8 +26,10 @@ class GeofenceScreen extends StatefulWidget {
 }
 
 class _GeofenceScreenState extends State<GeofenceScreen> {
-  static const _initialCameraPosition =
-      CameraPosition(target: LatLng(-7.9996, 112.629), zoom: 13);
+  static const _initialCameraPosition = CameraPosition(
+    target: LatLng(-7.9996, 112.629),
+    zoom: 13,
+  );
 
   late GoogleMapController _googleMapController;
   String _userId = '';
@@ -84,7 +86,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
       return;
     }
 
-    // Create a complete area request with all required parameters
     final areaRequest = AreaRequestDTO(
       caregiverId: _caregiverId,
       elderId: _elderId,

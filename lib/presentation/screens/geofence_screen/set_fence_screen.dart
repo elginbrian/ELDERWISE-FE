@@ -37,11 +37,9 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize with the passed values
     _mandiriRadius = widget.initialMandiriRadius;
     _pantauRadius = widget.initialPantauRadius;
     _center = widget.initialCenter ?? const LatLng(-7.9996, 112.629);
-    // Initialize circles and markers
     _updateCircles();
   }
 
@@ -81,7 +79,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         ),
       );
 
-      // Add circle for Area Pantau if larger than Mandiri
       if (_pantauRadius > _mandiriRadius) {
         _circles.add(
           Circle(
@@ -121,7 +118,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 32),
             child: TextButton(
               onPressed: () {
-                // Return data to GeofenceScreen
                 Navigator.of(context).pop({
                   'centerPoint': _formatCoordinates(_center),
                   'mandiriRadius': _mandiriRadius,

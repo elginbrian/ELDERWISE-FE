@@ -14,7 +14,7 @@ class AppColors {
   static const Color neutral100 = Color(0xFF0A0A0A);
 
   // Primary Colors
-  static const Color primaryMain = Color(0xFFFFDB00);
+  static const Color primaryMain = Color(0xFFFFEA0D);
   static const Color primarySurface = Color(0xFFFFFEF7);
   static const Color primaryBorder = Color(0xFFFDFCF1);
   static const Color primaryHover = Color(0xFFFFF741);
