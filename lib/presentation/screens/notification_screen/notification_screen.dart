@@ -1,6 +1,6 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
-import 'package:elderwise/presentation/widgets/notification/notificarion_item.dart';
+import 'package:elderwise/presentation/widgets/notification/notification_item.dart';
 import 'package:flutter/material.dart';
 
 class NotificationScreen extends StatefulWidget {
