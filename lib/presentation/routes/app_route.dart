@@ -13,7 +13,7 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/onboarding',
   routes: [
     GoRoute(
-        path: '/onboarding', builder: (context, state) => const  GeofenceScreen()),
+        path: '/onboarding', builder: (context, state) => const  AgendaPage()),
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
