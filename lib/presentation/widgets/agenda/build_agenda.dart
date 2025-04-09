@@ -3,14 +3,14 @@ import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 
 class BuildAgenda extends StatelessWidget {
-  final String title;
+  final String type;
   final String nama;
   final String dose;
   final String time;
 
   const BuildAgenda({
     super.key,
-    required this.title,
+    required this.type,
     required this.nama,
     required this.dose,
     required this.time,
@@ -19,7 +19,7 @@ class BuildAgenda extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String iconFile;
-    switch (title.toLowerCase()) {
+    switch (type.toLowerCase()) {
       case 'obat':
         iconFile = 'medicine.png';
         break;
@@ -62,7 +62,7 @@ class BuildAgenda extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  type,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,

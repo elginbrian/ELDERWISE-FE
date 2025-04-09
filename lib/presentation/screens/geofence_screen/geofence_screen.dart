@@ -86,7 +86,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
       return;
     }
 
-    // Create a complete area request with all required parameters
     final areaRequest = AreaRequestDTO(
       caregiverId: _caregiverId,
       elderId: _elderId,

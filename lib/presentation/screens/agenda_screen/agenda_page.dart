@@ -222,7 +222,7 @@ class _AgendaPageState extends State<AgendaPage> {
                     const Text(
                       'Agenda',
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
                         fontFamily: 'Poppins',
                         color: AppColors.neutral90,
@@ -233,30 +233,29 @@ class _AgendaPageState extends State<AgendaPage> {
                       child: ListView(
                         children: const [
                           BuildAgenda(
-  title: 'Obat',
-  nama: 'Paracetamol',
-  dose: '500mg',
-  time: '08:00',
-),
-BuildAgenda(
-  title: 'Makan',
-  nama: 'Nasi Goreng',
-  dose: '',
-  time: '12:00',
-),
-BuildAgenda(
-  title: 'Hidrasi',
-  nama: 'Air Mineral',
-  dose: '250ml',
-  time: '10:00',
-),
-BuildAgenda(
-  title: 'Aktivitas',
-  nama: 'Senam Pagi',
-  dose: '',
-  time: '06:30',
-),
-
+                            type: 'Obat',
+                            nama: 'Paracetamol',
+                            dose: '500mg',
+                            time: '08:00',
+                          ),
+                          BuildAgenda(
+                            type: 'Makan',
+                            nama: 'Nasi Goreng',
+                            dose: '',
+                            time: '12:00',
+                          ),
+                          BuildAgenda(
+                            type: 'Hidrasi',
+                            nama: 'Air Mineral',
+                            dose: '250ml',
+                            time: '10:00',
+                          ),
+                          BuildAgenda(
+                            type: 'Aktivitas',
+                            nama: 'Senam Pagi',
+                            dose: '',
+                            time: '06:30',
+                          ),
                         ],
                       ),
                     ),
