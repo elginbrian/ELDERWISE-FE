@@ -8,7 +8,6 @@ import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.d
 import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
 import 'package:elderwise/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
-import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,7 +15,7 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/onboarding',
   routes: [
     GoRoute(
-        path: '/onboarding', builder: (context, state) => const  NotificationScreen()),
+        path: '/onboarding', builder: (context, state) => const Onboarding()),
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
@@ -36,5 +35,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
         path: '/set-fence',
         builder: (context, state) => const SetFenceScreen()),
+    GoRoute(
+      path: '/notification',
+      builder: (context, state) => const NotificationScreen(),
+    ),
+    GoRoute(path: '/agenda', builder: (context, state) => const AgendaPage()),
   ],
 );
