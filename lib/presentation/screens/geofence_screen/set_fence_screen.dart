@@ -72,7 +72,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         Circle(
           circleId: const CircleId('mandiriArea'),
           center: _center,
-          radius: _mandiriRadius * 1000, // Convert km to meters
+          radius: _mandiriRadius * 1000,
           fillColor: AppColors.primaryMain.withOpacity(0.1),
           strokeColor: AppColors.primaryMain,
           strokeWidth: 2,
@@ -95,7 +95,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
   }
 
   String _formatCoordinates(LatLng position) {
-    // Format coordinates for display
     final lat = position.latitude.toStringAsFixed(4);
     final lng = position.longitude.toStringAsFixed(4);
     return "$lat° ${position.latitude >= 0 ? 'LU' : 'LS'} - $lng° ${position.longitude >= 0 ? 'BT' : 'BB'}";
@@ -110,7 +109,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.of(context).pop(); // Back without saving
+            Navigator.of(context).pop();
           },
         ),
         actions: [
@@ -171,7 +170,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                       },
                       height: 300,
                     ),
-                    // Instructions overlay
                     Positioned(
                       top: 10,
                       left: 10,

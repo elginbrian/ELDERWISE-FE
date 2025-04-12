@@ -34,11 +34,10 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   late GoogleMapController _googleMapController;
   String _userId = '';
   String _caregiverId = '';
-  String _elderId = ''; // Added elder ID state variable
+  String _elderId = '';
   String _areaId = '';
   bool _isLoading = true;
 
-  // Area information
   String _centerPoint = "-7.9996° LS - 112.6290° BT";
   double _mandiriRadius = 5.0;
   double _pantauRadius = 10.0;
@@ -47,7 +46,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   @override
   void initState() {
     super.initState();
-    // Load current user and areas when widget initializes
     _loadCurrentUser();
   }
 
@@ -113,7 +111,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
               setState(() {
                 _userId = state.user.user.userId;
               });
-              // Fetch user's caregiver and elder information
               context.read<UserBloc>().add(GetUserCaregiversEvent(_userId));
               context.read<UserBloc>().add(GetUserEldersEvent(_userId));
             } else if (state is AuthFailure) {
@@ -127,12 +124,10 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
             if (state is UserSuccess) {
               setState(() => _isLoading = false);
 
-              // Handle caregivers data
               if (state.response.data != null &&
                   state.response.data is Map &&
                   state.response.data.containsKey('caregivers') &&
                   state.response.data['caregivers'].isNotEmpty) {
-                // Extract caregiver ID from response
                 final caregiverId = state.response.data['caregivers'][0]
                         ['caregiver_id'] ??
                     state.response.data['caregivers'][0]['id'];
@@ -140,18 +135,15 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                   _caregiverId = caregiverId;
                 });
 
-                // Fetch areas for this caregiver
                 context
                     .read<AreaBloc>()
                     .add(GetAreasByCaregiverEvent(caregiverId));
               }
 
-              // Handle elders data
               if (state.response.data != null &&
                   state.response.data is Map &&
                   state.response.data.containsKey('elders') &&
                   state.response.data['elders'].isNotEmpty) {
-                // Extract elder ID from response
                 final elderId = state.response.data['elders'][0]['elder_id'] ??
                     state.response.data['elders'][0]['id'];
                 setState(() {
@@ -178,7 +170,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                   _centerPoint = _formatCoordinates(latLng);
                 });
 
-                // Update map camera
                 _googleMapController.animateCamera(
                   CameraUpdate.newCameraPosition(
                     CameraPosition(
@@ -231,7 +222,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                 MainButton(
                                   buttonText: "Atur Area",
                                   onTap: () async {
-                                    // Navigate to SetFenceScreen and await result
                                     final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -243,7 +233,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       ),
                                     );
 
-                                    // Process the result if it exists
                                     if (result != null &&
                                         result is Map<String, dynamic>) {
                                       _updateFenceData(
@@ -253,7 +242,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                         centerLatLng: result['centerLatLng'],
                                       );
 
-                                      // Save the area to backend
                                       _saveArea();
                                     }
                                   },
@@ -345,7 +333,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   }
 
   String _formatCoordinates(LatLng position) {
-    // Format coordinates for display
     final lat = position.latitude.toStringAsFixed(4);
     final lng = position.longitude.toStringAsFixed(4);
     return "$lat° ${position.latitude >= 0 ? 'LU' : 'LS'} - $lng° ${position.longitude >= 0 ? 'BT' : 'BB'}";

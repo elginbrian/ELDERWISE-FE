@@ -26,7 +26,6 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
         return;
       }
 
-      // Add log to verify entity type
       debugPrint(
           'Uploading image with entity type: ${event.entityType?.toStringValue()}');
 
@@ -89,7 +88,6 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
       ProcessEntityImageEvent event, Emitter<ImageState> emit) async {
     emit(ImageLoading());
     try {
-      // Validate and log entity type before sending to backend
       final entityTypeString = event.entityType.toStringValue();
       debugPrint(
           'Processing entity image with type: ${event.entityType} (string value: $entityTypeString)');
@@ -109,7 +107,6 @@ class ImageBloc extends Bloc<ImageEvent, ImageState> {
         imageId: event.imageId,
       );
 
-      // Log success
       debugPrint(
           'Image processed successfully with entity type: $entityTypeString');
 

@@ -36,11 +36,10 @@ class AgendaRequestDTO {
       'category': category,
       'content1': content1,
       'datetime':
-          datetime, // No conversion needed now, already a formatted string
+          datetime,
       'is_finished': isFinished,
     };
 
-    // Include content2 only if it's not null
     if (content2 != null) {
       data['content2'] = content2;
     }

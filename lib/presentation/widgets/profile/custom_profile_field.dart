@@ -84,7 +84,6 @@ class _CustomProfileFieldState extends State<CustomProfileField> {
                 ),
                 child: Row(
                   children: [
-                    // Icon
                     Padding(
                       padding: const EdgeInsets.only(left: 16.0, right: 8.0),
                       child: widget.icon != null
@@ -98,7 +97,6 @@ class _CustomProfileFieldState extends State<CustomProfileField> {
                               : Icon(Icons.person,
                                   size: 20, color: AppColors.neutral80),
                     ),
-                    // Text content
                     Expanded(
                       child: Text(
                         widget.controller?.text.isNotEmpty == true

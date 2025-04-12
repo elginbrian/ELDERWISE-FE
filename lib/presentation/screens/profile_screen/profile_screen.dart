@@ -43,7 +43,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   File? _elderImage;
   File? _caregiverImage;
 
-  // Data state variables
   bool _isLoading = true;
   bool _isSaving = false;
   String? _userId;
@@ -56,11 +55,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _elderImageChanged = false;
   bool _caregiverImageChanged = false;
 
-  // Track form changes to prevent unnecessary API calls
   bool _elderFormChanged = false;
   bool _caregiverFormChanged = false;
 
-  // Controllers for text fields
   final TextEditingController _elderNameController = TextEditingController();
   final TextEditingController _elderGenderController = TextEditingController();
   final TextEditingController _elderBirthdateController =
@@ -83,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
 
-    // Add change listeners to all controllers
     _elderNameController.addListener(_onElderFormChanged);
     _elderGenderController.addListener(_onElderFormChanged);
     _elderBirthdateController.addListener(_onElderFormChanged);
@@ -96,7 +92,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _caregiverPhoneController.addListener(_onCaregiverFormChanged);
     _caregiverRelationshipController.addListener(_onCaregiverFormChanged);
 
-    // Get current user using AuthBloc
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<AuthBloc>().add(GetCurrentUserEvent());
     });
@@ -119,7 +114,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _userId = userId;
     });
 
-    // Fetch elder and caregiver data in parallel
     if (_userId != null && _userId!.isNotEmpty) {
       context.read<UserBloc>().add(GetUserEldersEvent(_userId!));
       context.read<UserBloc>().add(GetUserCaregiversEvent(_userId!));
@@ -131,7 +125,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final elder = elderData[0];
 
-    // Prevent UI flicker by checking if data is actually different
     final bool needsUpdate = _elderData == null ||
         _elderData['name'] != elder['name'] ||
         _elderData['gender'] != elder['gender'] ||
@@ -142,9 +135,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _elderData = elder;
         _elderId = elder['elder_id'] ?? elder['id'] ?? '';
 
-        // Only update controllers if form hasn't been modified by user
         if (!_elderFormChanged) {
-          // Populate elder fields
           _elderNameController.text = elder['name'] ?? '';
           _elderGenderController.text = elder['gender'] ?? '';
 
@@ -195,7 +186,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final caregiver = caregiverData[0];
 
-    // Prevent UI flicker by checking if data is actually different
     final bool needsUpdate = _caregiverData == null ||
         _caregiverData['name'] != caregiver['name'] ||
         _caregiverData['gender'] != caregiver['gender'] ||
@@ -207,7 +197,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _caregiverData = caregiver;
         _caregiverId = caregiver['caregiver_id'] ?? caregiver['id'] ?? '';
 
-        // Only update controllers if form hasn't been modified by user
         if (!_caregiverFormChanged) {
           _caregiverNameController.text = caregiver['name'] ?? '';
           _caregiverGenderController.text = caregiver['gender'] ?? '';
@@ -242,7 +231,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickImageFromGallery(bool isElder) async {
-    // Show a subtle loading indicator while picking image
     final loadingSnackBar = SnackBar(
       content: Row(
         children: const [
@@ -268,7 +256,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final selectedImage =
         await ProfileImagePicker.pickImageFromGallery(context);
 
-    // Dismiss the loading snackbar
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
     if (selectedImage != null) {
@@ -338,19 +325,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    // Show optimistic UI update
     ToastHelper.showSuccessToast(context, 'Menyimpan perubahan...');
 
-    // Parse birthdate from text field
     DateTime birthdate;
     try {
       final parts = _elderBirthdateController.text.split('/');
       if (parts.length == 3) {
-        // Create the date as UTC and ensure it has timezone information
         birthdate = DateTime.utc(
-          int.parse(parts[2]), // year
-          int.parse(parts[1]), // month
-          int.parse(parts[0]), // day
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
         );
       } else {
         ToastHelper.showErrorToast(context, 'Format tanggal lahir tidak valid');
@@ -361,7 +345,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    // Create Elder entity
     final elder = Elder(
       elderId: _elderId!,
       userId: _userId!,
@@ -375,15 +358,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       updatedAt: DateTime.now().toUtc(),
     );
 
-    // Dispatch update event
     context.read<ElderBloc>().add(UpdateElderEvent(_elderId!, elder));
 
-    // Reset form changed flag
     setState(() {
       _elderFormChanged = false;
     });
 
-    // Upload image if changed - do this after profile update to ensure consistent behavior
     if (_elderImageChanged && _elderImage != null) {
       _uploadProfileImage(
         file: _elderImage!,
@@ -399,19 +379,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    // Show optimistic UI update
     ToastHelper.showSuccessToast(context, 'Menyimpan perubahan...');
 
-    // Parse birthdate from text field
     DateTime birthdate;
     try {
       final parts = _caregiverBirthdateController.text.split('/');
       if (parts.length == 3) {
-        // Create the date as UTC and ensure it has timezone information
         birthdate = DateTime.utc(
-          int.parse(parts[2]), // year
-          int.parse(parts[1]), // month
-          int.parse(parts[0]), // day
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
         );
       } else {
         ToastHelper.showErrorToast(context, 'Format tanggal lahir tidak valid');
@@ -422,7 +399,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return;
     }
 
-    // Create Caregiver entity
     final caregiver = Caregiver(
       caregiverId: _caregiverId!,
       userId: _userId!,
@@ -436,17 +412,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       updatedAt: DateTime.now().toUtc(),
     );
 
-    // Dispatch update event
     context
         .read<CaregiverBloc>()
         .add(UpdateCaregiverEvent(_caregiverId!, caregiver));
 
-    // Reset form changed flag
     setState(() {
       _caregiverFormChanged = false;
     });
 
-    // Upload image if changed - do this after profile update to ensure consistent behavior
     if (_caregiverImageChanged && _caregiverImage != null) {
       _uploadProfileImage(
         file: _caregiverImage!,
@@ -474,7 +447,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _saveProfileChanges() {
-    // Don't save if nothing changed
     if (!_elderFormChanged &&
         !_caregiverFormChanged &&
         !_elderImageChanged &&
@@ -497,7 +469,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
-    // Dispose all controllers
     _elderNameController.removeListener(_onElderFormChanged);
     _elderGenderController.removeListener(_onElderFormChanged);
     _elderBirthdateController.removeListener(_onElderFormChanged);
@@ -570,11 +541,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is CurrentUserSuccess) {
-              // Extract user ID from CurrentUserSuccess state
               final userId = state.user.user.userId;
               _fetchUserData(userId);
             } else if (state is AuthFailure) {
-              // Use a more user-friendly error message
               ToastHelper.showErrorToast(context,
                   ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
@@ -585,31 +554,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (state is UserSuccess) {
               setState(() => _isLoading = false);
 
-              // Check what type of response we received
               if (state.response.data != null && state.response.data is Map) {
-                // Check if it's elder data
                 if (state.response.data.containsKey('elders')) {
                   _populateElderData(state.response.data['elders']);
                 }
 
-                // Check if it's caregiver data
                 if (state.response.data.containsKey('caregivers')) {
                   _populateCaregiverData(state.response.data['caregivers']);
                 }
               }
             } else if (state is UserFailure) {
               setState(() => _isLoading = false);
-              // Use a more user-friendly error message
               ToastHelper.showErrorToast(context,
                   ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
           },
         ),
-        // Add Elder bloc listener
         BlocListener<ElderBloc, ElderState>(
           listener: (context, state) {
             if (state is ElderLoading) {
-              // Only show loading if not already showing (prevents flicker)
               if (!_isSaving) {
                 setState(() => _isSaving = true);
               }
@@ -621,23 +584,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ToastHelper.showSuccessToast(
                   context, 'Profil elder berhasil diperbarui');
 
-              // Refresh data
               if (_userId != null) {
                 context.read<UserBloc>().add(GetUserEldersEvent(_userId!));
               }
             } else if (state is ElderFailure) {
               setState(() => _isSaving = false);
-              // Use a more user-friendly error message
               ToastHelper.showErrorToast(context,
                   ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
           },
         ),
-        // Add Caregiver bloc listener
         BlocListener<CaregiverBloc, CaregiverState>(
           listener: (context, state) {
             if (state is CaregiverLoading) {
-              // Only show loading if not already showing (prevents flicker)
               if (!_isSaving) {
                 setState(() => _isSaving = true);
               }
@@ -649,28 +608,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ToastHelper.showSuccessToast(
                   context, 'Profil caregiver berhasil diperbarui');
 
-              // Refresh data
               if (_userId != null) {
                 context.read<UserBloc>().add(GetUserCaregiversEvent(_userId!));
               }
             } else if (state is CaregiverFailure) {
               setState(() => _isSaving = false);
-              // Use a more user-friendly error message
               ToastHelper.showErrorToast(context,
                   ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
           },
         ),
-        // Add Image bloc listener
         BlocListener<ImageBloc, ImageState>(
           listener: (context, state) {
             if (state is ImageLoading) {
-              // Only show loading if not already showing (prevents flicker)
               if (!_isSaving) {
                 setState(() => _isSaving = true);
               }
             } else if (state is ImageUploadSuccess) {
-              // Update photo URL based on entity type
               if (state.uploadedImage.entityType == EntityType.elder) {
                 setState(() {
                   _elderPhotoUrl = state.uploadedImage.url;
@@ -689,7 +643,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   context, 'Foto profil berhasil diperbarui');
             } else if (state is ImageFailure) {
               setState(() => _isSaving = false);
-              // Use a more user-friendly error message
               ToastHelper.showErrorToast(context,
                   ToastHelper.getUserFriendlyErrorMessage(state.error));
             }
@@ -738,9 +691,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               top: 24,
               left: 0,
               child: FloatingActionButton(
-                onPressed: _isSaving
-                    ? null
-                    : () => Navigator.pop(context), // Disable during saving
+                onPressed: _isSaving ? null : () => Navigator.pop(context),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 hoverElevation: 0,
@@ -751,7 +702,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     color: AppColors.neutral10, size: 36),
               ),
             ),
-            // Show a subtle overlay when loading or saving
             if (_isLoading || _isSaving)
               Positioned.fill(
                 child: Container(
@@ -817,7 +767,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ProfileToggle(
             value: switchValue,
             onChanged: _isLoading || _isSaving
-                ? (_) {} // Disable toggle while loading/saving
+                ? (_) {}
                 : (value) => setState(() {
                       switchValue = value;
                     }),

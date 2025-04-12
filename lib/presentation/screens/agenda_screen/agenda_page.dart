@@ -61,7 +61,6 @@ class _AgendaPageState extends State<AgendaPage> {
       });
     });
 
-    // Load current user info
     context.read<AuthBloc>().add(GetCurrentUserEvent());
   }
 

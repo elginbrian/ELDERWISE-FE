@@ -32,18 +32,15 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Pre-fetch data for a smoother experience
       _prefetchData();
     });
   }
 
   void _prefetchData() {
-    // Start by getting the current user
     context.read<AuthBloc>().add(GetCurrentUserEvent());
   }
 
   void _fetchUserData(String userId) {
-    // Don't fetch again if we already have data
     if (_dataFetched) return;
 
     setState(() {
@@ -51,11 +48,9 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     });
 
     if (_userId != null && _userId!.isNotEmpty) {
-      // Fetch data in parallel
       context.read<UserBloc>().add(GetUserEldersEvent(_userId!));
       context.read<UserBloc>().add(GetUserCaregiversEvent(_userId!));
 
-      // Mark that we've started fetching data
       _dataFetched = true;
     }
   }
@@ -67,7 +62,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     setState(() {
       _elderData = elder;
 
-      // Get photo URL
       if (elder['photo_url'] != null) {
         _elderPhotoUrl = elder['photo_url'];
       }
@@ -81,7 +75,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     setState(() {
       _caregiverData = caregiver;
 
-      // Get photo URL - check different possible field names
       if (caregiver['profile_url'] != null) {
         _caregiverPhotoUrl = caregiver['profile_url'];
       } else if (caregiver['photo_url'] != null) {
@@ -107,7 +100,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
         },
       ),
     ).then((_) {
-      // Refresh data when returning from profile screen
       if (_userId != null) {
         setState(() {
           _dataFetched = false;
@@ -126,7 +118,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
         BlocListener<AuthBloc, AuthState>(
           listener: (context, state) {
             if (state is CurrentUserSuccess) {
-              // Extract user ID from CurrentUserSuccess state
               final userId = state.user.user.userId;
               _fetchUserData(userId);
             } else if (state is AuthFailure) {
@@ -141,14 +132,11 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
             if (state is UserSuccess) {
               setState(() => _isLoading = false);
 
-              // Check what type of response we received
               if (state.response.data != null && state.response.data is Map) {
-                // Check if it's elder data
                 if (state.response.data.containsKey('elders')) {
                   _populateElderData(state.response.data['elders']);
                 }
 
-                // Check if it's caregiver data
                 if (state.response.data.containsKey('caregivers')) {
                   _populateCaregiverData(state.response.data['caregivers']);
                 }

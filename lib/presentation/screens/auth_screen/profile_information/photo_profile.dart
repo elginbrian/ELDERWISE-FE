@@ -50,7 +50,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
   String? _elderPhotoUrl;
   String? _caregiverPhotoUrl;
 
-  // Add state tracking for user data loading
   bool _isCheckingElderUser = true;
   bool _isCheckingCaregiverUser = true;
   bool _hasElderProfile = false;
@@ -76,7 +75,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
       _hasCaregiverProfile = true;
     }
 
-    // Fetch user profiles using UserBloc
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserBloc>().add(GetUserEldersEvent(widget.userId));
       context.read<UserBloc>().add(GetUserCaregiversEvent(widget.userId));
@@ -92,7 +90,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
       _hasElderProfile = true;
       _elderId = elder['elder_id'] ?? elder['id'] ?? '';
 
-      // Get photo URL if available
       if (elder['photo_url'] != null) {
         _elderPhotoUrl = elder['photo_url'];
       }
@@ -108,7 +105,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
       _hasCaregiverProfile = true;
       _caregiverId = caregiver['caregiver_id'] ?? caregiver['id'] ?? '';
 
-      // Get profile URL if available (using different field names)
       if (caregiver['profile_url'] != null) {
         _caregiverPhotoUrl = caregiver['profile_url'];
       } else if (caregiver['profileUrl'] != null) {
@@ -242,7 +238,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
   void _checkCompletionStatus() {
     bool isComplete = true;
 
-    // Only check uploads that were actually requested
     if (_needElderUpload && !_elderPhotoUploaded) {
       isComplete = false;
     }
@@ -457,19 +452,15 @@ class _PhotoProfileState extends State<PhotoProfile> {
             }
           },
         ),
-        // Add user bloc listeners
         BlocListener<UserBloc, UserState>(
           listener: (context, state) {
             if (state is UserSuccess) {
-              // Check what type of response we received
               if (state.response.data != null && state.response.data is Map) {
-                // Check if it's elder data
                 if (state.response.data.containsKey('elders')) {
                   setState(() => _isCheckingElderUser = false);
                   _populateElderData(state.response.data['elders']);
                 }
 
-                // Check if it's caregiver data
                 if (state.response.data.containsKey('caregivers')) {
                   setState(() => _isCheckingCaregiverUser = false);
                   _populateCaregiverData(state.response.data['caregivers']);
@@ -511,10 +502,8 @@ class _PhotoProfileState extends State<PhotoProfile> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Add top padding to center vertically when screen is large enough
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
-                // Center the profile images
                 Center(
                   child: Column(
                     children: [
@@ -537,10 +526,8 @@ class _PhotoProfileState extends State<PhotoProfile> {
                   ),
                 ),
 
-                // Add spacing before buttons
                 const SizedBox(height: 36),
 
-                // Button section
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -574,7 +561,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
                   ],
                 ),
 
-                // Add some bottom padding
                 const SizedBox(height: 16),
               ],
             ),

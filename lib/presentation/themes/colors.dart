@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Neutral Colors
   static const Color neutral10 = Color(0xFFFFFFFF);
   static const Color neutral20 = Color(0xFFEBF0F4);
   static const Color neutral30 = Color(0xFFE4E8EC);
@@ -13,7 +12,6 @@ class AppColors {
   static const Color neutral90 = Color(0xFF3D3F40);
   static const Color neutral100 = Color(0xFF0A0A0A);
 
-  // Primary Colors
   static const Color primaryMain = Color(0xFFFFEA0D);
   static const Color primarySurface = Color(0xFFFFFEF7);
   static const Color primaryBorder = Color(0xFFFDFCF1);
@@ -21,7 +19,6 @@ class AppColors {
   static const Color primaryPressed = Color(0xFFD1A100);
   static const Color primaryFocus = Color(0xFFFFFEF7);
 
-  // Secondary Colors
   static const Color secondaryFocus = Color(0xFFFFFDE3);
   static const Color secondarySurface = Color(0xFFFCFCF9);
   static const Color secondaryBorder = Color(0xFFFFF4F6);
