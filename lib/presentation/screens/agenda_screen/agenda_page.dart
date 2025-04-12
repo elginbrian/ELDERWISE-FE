@@ -1,7 +1,21 @@
-import 'package:elderwise/presentation/screens/assets/image_string.dart';
+import 'package:elderwise/domain/entities/agenda.dart';
+import 'package:elderwise/presentation/bloc/agenda/agenda_bloc.dart';
+import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
+import 'package:elderwise/presentation/bloc/agenda/agenda_state.dart';
+import 'package:elderwise/presentation/bloc/auth/auth_bloc.dart';
+import 'package:elderwise/presentation/bloc/auth/auth_event.dart';
+import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
+import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
+import 'package:elderwise/presentation/bloc/user/user_event.dart';
+import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/screens/agenda_screen/add_agenda.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
-import 'package:elderwise/presentation/widgets/agenda/build_agenda.dart';
+import 'package:elderwise/presentation/utils/toast_helper.dart';
+import 'package:elderwise/presentation/widgets/agenda/date_header.dart';
+import 'package:elderwise/presentation/widgets/agenda/week_selector.dart';
+import 'package:elderwise/presentation/widgets/agenda/agenda_list.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -13,8 +27,18 @@ class AgendaPage extends StatefulWidget {
 }
 
 class _AgendaPageState extends State<AgendaPage> {
-  DateTime selectedDate = DateTime(2025, 3, 26);
+  DateTime selectedDate = DateTime.now();
   final TextEditingController dateController = TextEditingController();
+  late DateTime anchorDate;
+
+  String _userId = '';
+  String _elderId = '';
+  String _caregiverId = '';
+  bool _isLoading = false;
+  bool _userDataLoaded = false;
+  List<Agenda> _agendas = [];
+  List<Agenda> _filteredAgendas = [];
+
   final List<String> weekdays = [
     'Senin',
     'Selasa',
@@ -28,12 +52,17 @@ class _AgendaPageState extends State<AgendaPage> {
   @override
   void initState() {
     super.initState();
+    anchorDate =
+        selectedDate.subtract(Duration(days: selectedDate.weekday - 1));
     initializeDateFormatting('id_ID', null).then((_) {
       setState(() {
         dateController.text =
             DateFormat('yyyy-MM-dd', 'id_ID').format(selectedDate);
       });
     });
+
+    // Load current user info
+    context.read<AuthBloc>().add(GetCurrentUserEvent());
   }
 
   @override
@@ -42,242 +71,279 @@ class _AgendaPageState extends State<AgendaPage> {
     super.dispose();
   }
 
-  void updateDateUI() {
-    setState(() {});
+  void _loadUserData() {
+    if (_userId.isNotEmpty && !_userDataLoaded) {
+      context.read<UserBloc>().add(GetUserEldersEvent(_userId));
+      context.read<UserBloc>().add(GetUserCaregiversEvent(_userId));
+      _userDataLoaded = true;
+    }
   }
 
-  void onDateSelected(DateTime date) {
+  void _loadAgendas() {
+    if (_elderId.isNotEmpty) {
+      context.read<AgendaBloc>().add(GetAgendasByElderIdEvent(_elderId));
+    } else {
+      ToastHelper.showErrorToast(context, 'ID Elder tidak ditemukan');
+    }
+  }
+
+  void _filterAgendasByDate() {
+    if (_agendas.isEmpty) return;
+
     setState(() {
-      selectedDate = date;
-      updateDateUI();
+      _filteredAgendas = _agendas.where((agenda) {
+        final agendaDate = agenda.datetime;
+        return agendaDate.year == selectedDate.year &&
+            agendaDate.month == selectedDate.month &&
+            agendaDate.day == selectedDate.day;
+      }).toList();
     });
   }
 
+  void _selectDate(DateTime date) {
+    setState(() {
+      selectedDate = date;
+    });
+    _filterAgendasByDate();
+  }
+
   List<DateTime> getDaysInWeek() {
-    final DateTime monday =
+    final DateTime weekStart =
         selectedDate.subtract(Duration(days: selectedDate.weekday - 1));
-    return List.generate(6, (index) => monday.add(Duration(days: index)));
+    return List.generate(7, (index) => weekStart.add(Duration(days: index)));
+  }
+
+  void previousWeek() {
+    setState(() {
+      selectedDate = selectedDate.subtract(const Duration(days: 7));
+    });
+    _filterAgendasByDate();
+  }
+
+  void nextWeek() {
+    setState(() {
+      selectedDate = selectedDate.add(const Duration(days: 7));
+    });
+    _filterAgendasByDate();
+  }
+
+  Future<void> _showDatePicker() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: AppColors.primaryMain,
+              onPrimary: AppColors.neutral90,
+              onSurface: AppColors.neutral90,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      _selectDate(picked);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final daysInWeek = getDaysInWeek();
 
-    return Scaffold(
-      backgroundColor: AppColors.primaryMain,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
-              child: Row(
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is CurrentUserSuccess) {
+              setState(() {
+                _userId = state.user.user.userId;
+              });
+              _loadUserData();
+            }
+          },
+        ),
+        BlocListener<UserBloc, UserState>(
+          listener: (context, state) {
+            if (state is UserSuccess) {
+              if (state.response.data != null && state.response.data is Map) {
+                if (state.response.data.containsKey('elders') &&
+                    state.response.data['elders'] is List &&
+                    state.response.data['elders'].isNotEmpty) {
+                  final elderData = state.response.data['elders'][0];
+                  setState(() {
+                    _elderId = elderData['elder_id'] ?? elderData['id'] ?? '';
+                  });
+
+                  if (_elderId.isNotEmpty) {
+                    _loadAgendas();
+                  }
+                }
+
+                if (state.response.data.containsKey('caregivers') &&
+                    state.response.data['caregivers'] is List &&
+                    state.response.data['caregivers'].isNotEmpty) {
+                  final caregiverData = state.response.data['caregivers'][0];
+                  setState(() {
+                    _caregiverId = caregiverData['caregiver_id'] ??
+                        caregiverData['id'] ??
+                        '';
+                  });
+                }
+              }
+            } else if (state is UserFailure) {
+              ToastHelper.showErrorToast(context, state.error);
+            }
+          },
+        ),
+        BlocListener<AgendaBloc, AgendaState>(
+          listener: (context, state) {
+            setState(() {
+              _isLoading = state is AgendaLoading;
+            });
+
+            if (state is AgendaSuccess) {
+              ToastHelper.showSuccessToast(context, 'Operasi agenda berhasil');
+              _loadAgendas();
+            } else if (state is AgendaListSuccess) {
+              setState(() {
+                _agendas = state.agendas;
+                _filterAgendasByDate();
+              });
+            } else if (state is AgendaFailure) {
+              ToastHelper.showErrorToast(context, state.error);
+            }
+          },
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: AppColors.primaryMain,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
                 children: [
-                  const Icon(Icons.arrow_back_ios, color: AppColors.neutral90),
-                  const SizedBox(width: 32),
-                  const Text(
-                    'Agenda',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: AppColors.neutral90,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 24.0),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.arrow_back_ios,
+                              color: AppColors.neutral90),
+                        ),
+                        const SizedBox(width: 16),
+                        const Text(
+                          'Agenda',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: AppColors.neutral90,
+                          ),
+                        ),
+                        const Spacer(),
+                      ],
                     ),
                   ),
-                  const Spacer(),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(32.0),
-                decoration: const BoxDecoration(
-                  color: AppColors.secondarySurface,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(32),
-                    topRight: Radius.circular(32),
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 20.0),
+                      decoration: const BoxDecoration(
                         color: AppColors.secondarySurface,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(32),
+                          topRight: Radius.circular(32),
+                        ),
                       ),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          GestureDetector(
-                            onTap: () async {
-                              final DateTime? picked = await showDatePicker(
-                                context: context,
-                                initialDate: selectedDate,
-                                firstDate: DateTime(2020),
-                                lastDate: DateTime(2030),
-                                builder: (context, child) {
-                                  return Theme(
-                                    data: Theme.of(context).copyWith(
-                                      colorScheme: const ColorScheme.light(
-                                        primary: AppColors.primaryMain,
-                                        onPrimary: AppColors.neutral90,
-                                        onSurface: AppColors.neutral90,
-                                      ),
-                                    ),
-                                    child: child!,
-                                  );
-                                },
-                              );
-
-                              if (picked != null) {
-                                setState(() {
-                                  selectedDate = picked;
-                                  updateDateUI();
-                                });
-                              }
-                            },
-                            child: Row(
-                              children: [
-                                Text(
-                                  DateFormat('EEEE, d MMMM yyyy', 'id_ID')
-                                      .format(selectedDate),
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 16,
-                                      fontFamily: 'Poppins'),
+                          DateHeader(
+                            selectedDate: selectedDate,
+                            onTap: _showDatePicker,
+                          ),
+                          const SizedBox(height: 20),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 0),
+                            child: WeekSelector(
+                              daysInWeek: daysInWeek,
+                              selectedDate: selectedDate,
+                              weekdays: weekdays,
+                              onDateSelected: _selectDate,
+                              onPreviousWeek: previousWeek,
+                              onNextWeek: nextWeek,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Agenda Kegiatan',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.neutral90,
                                 ),
-                                const Spacer(),
-                                const Icon(Icons.keyboard_arrow_down,
-                                    color: AppColors.neutral90),
-                              ],
-                            ),
+                              ),
+                              Text(
+                                DateFormat('d MMMM', 'id_ID')
+                                    .format(selectedDate),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.neutral70,
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(height: 16),
-                          SizedBox(
-                            height: 60,
-                            child: ListView.builder(
-                              itemCount: daysInWeek.length,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              shrinkWrap: true,
-                              scrollDirection: Axis.horizontal,
-                              itemBuilder: (context, index) {
-                                final day = daysInWeek[index];
-                                final isSelected =
-                                    day.day == selectedDate.day &&
-                                        day.month == selectedDate.month;
-
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 4.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        selectedDate = day;
-                                      });
-                                    },
-                                    child: Container(
-                                      width: 50,
-                                      decoration: BoxDecoration(
-                                        color: isSelected
-                                            ? AppColors.primaryMain
-                                            : AppColors.secondarySurface,
-                                        borderRadius: BorderRadius.circular(10),
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
-                                          width: 1,
-                                        ),
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '${day.day}',
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                                fontFamily: 'Poppins',
-                                                color: AppColors.neutral90),
-                                          ),
-                                          Text(
-                                            weekdays[day.weekday - 1],
-                                            style: const TextStyle(
-                                                fontSize: 12,
-                                                fontFamily: 'Poppins',
-                                                color: AppColors.neutral90),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
+                          Expanded(
+                            child: AgendaList(
+                              agendas: _filteredAgendas,
+                              isLoading: _isLoading,
+                              onAgendaUpdated: _loadAgendas,
                             ),
-                          ),
-                          const SizedBox(height: 16),
-                        ],
-                      ),
-                    ),
-                    const Text(
-                      'Agenda',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'Poppins',
-                        color: AppColors.neutral90,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView(
-                        children: const [
-                          BuildAgenda(
-                            type: 'Obat',
-                            nama: 'Paracetamol',
-                            dose: '500mg',
-                            time: '08:00',
-                          ),
-                          BuildAgenda(
-                            type: 'Makan',
-                            nama: 'Nasi Goreng',
-                            dose: '',
-                            time: '12:00',
-                          ),
-                          BuildAgenda(
-                            type: 'Hidrasi',
-                            nama: 'Air Mineral',
-                            dose: '250ml',
-                            time: '10:00',
-                          ),
-                          BuildAgenda(
-                            type: 'Aktivitas',
-                            nama: 'Senam Pagi',
-                            dose: '',
-                            time: '06:30',
                           ),
                         ],
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              Positioned(
+                right: 16,
+                bottom: 120,
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    final result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const AddAgenda()),
+                    );
+                    if (result == true) {
+                      _loadAgendas();
+                    }
+                  },
+                  elevation: 2,
+                  backgroundColor: AppColors.primaryMain,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  child: const Icon(Icons.add, color: AppColors.neutral90),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        child: Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.primaryMain,
-            borderRadius: BorderRadius.circular(32),
+            ],
           ),
-          child: const Icon(Icons.add, color: AppColors.neutral90),
         ),
       ),
     );

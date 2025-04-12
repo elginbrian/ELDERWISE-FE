@@ -4,7 +4,7 @@ class AgendaRequestDTO {
   final String category;
   final String content1;
   final String? content2;
-  final DateTime datetime;
+  final String datetime;
   final bool isFinished;
 
   AgendaRequestDTO({
@@ -24,7 +24,7 @@ class AgendaRequestDTO {
       category: json['category'] as String,
       content1: json['content1'] as String,
       content2: json['content2'] as String?,
-      datetime: DateTime.parse(json['datetime'] as String),
+      datetime: json['datetime'] as String,
       isFinished: json['is_finished'] as bool,
     );
   }
@@ -35,7 +35,8 @@ class AgendaRequestDTO {
       'caregiver_id': caregiverId,
       'category': category,
       'content1': content1,
-      'datetime': datetime.toIso8601String(),
+      'datetime':
+          datetime, // No conversion needed now, already a formatted string
       'is_finished': isFinished,
     };
 
