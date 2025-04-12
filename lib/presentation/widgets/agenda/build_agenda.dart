@@ -7,6 +7,8 @@ class BuildAgenda extends StatelessWidget {
   final String nama;
   final String dose;
   final String time;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const BuildAgenda({
     super.key,
@@ -14,6 +16,8 @@ class BuildAgenda extends StatelessWidget {
     required this.nama,
     required this.dose,
     required this.time,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -73,13 +77,16 @@ class BuildAgenda extends StatelessWidget {
                 Row(
                   children: [
                     if (nama.isNotEmpty)
-                      Text(
-                        nama,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Poppins',
-                          color: AppColors.neutral90,
+                      Flexible(
+                        child: Text(
+                          nama,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: AppColors.neutral90,
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -115,13 +122,14 @@ class BuildAgenda extends StatelessWidget {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: IconButton(
-              icon: const Icon(Icons.edit, color: Colors.grey),
-              onPressed: () {},
+          if (onEdit != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: IconButton(
+                icon: const Icon(Icons.edit, color: Colors.grey),
+                onPressed: onEdit,
+              ),
             ),
-          ),
         ],
       ),
     );

@@ -63,8 +63,8 @@ void setupDependencies() {
   );
 
   getIt.registerFactory<AuthBloc>(() => AuthBloc(getIt<AuthRepository>()));
-  getIt
-      .registerFactory<AgendaBloc>(() => AgendaBloc(getIt<AgendaRepository>()));
+  getIt.registerFactory<AgendaBloc>(
+      () => AgendaBloc(getIt<AgendaRepository>(), getIt<ElderRepository>()));
   getIt.registerFactory<AreaBloc>(() => AreaBloc(getIt<AreaRepository>()));
   getIt.registerFactory<CaregiverBloc>(
       () => CaregiverBloc(getIt<CaregiverRepository>()));

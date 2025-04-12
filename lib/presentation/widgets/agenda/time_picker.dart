@@ -23,10 +23,27 @@ class TimePicker extends StatefulWidget {
   State<TimePicker> createState() => _TimePickerState();
 }
 
-
 class _TimePickerState extends State<TimePicker> {
   TimeOfDay? _selectedTime;
   bool _touched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with the initial time if provided
+    _selectedTime = widget.initialTime;
+  }
+
+  @override
+  void didUpdateWidget(TimePicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update _selectedTime if the initialTime changes
+    if (widget.initialTime != oldWidget.initialTime) {
+      setState(() {
+        _selectedTime = widget.initialTime;
+      });
+    }
+  }
 
   Future<void> _selectTime() async {
     final TimeOfDay now = TimeOfDay.now();
@@ -38,10 +55,8 @@ class _TimePickerState extends State<TimePicker> {
           data: Theme.of(context).copyWith(
             timePickerTheme: TimePickerThemeData(
               dialHandColor: AppColors.primaryMain,
-              // hourMinuteTextColor: AppColors.primaryMain,
               hourMinuteShape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                // side: BorderSide(color: AppColors.primaryMain, width: 2),
               ),
               dayPeriodColor: AppColors.primarySurface,
               dialBackgroundColor: AppColors.secondarySurface,
@@ -103,8 +118,7 @@ class _TimePickerState extends State<TimePicker> {
                 Padding(
                   padding: const EdgeInsets.only(left: 16.0, right: 12.0),
                   child: widget.icon != null
-                      ? Icon(widget.icon,
-                          size: 20, color: AppColors.neutral80)
+                      ? Icon(widget.icon, size: 20, color: AppColors.neutral80)
                       : widget.assetImage != null
                           ? ImageIcon(
                               AssetImage('assets/icons/${widget.assetImage}'),
@@ -120,9 +134,8 @@ class _TimePickerState extends State<TimePicker> {
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
                       fontFamily: 'Poppins',
-                      color: hasTime
-                          ? AppColors.neutral90
-                          : AppColors.neutral80,
+                      color:
+                          hasTime ? AppColors.neutral90 : AppColors.neutral80,
                     ),
                   ),
                 ),
