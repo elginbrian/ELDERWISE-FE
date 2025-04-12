@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Elder {
   final String elderId;
   final String userId;
@@ -23,19 +25,54 @@ class Elder {
     required this.updatedAt,
   });
 
-  factory Elder.fromJson(Map<String, dynamic> json) {
-    return Elder(
-      elderId: json['elder_id'] as String,
-      userId: json['user_id'] as String,
-      name: json['name'] as String,
-      birthdate: DateTime.parse(json['birthdate'] as String),
-      gender: json['gender'] as String,
-      bodyHeight: (json['body_height'] as num).toDouble(),
-      bodyWeight: (json['body_weight'] as num).toDouble(),
-      photoUrl: json['photo_url'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-    );
+  factory Elder.fromJson(dynamic json) {
+    debugPrint('Elder.fromJson called with: ${json.runtimeType}');
+
+    try {
+      if (json is Map<String, dynamic>) {
+        final requiredFields = [
+          'elder_id',
+          'user_id',
+          'name',
+          'birthdate',
+          'gender',
+          'body_height',
+          'body_weight',
+          'photo_url',
+          'created_at',
+          'updated_at'
+        ];
+
+        for (final field in requiredFields) {
+          if (!json.containsKey(field)) {
+            throw FormatException(
+                'Missing required field: $field in elder data: $json');
+          }
+        }
+
+        return Elder(
+          elderId: json['elder_id'] as String,
+          userId: json['user_id'] as String,
+          name: json['name'] as String,
+          birthdate: DateTime.parse(json['birthdate'] as String),
+          gender: json['gender'] as String,
+          bodyHeight: (json['body_height'] is num)
+              ? (json['body_height'] as num).toDouble()
+              : double.tryParse(json['body_height'].toString()) ?? 0.0,
+          bodyWeight: (json['body_weight'] is num)
+              ? (json['body_weight'] as num).toDouble()
+              : double.tryParse(json['body_weight'].toString()) ?? 0.0,
+          photoUrl: json['photo_url'] as String,
+          createdAt: DateTime.parse(json['created_at'] as String),
+          updatedAt: DateTime.parse(json['updated_at'] as String),
+        );
+      } else {
+        throw FormatException('Unsupported JSON format for elder: $json');
+      }
+    } catch (e) {
+      debugPrint('Error in Elder.fromJson: $e');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -43,13 +80,18 @@ class Elder {
       'elder_id': elderId,
       'user_id': userId,
       'name': name,
-      'birthdate': birthdate.toIso8601String(),
+      'birthdate': _formatDateForJson(birthdate),
       'gender': gender,
       'body_height': bodyHeight,
       'body_weight': bodyWeight,
       'photo_url': photoUrl,
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
+      'created_at': _formatDateForJson(createdAt),
+      'updated_at': _formatDateForJson(updatedAt),
     };
+  }
+
+  String _formatDateForJson(DateTime date) {
+    final iso = date.toUtc().toIso8601String();
+    return iso.endsWith('Z') ? iso : iso + 'Z';
   }
 }

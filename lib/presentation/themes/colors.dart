@@ -14,10 +14,18 @@ class AppColors {
   static const Color neutral100 = Color(0xFF0A0A0A);
 
   // Primary Colors
-  static const Color primaryMain = Color(0xFFFFDB00);
+  static const Color primaryMain = Color(0xFFFFEA0D);
   static const Color primarySurface = Color(0xFFFFFEF7);
   static const Color primaryBorder = Color(0xFFFDFCF1);
   static const Color primaryHover = Color(0xFFFFF741);
   static const Color primaryPressed = Color(0xFFD1A100);
   static const Color primaryFocus = Color(0xFFFFFEF7);
+
+  // Secondary Colors
+  static const Color secondaryFocus = Color(0xFFFFFDE3);
+  static const Color secondarySurface = Color(0xFFFCFCF9);
+  static const Color secondaryBorder = Color(0xFFFFF4F6);
+  static const Color secondaryHover = Color(0xFFD4C8BD);
+  static const Color secondaryPressed = Color(0xFFB5B0AC);
+  static const Color secondaryFocusAlt = Color(0xFFF7F8F8);
 }

@@ -1,7 +1,9 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
-import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
+import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
+import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:elderwise/presentation/screens/agenda_screen/agenda_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -51,13 +53,17 @@ class _MainScreenState extends State<MainScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    selectedIndex == index ? navIconsActive[index] : navIcons[index],
+                    selectedIndex == index
+                        ? navIconsActive[index]
+                        : navIcons[index],
                     const SizedBox(height: 4),
-                    Text(
-                      navTitles[index],
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 8,
-                        color: selectedIndex == index ? AppColors.primaryMain : AppColors.neutral90,)
-                    ),
+                    Text(navTitles[index],
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontSize: 8,
+                              color: selectedIndex == index
+                                  ? AppColors.primaryMain
+                                  : AppColors.neutral90,
+                            )),
                   ],
                 ),
               );
@@ -70,29 +76,93 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 List<Image> navIcons = [
-  Image.asset(iconImages + 'home.png', width: 20, height: 20),
-  Image.asset(iconImages + 'clock.png', width: 20, height: 20),
-  Image.asset(iconImages + 'map.png', width: 20, height: 20),
-  Image.asset(iconImages + 'profile.png', width: 20, height: 20),
+  Image.asset('${iconImages}home.png', width: 20, height: 20),
+  Image.asset('${iconImages}clock.png', width: 20, height: 20),
+  Image.asset('${iconImages}map.png', width: 20, height: 20),
+  Image.asset('${iconImages}profile.png', width: 20, height: 20),
 ];
 
 List<Image> navIconsActive = [
-  Image.asset(iconImages + 'home_active.png', width: 20, height: 20),
-  Image.asset(iconImages + 'clock_active.png', width: 20, height: 20),
-  Image.asset(iconImages + 'map_active.png', width: 20, height: 20),
-  Image.asset(iconImages + 'profile_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}home_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}clock_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}map_active.png', width: 20, height: 20),
+  Image.asset('${iconImages}profile_active.png', width: 20, height: 20),
 ];
 
 List<String> navTitles = [
   "Home",
-  "Clock",
-  "Map",
+  "Agenda",
+  "Maps",
   "Profile",
 ];
 
+class HomePlaceholderScreen extends StatelessWidget {
+  const HomePlaceholderScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.home, size: 64, color: AppColors.primaryMain),
+            SizedBox(height: 16),
+            Text(
+              "Home Screen",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryMain,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Coming Soon",
+              style: TextStyle(fontSize: 16, color: AppColors.neutral90),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AgendaPlaceholderScreen extends StatelessWidget {
+  const AgendaPlaceholderScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.calendar_today, size: 64, color: AppColors.primaryMain),
+            SizedBox(height: 16),
+            Text(
+              "Agenda Screen",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryMain,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              "Coming Soon",
+              style: TextStyle(fontSize: 16, color: AppColors.neutral90),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 final List<Widget> screens = [
-  ProfileScreen(),
-  ProfileScreen(),
-  ProfileScreen(),
-  ProfileScreen(),
+  const HomePlaceholderScreen(),
+  const AgendaPage(),
+  const GeofenceScreen(),
+  const MainProfileScreen(),
 ];

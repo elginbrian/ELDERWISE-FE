@@ -1,15 +1,20 @@
 import 'package:bloc/bloc.dart';
 import 'package:elderwise/data/api/responses/agenda_response.dart';
+import 'package:elderwise/domain/entities/agenda.dart';
 import 'package:elderwise/domain/repositories/agenda_repository.dart';
+import 'package:elderwise/domain/repositories/elder_repository.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_state.dart';
 import 'package:flutter/material.dart';
 
 class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
   final AgendaRepository agendaRepository;
+  final ElderRepository elderRepository;
 
-  AgendaBloc(this.agendaRepository) : super(AgendaInitial()) {
+  AgendaBloc(this.agendaRepository, this.elderRepository)
+      : super(AgendaInitial()) {
     on<GetAgendaEvent>(_onGetAgenda);
+    on<GetAgendasByElderIdEvent>(_onGetAgendasByElderId);
     on<CreateAgendaEvent>(_onCreateAgenda);
     on<UpdateAgendaEvent>(_onUpdateAgenda);
     on<DeleteAgendaEvent>(_onDeleteAgenda);
@@ -20,13 +25,52 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     emit(AgendaLoading());
     try {
       final response = await agendaRepository.getAgendaByID(event.agendaId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in agenda data processing: $e');
+          emit(AgendaFailure('Error processing agenda data'));
+        }
       } else {
         emit(AgendaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get agenda exception: $e');
+      emit(AgendaFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onGetAgendasByElderId(
+      GetAgendasByElderIdEvent event, Emitter<AgendaState> emit) async {
+    emit(AgendaLoading());
+    try {
+      final response = await elderRepository.getElderAgendas(event.elderId);
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
+      if (response.success) {
+        try {
+          final agendasData = AgendasResponseDTO.fromJson(response.data);
+          emit(AgendaListSuccess(agendasData.agendas));
+        } catch (e) {
+          debugPrint('Error in agendas data processing: $e');
+          emit(AgendaFailure('Error processing agendas data'));
+        }
+      } else {
+        emit(AgendaFailure(response.message));
+      }
+    } catch (e) {
+      debugPrint('Get elder agendas exception: $e');
       emit(AgendaFailure(e.toString()));
     }
   }
@@ -36,13 +80,24 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     emit(AgendaLoading());
     try {
       final response = await agendaRepository.createAgenda(event.agendaRequest);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in agenda data processing: $e');
+          emit(AgendaFailure('Error processing agenda data'));
+        }
       } else {
         emit(AgendaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Create agenda exception: $e');
       emit(AgendaFailure(e.toString()));
     }
   }
@@ -53,13 +108,24 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     try {
       final response = await agendaRepository.updateAgenda(
           event.agendaId, event.agendaRequest);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in agenda data processing: $e');
+          emit(AgendaFailure('Error processing agenda data'));
+        }
       } else {
         emit(AgendaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Update agenda exception: $e');
       emit(AgendaFailure(e.toString()));
     }
   }
@@ -69,13 +135,24 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
     emit(AgendaLoading());
     try {
       final response = await agendaRepository.deleteAgenda(event.agendaId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AgendaSuccess(AgendaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in agenda data processing: $e');
+          emit(AgendaFailure('Error processing agenda data'));
+        }
       } else {
         emit(AgendaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Delete agenda exception: $e');
       emit(AgendaFailure(e.toString()));
     }
   }

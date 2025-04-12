@@ -13,7 +13,7 @@ class CaregiverRepositoryImpl implements CaregiverRepository {
   @override
   Future<ResponseWrapper> getCaregiverByID(String caregiverId) async {
     final response = await dio.get(ApiConfig.getCaregiver(caregiverId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -23,7 +23,7 @@ class CaregiverRepositoryImpl implements CaregiverRepository {
       ApiConfig.createCaregiver,
       data: caregiverRequest.toJson(),
     );
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -34,7 +34,7 @@ class CaregiverRepositoryImpl implements CaregiverRepository {
       ApiConfig.updateCaregiver(caregiverId),
       data: caregiverRequest.toJson(),
     );
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

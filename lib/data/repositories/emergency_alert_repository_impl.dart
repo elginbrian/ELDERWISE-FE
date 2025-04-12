@@ -13,7 +13,7 @@ class EmergencyAlertRepositoryImpl implements EmergencyAlertRepository {
   @override
   Future<ResponseWrapper> getEmergencyAlertByID(String alertId) async {
     final response = await dio.get(ApiConfig.getEmergencyAlert(alertId));
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -22,7 +22,7 @@ class EmergencyAlertRepositoryImpl implements EmergencyAlertRepository {
       EmergencyAlertRequestDTO alertRequest) async {
     final response = await dio.post(ApiConfig.createEmergencyAlert,
         data: alertRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 
@@ -31,7 +31,7 @@ class EmergencyAlertRepositoryImpl implements EmergencyAlertRepository {
       String alertId, EmergencyAlertRequestDTO alertRequest) async {
     final response = await dio.put(ApiConfig.updateEmergencyAlert(alertId),
         data: alertRequest.toJson());
-    debugPrint(response.data);
+    debugPrint("Repository: ${response.data}");
     return ResponseWrapper.fromJson(response.data);
   }
 }

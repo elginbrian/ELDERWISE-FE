@@ -20,14 +20,26 @@ class LocationHistoryBloc
     try {
       final response =
           await repository.getLocationHistoryByID(event.locationHistoryId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(LocationHistorySuccess(
-            LocationHistoryResponseDTO.fromJson(response.data)));
+        try {
+          emit(LocationHistorySuccess(
+              LocationHistoryResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in location history data processing: $e');
+          emit(
+              LocationHistoryFailure('Error processing location history data'));
+        }
       } else {
         emit(LocationHistoryFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get location history exception: $e');
       emit(LocationHistoryFailure(e.toString()));
     }
   }
@@ -38,14 +50,26 @@ class LocationHistoryBloc
     try {
       final response =
           await repository.getLocationHistoryPoints(event.locationHistoryId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(LocationHistoryPointsSuccess(
-            LocationHistoryPointsResponseDTO.fromJson(response.data)));
+        try {
+          emit(LocationHistoryPointsSuccess(
+              LocationHistoryPointsResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in location history points data processing: $e');
+          emit(LocationHistoryFailure(
+              'Error processing location history points data'));
+        }
       } else {
         emit(LocationHistoryFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get location history points exception: $e');
       emit(LocationHistoryFailure(e.toString()));
     }
   }

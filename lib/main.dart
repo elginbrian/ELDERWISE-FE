@@ -1,9 +1,6 @@
-import 'package:elderwise/data/api/app_config.dart';
+import 'package:elderwise/data/api/env_config.dart';
 import 'package:elderwise/presentation/widgets/web_layout.dart';
 import 'package:flutter/foundation.dart';
-import 'package:elderwise/presentation/screens/auth_screen/login_screen.dart';
-import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
-import 'package:elderwise/presentation/themes/theme_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:elderwise/di/container.dart';
@@ -13,14 +10,34 @@ import 'package:elderwise/presentation/bloc/area/area_bloc.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_bloc.dart';
 import 'package:elderwise/presentation/bloc/elder/elder_bloc.dart';
 import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_bloc.dart';
+import 'package:elderwise/presentation/bloc/image/image_bloc.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
-import 'package:elderwise/presentation/routes/test/test_route.dart';
+import 'package:elderwise/presentation/routes/app_route.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   await appConfig.initialize();
+
+  try {
+    await Supabase.initialize(
+      url: appConfig.supabaseUrl,
+      anonKey: appConfig.supabaseAnonKey,
+      debug: appConfig.environment == 'development',
+    );
+    debugPrint("Supabase initialized successfully");
+  } catch (e, stackTrace) {
+    debugPrint("Error initializing Supabase: $e");
+    debugPrint(stackTrace.toString());
+  }
 
   try {
     setupDependencies();
@@ -44,6 +61,7 @@ void main() async {
         BlocProvider<LocationHistoryBloc>(
             create: (context) => getIt<LocationHistoryBloc>()),
         BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
+        BlocProvider<ImageBloc>(create: (context) => getIt<ImageBloc>()),
       ],
       child: const MyApp(),
     ),
@@ -56,16 +74,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
-      title: 'Elderwise Demo',
+      title: 'Elderwise',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      routerConfig: testRouter,
+      routerConfig: appRouter,
       builder: (context, child) {
         if (kIsWeb) {
           return WebLayout(
-            localBackgroundImagePath: 'assets/default_background.jpg',
+            localBackgroundImagePath:
+                'lib/presentation/screens/assets/images/web_background.jpg',
             child: child ?? const SizedBox(),
           );
         }

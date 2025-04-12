@@ -20,13 +20,24 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     emit(AreaLoading());
     try {
       final response = await areaRepository.getAreaByID(event.areaId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in area data processing: $e');
+          emit(AreaFailure('Error processing area data'));
+        }
       } else {
         emit(AreaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get area exception: $e');
       emit(AreaFailure(e.toString()));
     }
   }
@@ -36,13 +47,24 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     emit(AreaLoading());
     try {
       final response = await areaRepository.createArea(event.areaRequest);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in area data processing: $e');
+          emit(AreaFailure('Error processing area data'));
+        }
       } else {
         emit(AreaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Create area exception: $e');
       emit(AreaFailure(e.toString()));
     }
   }
@@ -53,13 +75,24 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     try {
       final response =
           await areaRepository.updateArea(event.areaId, event.areaRequest);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in area data processing: $e');
+          emit(AreaFailure('Error processing area data'));
+        }
       } else {
         emit(AreaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Update area exception: $e');
       emit(AreaFailure(e.toString()));
     }
   }
@@ -69,13 +102,24 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     emit(AreaLoading());
     try {
       final response = await areaRepository.deleteArea(event.areaId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        try {
+          emit(AreaSuccess(AreaResponseDTO.fromJson(response.data)));
+        } catch (e) {
+          debugPrint('Error in area data processing: $e');
+          emit(AreaFailure('Error processing area data'));
+        }
       } else {
         emit(AreaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Delete area exception: $e');
       emit(AreaFailure(e.toString()));
     }
   }
@@ -86,14 +130,25 @@ class AreaBloc extends Bloc<AreaEvent, AreaState> {
     try {
       final response =
           await areaRepository.getAreasByCaregiver(event.caregiverId);
-      debugPrint(response.data.toString());
+
+      debugPrint('Complete response structure: ${response.runtimeType}');
+      debugPrint('Response success: ${response.success}');
+      debugPrint('Response message: ${response.message}');
+      debugPrint('Response data type: ${response.data.runtimeType}');
+
       if (response.success) {
-        final areasData = {'areas': response.data['areas']};
-        emit(AreasSuccess(AreasResponseDTO.fromJson(areasData)));
+        try {
+          final areasData = {'areas': response.data['areas']};
+          emit(AreasSuccess(AreasResponseDTO.fromJson(areasData)));
+        } catch (e) {
+          debugPrint('Error in areas data processing: $e');
+          emit(AreaFailure('Error processing areas data'));
+        }
       } else {
         emit(AreaFailure(response.message));
       }
     } catch (e) {
+      debugPrint('Get areas by caregiver exception: $e');
       emit(AreaFailure(e.toString()));
     }
   }
