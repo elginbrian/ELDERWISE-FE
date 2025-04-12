@@ -1,4 +1,5 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
+import 'package:elderwise/presentation/screens/notification_screen/empty_notification.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/notification/notification_item.dart';
 import 'package:flutter/material.dart';
@@ -40,9 +41,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isAllEmpty = newNotifications.isEmpty &&
+        thisWeekNotifications.isEmpty &&
+        thisMonthNotifications.isEmpty;
+
     return Scaffold(
       backgroundColor: AppColors.secondarySurface,
       appBar: AppBar(
+        backgroundColor: AppColors.secondarySurface,
         title: const Text(
           "Notifikasi",
           style: TextStyle(
@@ -58,64 +64,76 @@ class _NotificationScreenState extends State<NotificationScreen> {
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Baru Saja",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16, 
-                    fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              ...newNotifications.map((notif) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: NotificationItem(
-                      title: notif['title']!,
-                      content: notif['content']!,
-                      time: notif['time']!,
-                      type: notif['type']!,
-                    ),
-                  )),
-
-              const SizedBox(height: 24),
-              const Text("Minggu Ini",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16, 
-                    fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              ...thisWeekNotifications.map((notif) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: NotificationItem(
-                      title: notif['title']!,
-                      content: notif['content']!,
-                      time: notif['time']!,
-                      type: notif['type']!,
-                    ),
-                  )),
-
-              const SizedBox(height: 24),
-              const Text("Bulan Ini",
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16, 
-                    fontWeight: FontWeight.w600)),
-              const SizedBox(height: 12),
-              ...thisMonthNotifications.map((notif) => Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: NotificationItem(
-                      title: notif['title']!,
-                      content: notif['content']!,
-                      time: notif['time']!,
-                      type: notif['type']!,
-                    ),
-                  )),
-            ],
-          ),
+body: Padding(
+  padding: const EdgeInsets.all(32.0),
+  child: isAllEmpty
+      ? Expanded(
+        child: Center(
+          child: Center(
+              child: EmptyNotification(),
+            ),
         ),
+      )
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (newNotifications.isNotEmpty) ...[
+                      const Text("Baru Saja",
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 12),
+                      ...newNotifications.map((notif) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: NotificationItem(
+                              title: notif['title']!,
+                              content: notif['content']!,
+                              time: notif['time']!,
+                              type: notif['type']!,
+                            ),
+                          )),
+                      const SizedBox(height: 24),
+                    ],
+                    if (thisWeekNotifications.isNotEmpty) ...[
+                      const Text("Minggu Ini",
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 12),
+                      ...thisWeekNotifications.map((notif) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: NotificationItem(
+                              title: notif['title']!,
+                              content: notif['content']!,
+                              time: notif['time']!,
+                              type: notif['type']!,
+                            ),
+                          )),
+                      const SizedBox(height: 24),
+                    ],
+                    if (thisMonthNotifications.isNotEmpty) ...[
+                      const Text("Bulan Ini",
+                          style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600)),
+                      const SizedBox(height: 12),
+                      ...thisMonthNotifications.map((notif) => Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: NotificationItem(
+                              title: notif['title']!,
+                              content: notif['content']!,
+                              time: notif['time']!,
+                              type: notif['type']!,
+                            ),
+                          )),
+                    ]
+                  ],
+                ),
+              ),
       ),
     );
   }

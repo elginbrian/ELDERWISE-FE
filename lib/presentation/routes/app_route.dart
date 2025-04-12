@@ -6,6 +6,7 @@ import 'package:elderwise/presentation/screens/auth_screen/profile_information/s
 import 'package:elderwise/presentation/screens/auth_screen/signup_screen.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
 import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
+import 'package:elderwise/presentation/screens/notification_screen/empty_notification.dart';
 import 'package:elderwise/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
