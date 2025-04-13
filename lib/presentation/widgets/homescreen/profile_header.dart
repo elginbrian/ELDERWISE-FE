@@ -1,5 +1,4 @@
 import 'package:elderwise/domain/enums/user_mode.dart';
-import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/notification_screen/notification_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
@@ -37,26 +36,29 @@ class ProfileHeader extends StatelessWidget {
               image: currentMode == UserMode.elder
                   ? (elderPhotoUrl != null
                       ? NetworkImage(elderPhotoUrl!) as ImageProvider
-                      : const AssetImage(iconImages + 'google.png'))
+                      : const AssetImage(
+                          'lib/presentation/screens/assets/images/elder_placeholder.png'))
                   : (caregiverPhotoUrl != null
                       ? NetworkImage(caregiverPhotoUrl!) as ImageProvider
-                      : const AssetImage(iconImages + 'google.png')),
+                      : const AssetImage(
+                          'lib/presentation/screens/assets/images/caregiver_placeholder.png')),
               fit: BoxFit.cover,
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () {
+        IconButton(
+          icon: const Icon(
+            Icons.notifications_outlined,
+            size: 24,
+            color: AppColors.neutral90,
+          ),
+          onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => const NotificationScreen()),
             );
           },
-          child: Image.asset(
-            iconImages + 'notif.png',
-            width: 24,
-          ),
         ),
       ],
     );

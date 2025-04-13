@@ -30,12 +30,10 @@ class _AgendaListItemState extends State<AgendaListItem> {
   Widget build(BuildContext context) {
     final time = DateFormat('HH:mm').format(widget.agenda.datetime);
 
-    // Get current user mode
     final userMode = context.watch<UserModeBloc>().state.userMode;
     final isElderMode = userMode == UserMode.elder;
 
     return Dismissible(
-      // Only allow dismissal if not in elder mode
       key: Key(widget.agenda.agendaId),
       direction:
           isElderMode ? DismissDirection.none : DismissDirection.endToStart,
@@ -125,7 +123,6 @@ class _AgendaListItemState extends State<AgendaListItem> {
   Widget _buildLeadingIcon(String category, bool isFinished) {
     String iconFile;
 
-    // Match the same logic as in BuildAgenda for choosing icon files
     switch (category.toLowerCase()) {
       case 'obat':
         iconFile = 'medicine.png';
@@ -144,17 +141,16 @@ class _AgendaListItemState extends State<AgendaListItem> {
         iconFile = 'default.png';
     }
 
-    // Keep container size reasonable but maximize image size within
     return Container(
-      width: 60, // Maintain a reasonable container size
-      height: 60, // Maintain a reasonable container size
+      width: 60,
+      height: 60,
       padding:
-          const EdgeInsets.all(0), // Remove padding to maximize image space
+          const EdgeInsets.all(0),
       child: Image.asset(
         iconImages + iconFile,
-        width: 60, // Make image fill container
-        height: 60, // Make image fill container
-        fit: BoxFit.contain, // Ensure the image fits properly
+        width: 60,
+        height: 60,
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -168,7 +164,7 @@ class _AgendaListItemState extends State<AgendaListItem> {
         color: widget.agenda.isFinished
             ? AppColors.primaryMain
             : AppColors.neutral50,
-        size: 30, // Larger icon for better visibility
+        size: 30,
       ),
       onPressed: () => _toggleAgendaStatus(context),
       tooltip:
@@ -176,7 +172,6 @@ class _AgendaListItemState extends State<AgendaListItem> {
     );
   }
 
-  // Modified to remove the delete button since we're using swipe instead
   Widget _buildCaregiverModeTrailingWithoutDelete(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -207,7 +202,6 @@ class _AgendaListItemState extends State<AgendaListItem> {
     final userMode = context.read<UserModeBloc>().state.userMode;
     final isElderMode = userMode == UserMode.elder;
 
-    // Don't allow deletion in elder mode
     if (isElderMode) return false;
 
     return await showDialog<bool>(
@@ -254,7 +248,6 @@ class _AgendaListItemState extends State<AgendaListItem> {
     final userMode = context.read<UserModeBloc>().state.userMode;
     final isElderMode = userMode == UserMode.elder;
 
-    // Don't allow editing in elder mode
     if (isElderMode) return;
 
     Navigator.push(
@@ -277,8 +270,6 @@ class _AgendaListItemState extends State<AgendaListItem> {
   }
 
   IconData _getIconForCategory(String category) {
-    // This method can be kept for backward compatibility
-    // and for use with any UI elements that still need IconData
     switch (category.toLowerCase()) {
       case 'obat':
         return Icons.medication;

@@ -6,9 +6,11 @@ import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
 import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
+import 'package:elderwise/presentation/screens/auth_screen/mode_screen.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../themes/colors.dart';
 import 'profile_screen.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
@@ -112,19 +114,30 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     });
   }
 
-  void _toggleElderMode() {
-    final targetMode = _currentMode == UserMode.caregiver
-        ? UserMode.elder
-        : UserMode.caregiver;
-
-    context.read<UserModeBloc>().add(ToggleUserModeEvent(targetMode));
-
-    ToastHelper.showSuccessToast(
+  void _navigateToModeScreen() {
+    Navigator.push(
       context,
-      targetMode == UserMode.elder
-          ? 'Mode Elder diaktifkan'
-          : 'Mode Caregiver diaktifkan',
-    );
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            const ModeScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+              position: animation.drive(tween), child: child);
+        },
+      ),
+    ).then((_) {
+      if (_userId != null) {
+        setState(() {
+          _dataFetched = false;
+        });
+        _fetchUserData(_userId!);
+      }
+    });
   }
 
   @override
@@ -282,11 +295,8 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   ),
                                   const SizedBox(height: 24),
                                   MainButton(
-                                    buttonText:
-                                        _currentMode == UserMode.caregiver
-                                            ? "Aktifkan Mode Elder"
-                                            : "Kembali ke Mode Caregiver",
-                                    onTap: _toggleElderMode,
+                                    buttonText: "Pilih Mode Pengguna",
+                                    onTap: _navigateToModeScreen,
                                   ),
                                   const SizedBox(height: 16),
                                   TextButton(

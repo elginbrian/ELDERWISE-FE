@@ -46,94 +46,114 @@ class _NotificationScreenState extends State<NotificationScreen> {
         thisMonthNotifications.isEmpty;
 
     return Scaffold(
-      backgroundColor: AppColors.secondarySurface,
-      appBar: AppBar(
-        backgroundColor: AppColors.secondarySurface,
-        title: const Text(
-          "Notifikasi",
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 24,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ),
-body: Padding(
-  padding: const EdgeInsets.all(32.0),
-  child: isAllEmpty
-      ? Expanded(
-        child: Center(
-          child: Center(
-              child: EmptyNotification(),
-            ),
-        ),
-      )
-            : SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (newNotifications.isNotEmpty) ...[
-                      const Text("Baru Saja",
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 12),
-                      ...newNotifications.map((notif) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: NotificationItem(
-                              title: notif['title']!,
-                              content: notif['content']!,
-                              time: notif['time']!,
-                              type: notif['type']!,
-                            ),
-                          )),
-                      const SizedBox(height: 24),
-                    ],
-                    if (thisWeekNotifications.isNotEmpty) ...[
-                      const Text("Minggu Ini",
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 12),
-                      ...thisWeekNotifications.map((notif) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: NotificationItem(
-                              title: notif['title']!,
-                              content: notif['content']!,
-                              time: notif['time']!,
-                              type: notif['type']!,
-                            ),
-                          )),
-                      const SizedBox(height: 24),
-                    ],
-                    if (thisMonthNotifications.isNotEmpty) ...[
-                      const Text("Bulan Ini",
-                          style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 12),
-                      ...thisMonthNotifications.map((notif) => Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: NotificationItem(
-                              title: notif['title']!,
-                              content: notif['content']!,
-                              time: notif['time']!,
-                              type: notif['type']!,
-                            ),
-                          )),
-                    ]
-                  ],
-                ),
+      backgroundColor: AppColors.primaryMain,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: const Icon(Icons.arrow_back_ios,
+                        color: AppColors.neutral90),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Notifikasi',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: AppColors.neutral90,
+                    ),
+                  ),
+                  const Spacer(),
+                ],
               ),
+            ),
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: const BoxDecoration(
+                  color: AppColors.secondarySurface,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
+                  ),
+                ),
+                child: isAllEmpty
+                    ? Center(
+                        child: EmptyNotification(),
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 32, horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (newNotifications.isNotEmpty) ...[
+                              const Text("Baru Saja",
+                                  style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 12),
+                              ...newNotifications.map((notif) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: NotificationItem(
+                                      title: notif['title']!,
+                                      content: notif['content']!,
+                                      time: notif['time']!,
+                                      type: notif['type']!,
+                                    ),
+                                  )),
+                              const SizedBox(height: 24),
+                            ],
+                            if (thisWeekNotifications.isNotEmpty) ...[
+                              const Text("Minggu Ini",
+                                  style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 12),
+                              ...thisWeekNotifications.map((notif) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: NotificationItem(
+                                      title: notif['title']!,
+                                      content: notif['content']!,
+                                      time: notif['time']!,
+                                      type: notif['type']!,
+                                    ),
+                                  )),
+                              const SizedBox(height: 24),
+                            ],
+                            if (thisMonthNotifications.isNotEmpty) ...[
+                              const Text("Bulan Ini",
+                                  style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 12),
+                              ...thisMonthNotifications.map((notif) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: NotificationItem(
+                                      title: notif['title']!,
+                                      content: notif['content']!,
+                                      time: notif['time']!,
+                                      type: notif['type']!,
+                                    ),
+                                  )),
+                            ]
+                          ],
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

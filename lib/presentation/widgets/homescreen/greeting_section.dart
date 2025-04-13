@@ -26,15 +26,16 @@ class GreetingSection extends StatelessWidget {
                   text: "Halo, ",
                   style: TextStyle(
                     color: AppColors.neutral90,
-                    fontSize: 24,
+                    fontSize: 22,
                     fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 TextSpan(
                   text: userName,
                   style: const TextStyle(
                     color: AppColors.neutral90,
-                    fontSize: 24,
+                    fontSize: 22,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                   ),
@@ -47,7 +48,7 @@ class GreetingSection extends StatelessWidget {
                 ? "Lihat agenda hari ini!"
                 : "Pantau aktivitas elder anda!",
             style: const TextStyle(
-              color: AppColors.neutral90,
+              color: AppColors.neutral70,
               fontSize: 16,
               fontFamily: 'Poppins',
             ),

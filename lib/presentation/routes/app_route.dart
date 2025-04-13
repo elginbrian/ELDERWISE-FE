@@ -16,7 +16,8 @@ final GoRouter appRouter = GoRouter(
   initialLocation: '/onboarding',
   routes: [
     GoRoute(
-        path: '/onboarding', builder: (context, state) => const MainScreen()),
+        path: '/onboarding',
+        builder: (context, state) => MainScreen(key: MainScreen.mainScreenKey)),
     GoRoute(
       path: '/login',
       builder: (context, state) => const LoginScreen(),
@@ -41,5 +42,9 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const NotificationScreen(),
     ),
     GoRoute(path: '/agenda', builder: (context, state) => const AgendaPage()),
+    GoRoute(
+      path: '/mode',
+      builder: (context, state) => const ModeScreen(),
+    ),
   ],
 );
