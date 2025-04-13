@@ -5,12 +5,13 @@ import 'package:elderwise/presentation/bloc/agenda/agenda_bloc.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
 import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/agenda_screen/add_agenda.dart';
+import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
-class AgendaListItem extends StatelessWidget {
+class AgendaListItem extends StatefulWidget {
   final Agenda agenda;
   final Function() onAgendaUpdated;
 
@@ -21,184 +22,268 @@ class AgendaListItem extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<AgendaListItem> createState() => _AgendaListItemState();
+}
+
+class _AgendaListItemState extends State<AgendaListItem> {
+  @override
   Widget build(BuildContext context) {
-    final userModeState = context.watch<UserModeBloc>().state;
-    final isElderMode = userModeState.userMode == UserMode.elder;
+    final time = DateFormat('HH:mm').format(widget.agenda.datetime);
 
-    final time = DateFormat('HH:mm').format(agenda.datetime);
+    // Get current user mode
+    final userMode = context.watch<UserModeBloc>().state.userMode;
+    final isElderMode = userMode == UserMode.elder;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    return Dismissible(
+      // Only allow dismissal if not in elder mode
+      key: Key(widget.agenda.agendaId),
+      direction:
+          isElderMode ? DismissDirection.none : DismissDirection.endToStart,
+      confirmDismiss: (direction) => _confirmDelete(context),
+      onDismissed: (direction) {
+        context
+            .read<AgendaBloc>()
+            .add(DeleteAgendaEvent(widget.agenda.agendaId));
+        widget.onAgendaUpdated();
+      },
+      background: Container(
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 16),
+        child: const Icon(Icons.delete, color: Colors.white),
       ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: agenda.isFinished
-              ? AppColors.primaryMain
-              : AppColors.primaryMain.withOpacity(0.1),
-          child: Icon(
-            _getIconForCategory(agenda.category),
-            color: agenda.isFinished ? Colors.white : AppColors.primaryMain,
-          ),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        title: Text(
-          agenda.content1,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            fontFamily: 'Poppins',
-            color: AppColors.neutral90,
-            decoration: agenda.isFinished
-                ? TextDecoration.lineThrough
-                : TextDecoration.none,
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          leading: _buildLeadingIcon(
+              widget.agenda.category, widget.agenda.isFinished),
+          title: Text(
+            widget.agenda.content1,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Poppins',
+              color: AppColors.neutral90,
+              decoration: widget.agenda.isFinished
+                  ? TextDecoration.lineThrough
+                  : TextDecoration.none,
+            ),
           ),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (agenda.content2 != null && agenda.content2!.isNotEmpty)
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (widget.agenda.content2 != null &&
+                  widget.agenda.content2!.isNotEmpty)
+                Text(
+                  widget.agenda.content2!,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'Poppins',
+                    color: AppColors.neutral70,
+                    decoration: widget.agenda.isFinished
+                        ? TextDecoration.lineThrough
+                        : TextDecoration.none,
+                  ),
+                ),
               Text(
-                agenda.content2!,
+                'Pukul $time',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontFamily: 'Poppins',
-                  color: AppColors.neutral70,
-                  decoration: agenda.isFinished
+                  color: AppColors.neutral60,
+                  decoration: widget.agenda.isFinished
                       ? TextDecoration.lineThrough
                       : TextDecoration.none,
                 ),
               ),
-            Text(
-              'Pukul $time',
-              style: TextStyle(
-                fontSize: 12,
-                fontFamily: 'Poppins',
-                color: AppColors.neutral60,
-                decoration: agenda.isFinished
-                    ? TextDecoration.lineThrough
-                    : TextDecoration.none,
-              ),
-            ),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: Icon(
-                agenda.isFinished
-                    ? Icons.check_circle
-                    : Icons.check_circle_outline,
-                color: agenda.isFinished
-                    ? AppColors.primaryMain
-                    : AppColors.neutral50,
-              ),
-              onPressed: () {
-                _toggleAgendaStatus(context);
-              },
-            ),
-
-            if (!isElderMode) ...[
-              IconButton(
-                icon: const Icon(
-                  Icons.edit_outlined,
-                  color: AppColors.neutral50,
-                ),
-                onPressed: () => _editAgenda(context),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.neutral50,
-                ),
-                onPressed: () => _deleteAgenda(context),
-              ),
             ],
-          ],
+          ),
+          trailing: isElderMode
+              ? _buildElderModeTrailing(context)
+              : _buildCaregiverModeTrailingWithoutDelete(context),
         ),
       ),
     );
+  }
+
+  Widget _buildLeadingIcon(String category, bool isFinished) {
+    String iconFile;
+
+    // Match the same logic as in BuildAgenda for choosing icon files
+    switch (category.toLowerCase()) {
+      case 'obat':
+        iconFile = 'medicine.png';
+        break;
+      case 'makan':
+      case 'makanan':
+        iconFile = 'food.png';
+        break;
+      case 'hidrasi':
+        iconFile = 'hidration.png';
+        break;
+      case 'aktivitas':
+        iconFile = 'activity.png';
+        break;
+      default:
+        iconFile = 'default.png';
+    }
+
+    // Keep container size reasonable but maximize image size within
+    return Container(
+      width: 60, // Maintain a reasonable container size
+      height: 60, // Maintain a reasonable container size
+      padding:
+          const EdgeInsets.all(0), // Remove padding to maximize image space
+      child: Image.asset(
+        iconImages + iconFile,
+        width: 60, // Make image fill container
+        height: 60, // Make image fill container
+        fit: BoxFit.contain, // Ensure the image fits properly
+      ),
+    );
+  }
+
+  Widget _buildElderModeTrailing(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        widget.agenda.isFinished
+            ? Icons.check_circle
+            : Icons.check_circle_outline,
+        color: widget.agenda.isFinished
+            ? AppColors.primaryMain
+            : AppColors.neutral50,
+        size: 30, // Larger icon for better visibility
+      ),
+      onPressed: () => _toggleAgendaStatus(context),
+      tooltip:
+          widget.agenda.isFinished ? 'Tandai belum selesai' : 'Tandai selesai',
+    );
+  }
+
+  // Modified to remove the delete button since we're using swipe instead
+  Widget _buildCaregiverModeTrailingWithoutDelete(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: Icon(
+            widget.agenda.isFinished
+                ? Icons.check_circle
+                : Icons.check_circle_outline,
+            color: widget.agenda.isFinished
+                ? AppColors.primaryMain
+                : AppColors.neutral50,
+          ),
+          onPressed: () => _toggleAgendaStatus(context),
+        ),
+        IconButton(
+          icon: const Icon(
+            Icons.edit_outlined,
+            color: AppColors.neutral50,
+          ),
+          onPressed: () => _editAgenda(context),
+        ),
+      ],
+    );
+  }
+
+  Future<bool> _confirmDelete(BuildContext context) async {
+    final userMode = context.read<UserModeBloc>().state.userMode;
+    final isElderMode = userMode == UserMode.elder;
+
+    // Don't allow deletion in elder mode
+    if (isElderMode) return false;
+
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Konfirmasi'),
+            content:
+                const Text('Apakah Anda yakin ingin menghapus agenda ini?'),
+            actions: [
+              TextButton(
+                child: const Text('Batal'),
+                onPressed: () => Navigator.pop(context, false),
+              ),
+              TextButton(
+                child: const Text('Hapus'),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   void _toggleAgendaStatus(BuildContext context) {
     final updatedAgendaDto = AgendaRequestDTO(
-      elderId: agenda.elderId,
-      caregiverId: agenda.caregiverId,
-      category: agenda.category,
-      content1: agenda.content1,
-      content2: agenda.content2,
-      datetime: agenda.datetime.toIso8601String(),
-      isFinished: !agenda.isFinished,
+      elderId: widget.agenda.elderId,
+      caregiverId: widget.agenda.caregiverId,
+      category: widget.agenda.category,
+      content1: widget.agenda.content1,
+      content2: widget.agenda.content2,
+      datetime: widget.agenda.datetime.toIso8601String(),
+      isFinished: !widget.agenda.isFinished,
     );
 
     context.read<AgendaBloc>().add(UpdateAgendaEvent(
-          agenda.agendaId,
+          widget.agenda.agendaId,
           updatedAgendaDto,
         ));
 
-    onAgendaUpdated();
+    widget.onAgendaUpdated();
   }
 
   void _editAgenda(BuildContext context) {
+    final userMode = context.read<UserModeBloc>().state.userMode;
+    final isElderMode = userMode == UserMode.elder;
+
+    // Don't allow editing in elder mode
+    if (isElderMode) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => AddAgenda(
-          agendaId: agenda.agendaId,
-          category: agenda.category,
-          content1: agenda.content1,
-          content2: agenda.content2,
-          timeStr: '${agenda.datetime.hour}:${agenda.datetime.minute}',
+          agendaId: widget.agenda.agendaId,
+          category: widget.agenda.category,
+          content1: widget.agenda.content1,
+          content2: widget.agenda.content2,
+          timeStr:
+              '${widget.agenda.datetime.hour}:${widget.agenda.datetime.minute}',
         ),
       ),
     ).then((result) {
       if (result == true) {
-        onAgendaUpdated();
+        widget.onAgendaUpdated();
       }
     });
   }
 
-  void _deleteAgenda(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Konfirmasi'),
-        content: const Text('Apakah Anda yakin ingin menghapus agenda ini?'),
-        actions: [
-          TextButton(
-            child: const Text('Batal'),
-            onPressed: () => Navigator.pop(context),
-          ),
-          TextButton(
-            child: const Text('Hapus'),
-            onPressed: () {
-              Navigator.pop(context);
-              context
-                  .read<AgendaBloc>()
-                  .add(DeleteAgendaEvent(agenda.agendaId));
-              onAgendaUpdated();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   IconData _getIconForCategory(String category) {
+    // This method can be kept for backward compatibility
+    // and for use with any UI elements that still need IconData
     switch (category.toLowerCase()) {
       case 'obat':
         return Icons.medication;
       case 'makanan':
+      case 'makan':
         return Icons.restaurant;
       case 'aktivitas':
         return Icons.directions_run;

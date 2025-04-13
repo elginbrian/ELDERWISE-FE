@@ -63,6 +63,7 @@ class _AgendaPageState extends State<AgendaPage> {
       });
     });
 
+    context.read<UserModeBloc>().add(InitializeUserModeEvent());
     context.read<AuthBloc>().add(GetCurrentUserEvent());
   }
 
@@ -155,9 +156,8 @@ class _AgendaPageState extends State<AgendaPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userModeState = context.watch<UserModeBloc>().state;
-    final isElderMode = userModeState.userMode == UserMode.elder;
-
+    final userMode = context.select((UserModeBloc bloc) => bloc.state.userMode);
+    final isElderMode = userMode == UserMode.elder;
     final daysInWeek = getDaysInWeek();
 
     return MultiBlocListener(
@@ -222,6 +222,11 @@ class _AgendaPageState extends State<AgendaPage> {
             } else if (state is AgendaFailure) {
               ToastHelper.showErrorToast(context, state.error);
             }
+          },
+        ),
+        BlocListener<UserModeBloc, UserModeState>(
+          listener: (context, state) {
+            setState(() {});
           },
         ),
       ],
