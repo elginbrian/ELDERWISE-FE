@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
