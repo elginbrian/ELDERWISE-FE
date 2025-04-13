@@ -48,12 +48,10 @@ class _GenderSelectorState extends State<GenderSelector> {
           ),
           child: Row(
             children: [
-              // Left icon
               const Padding(
                 padding: EdgeInsets.only(left: 16.0, right: 8.0),
                 child: Icon(Icons.wc, size: 20, color: AppColors.neutral80),
               ),
-              // If readOnly, show text instead of dropdown
               widget.readOnly
                   ? Expanded(
                       child: Text(
@@ -101,7 +99,6 @@ class _GenderSelectorState extends State<GenderSelector> {
                                 color: AppColors.neutral80,
                               ),
                             ),
-                            // Adjust the alignment and padding of dropdown items
                             itemHeight: 48,
                             underline: const SizedBox(),
                             onTap: () {
@@ -157,13 +154,6 @@ class _GenderSelectorState extends State<GenderSelector> {
                         ),
                       ),
                     ),
-              // Show dropdown icon in readOnly mode to maintain visual consistency
-              if (widget.readOnly)
-                const Padding(
-                  padding: EdgeInsets.only(right: 12.0),
-                  child:
-                      Icon(Icons.arrow_drop_down, color: AppColors.neutral80),
-                ),
             ],
           ),
         ),

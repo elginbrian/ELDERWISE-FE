@@ -213,59 +213,105 @@ class _AddAgendaState extends State<AddAgenda> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.secondarySurface,
-        appBar: AppBar(
-          title:
-              Text(widget.agendaId != null ? "Edit Agenda" : "Tambah Agenda"),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.pop(context),
-          ),
-          backgroundColor: AppColors.secondarySurface,
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
+        backgroundColor: AppColors.primaryMain,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16.0, vertical: 16.0),
+                    child: Row(
                       children: [
-                        AgendaTypeDropdown(
-                          selectedValue: selectedAgenda,
-                          onChanged: (value) {
-                            setState(() {
-                              selectedAgenda = value;
-                            });
-                          },
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(Icons.arrow_back_ios,
+                              color: AppColors.neutral90),
                         ),
-                        const SizedBox(height: 16),
-                        if (selectedAgenda != null)
-                          AgendaFormSection(
-                            type: selectedAgenda!,
-                            nameController: _nameController,
-                            amountController: _amountController,
-                            selectedDate: _selectedDate,
-                            selectedTime: _selectedTime,
-                            onDateSelected: _onDateSelected,
-                            onTimeSelected: _onTimeSelected,
+                        const SizedBox(width: 16),
+                        Text(
+                          widget.agendaId != null
+                              ? "Edit Agenda"
+                              : "Tambah Agenda",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: AppColors.neutral90,
                           ),
+                        ),
                       ],
                     ),
                   ),
-                ),
-                MainButton(
-                  buttonText: widget.agendaId != null
-                      ? "Perbarui Agenda"
-                      : "Tambah Agenda",
-                  onTap: _isLoading ? () {} : _submitForm,
-                  isLoading: _isLoading,
-                )
-              ],
-            ),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: const BoxDecoration(
+                        color: AppColors.secondarySurface,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(32),
+                          topRight: Radius.circular(32),
+                        ),
+                      ),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                    top: 32.0,
+                                    left: 16.0,
+                                    right: 16.0,
+                                    bottom: 16.0,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      AgendaTypeDropdown(
+                                        selectedValue: selectedAgenda,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            selectedAgenda = value;
+                                          });
+                                        },
+                                      ),
+                                      const SizedBox(height: 16),
+                                      if (selectedAgenda != null)
+                                        AgendaFormSection(
+                                          type: selectedAgenda!,
+                                          nameController: _nameController,
+                                          amountController: _amountController,
+                                          selectedDate: _selectedDate,
+                                          selectedTime: _selectedTime,
+                                          onDateSelected: _onDateSelected,
+                                          onTimeSelected: _onTimeSelected,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: MainButton(
+                                buttonText: widget.agendaId != null
+                                    ? "Perbarui Agenda"
+                                    : "Tambah Agenda",
+                                onTap: _isLoading ? () {} : _submitForm,
+                                isLoading: _isLoading,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

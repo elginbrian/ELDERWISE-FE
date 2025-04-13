@@ -1,4 +1,5 @@
 import 'package:elderwise/data/api/requests/agenda_request.dart';
+import 'package:elderwise/domain/entities/agenda.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class AgendaEvent extends Equatable {
@@ -40,4 +41,14 @@ class UpdateAgendaEvent extends AgendaEvent {
 class DeleteAgendaEvent extends AgendaEvent {
   final String agendaId;
   DeleteAgendaEvent(this.agendaId);
+}
+
+class UpdateAgendaStatusEvent extends AgendaEvent {
+  final String agendaId;
+  final Agenda agenda;
+
+  UpdateAgendaStatusEvent(this.agendaId, this.agenda);
+
+  @override
+  List<Object> get props => [agendaId, agenda];
 }

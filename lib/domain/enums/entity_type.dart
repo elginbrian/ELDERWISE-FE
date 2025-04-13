@@ -8,13 +8,10 @@ enum EntityType {
   area,
   general;
 
-  // Return the exact string format the backend expects
   String toStringValue() {
-    // Ensure lowercase string to match backend const EntityType values
     return toString().split('.').last.toLowerCase();
   }
 
-  // For JSON serialization
   String toJson() {
     return toStringValue();
   }
@@ -22,7 +19,6 @@ enum EntityType {
   static EntityType? fromString(String? value) {
     if (value == null || value.isEmpty) return EntityType.general;
 
-    // Clean up the value - remove EntityType prefix, trim, and lowercase
     String cleanValue = value.trim().toLowerCase();
     if (cleanValue.contains('.')) {
       cleanValue = cleanValue.split('.').last.trim();

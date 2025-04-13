@@ -66,7 +66,6 @@ class _StepperScreenState extends State<StepperScreen> {
           setState(() {
             isLoading = false;
           });
-          // Optionally navigate back to login if auth fails
           context.go('/login');
         }
       },

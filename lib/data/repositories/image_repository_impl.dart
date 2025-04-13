@@ -128,7 +128,6 @@ class ImageRepositoryImpl implements ImageRepository {
       throw Exception('User ID must be provided');
     }
     try {
-      // Get the exact entity type string expected by the backend
       final String entityTypeString = entityType.toStringValue();
 
       debugPrint("Entity type before request: $entityTypeString");
@@ -143,7 +142,6 @@ class ImageRepositoryImpl implements ImageRepository {
         if (imagePath != null) 'path': imagePath,
       };
 
-      // Print the final payload
       debugPrint("Sending payload to backend: ${requestData.toString()}");
 
       final response = await ApiConfig.dio.post(
@@ -151,7 +149,6 @@ class ImageRepositoryImpl implements ImageRepository {
         data: requestData,
       );
 
-      // Log the raw response
       debugPrint("Raw response: ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {

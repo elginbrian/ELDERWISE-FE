@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
@@ -17,6 +18,9 @@ import 'package:elderwise/presentation/widgets/geofence/fence_map_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 
 class GeofenceScreen extends StatefulWidget {
   const GeofenceScreen({super.key});
@@ -31,24 +35,57 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
     zoom: 13,
   );
 
-  late GoogleMapController _googleMapController;
+  late GoogleMapController? _googleMapController;
+  bool _mapInitialized = false;
   String _userId = '';
   String _caregiverId = '';
-  String _elderId = ''; // Added elder ID state variable
+  String _elderId = '';
   String _areaId = '';
   bool _isLoading = true;
 
-  // Area information
   String _centerPoint = "-7.9996° LS - 112.6290° BT";
   double _mandiriRadius = 5.0;
   double _pantauRadius = 10.0;
   LatLng _centerLatLng = const LatLng(-7.9996, 112.629);
 
+  Set<Marker> _markers = {};
+  BitmapDescriptor _centerMarkerIcon =
+      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+
   @override
   void initState() {
     super.initState();
-    // Load current user and areas when widget initializes
     _loadCurrentUser();
+    _initMarkerIcon();
+  }
+
+  void _initMarkerIcon() {
+    _centerMarkerIcon =
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+
+    _updateMarker();
+
+    _getCurrentLocation();
+  }
+
+  void _updateMarker() {
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('centerPoint'),
+          position: _centerLatLng,
+          icon: _centerMarkerIcon,
+          draggable: true,
+          onDragEnd: (newPosition) {
+            setState(() {
+              _centerLatLng = newPosition;
+              _centerPoint = _formatCoordinates(newPosition);
+            });
+            _updateMarker();
+          },
+        ),
+      };
+    });
   }
 
   void _loadCurrentUser() {
@@ -57,8 +94,51 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   @override
   void dispose() {
-    _googleMapController.dispose();
+    _googleMapController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ToastHelper.showErrorToast(context, 'Izin lokasi ditolak');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        ToastHelper.showErrorToast(context,
+            'Izin lokasi ditolak secara permanen, silakan ubah di pengaturan');
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _centerLatLng = LatLng(position.latitude, position.longitude);
+        _centerPoint = _formatCoordinates(_centerLatLng);
+      });
+
+      _updateMarker();
+
+      if (_mapInitialized && _googleMapController != null) {
+        _googleMapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: _centerLatLng,
+              zoom: _calculateZoomLevel(_pantauRadius),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, 'Gagal mendapatkan lokasi: $e');
+    }
   }
 
   void _updateFenceData({
@@ -73,6 +153,25 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
       if (pantauRadius != null) _pantauRadius = pantauRadius;
       if (centerLatLng != null) _centerLatLng = centerLatLng;
     });
+
+    _updateMarker();
+
+    if (pantauRadius != null &&
+        _mapInitialized &&
+        _googleMapController != null) {
+      _googleMapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: _centerLatLng,
+            zoom: _calculateZoomLevel(pantauRadius),
+          ),
+        ),
+      );
+    }
+  }
+
+  double _calculateZoomLevel(double radiusInKm) {
+    return 13.0 - (radiusInKm / 5.0);
   }
 
   void _saveArea() {
@@ -105,6 +204,9 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -113,7 +215,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
               setState(() {
                 _userId = state.user.user.userId;
               });
-              // Fetch user's caregiver and elder information
               context.read<UserBloc>().add(GetUserCaregiversEvent(_userId));
               context.read<UserBloc>().add(GetUserEldersEvent(_userId));
             } else if (state is AuthFailure) {
@@ -127,12 +228,10 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
             if (state is UserSuccess) {
               setState(() => _isLoading = false);
 
-              // Handle caregivers data
               if (state.response.data != null &&
                   state.response.data is Map &&
                   state.response.data.containsKey('caregivers') &&
                   state.response.data['caregivers'].isNotEmpty) {
-                // Extract caregiver ID from response
                 final caregiverId = state.response.data['caregivers'][0]
                         ['caregiver_id'] ??
                     state.response.data['caregivers'][0]['id'];
@@ -140,18 +239,15 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                   _caregiverId = caregiverId;
                 });
 
-                // Fetch areas for this caregiver
                 context
                     .read<AreaBloc>()
                     .add(GetAreasByCaregiverEvent(caregiverId));
               }
 
-              // Handle elders data
               if (state.response.data != null &&
                   state.response.data is Map &&
                   state.response.data.containsKey('elders') &&
                   state.response.data['elders'].isNotEmpty) {
-                // Extract elder ID from response
                 final elderId = state.response.data['elders'][0]['elder_id'] ??
                     state.response.data['elders'][0]['id'];
                 setState(() {
@@ -178,15 +274,19 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                   _centerPoint = _formatCoordinates(latLng);
                 });
 
-                // Update map camera
-                _googleMapController.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                      target: latLng,
-                      zoom: 13,
+                _updateMarker();
+
+                if (_mapInitialized && _googleMapController != null) {
+                  _googleMapController!.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: latLng,
+                        zoom: _calculateZoomLevel(
+                            area.watchAreaRadius.toDouble()),
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               }
             } else if (state is AreaSuccess) {
               ToastHelper.showSuccessToast(context, 'Area berhasil disimpan');
@@ -197,96 +297,118 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
         ),
       ],
       child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'lib/presentation/screens/assets/images/bg_floral.png',
-              ),
-              fit: BoxFit.cover,
-            ),
-          ),
+        backgroundColor: AppColors.primaryMain,
+        body: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 128),
-              Expanded(
-                child: Stack(
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 24.0),
+                child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(32),
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: AppColors.neutral20,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32.0),
-                          topRight: Radius.circular(32.0),
-                        ),
+                    const Text(
+                      'Geofence',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                        color: AppColors.neutral90,
                       ),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : Column(
-                              children: [
-                                MainButton(
-                                  buttonText: "Atur Area",
-                                  onTap: () async {
-                                    // Navigate to SetFenceScreen and await result
-                                    final result = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SetFenceScreen(
-                                          initialMandiriRadius: _mandiriRadius,
-                                          initialPantauRadius: _pantauRadius,
-                                          initialCenter: _centerLatLng,
-                                        ),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: AppColors.secondarySurface,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32.0),
+                      topRight: Radius.circular(32.0),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : Column(
+                          children: [
+                            if (!isElderMode)
+                              MainButton(
+                                buttonText: "Atur Area",
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SetFenceScreen(
+                                        initialMandiriRadius: _mandiriRadius,
+                                        initialPantauRadius: _pantauRadius,
+                                        initialCenter: _centerLatLng,
                                       ),
+                                    ),
+                                  );
+
+                                  if (result != null &&
+                                      result is Map<String, dynamic>) {
+                                    _updateFenceData(
+                                      centerPoint: result['centerPoint'],
+                                      mandiriRadius: result['mandiriRadius'],
+                                      pantauRadius: result['pantauRadius'],
+                                      centerLatLng: result['centerLatLng'],
                                     );
 
-                                    // Process the result if it exists
-                                    if (result != null &&
-                                        result is Map<String, dynamic>) {
-                                      _updateFenceData(
-                                        centerPoint: result['centerPoint'],
-                                        mandiriRadius: result['mandiriRadius'],
-                                        pantauRadius: result['pantauRadius'],
-                                        centerLatLng: result['centerLatLng'],
-                                      );
-
-                                      // Save the area to backend
-                                      _saveArea();
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 32),
-                                Container(
-                                  width: double.infinity,
-                                  height: 500,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.secondarySurface,
-                                    borderRadius: BorderRadius.circular(32),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 4),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
+                                        duration: Duration(seconds: 3),
                                       ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    );
+                                  }
+                                },
+                              ),
+                            const SizedBox(height: 32),
+                            Container(
+                              width: double.infinity,
+                              height: 500,
+                              decoration: BoxDecoration(
+                                color: AppColors.secondarySurface,
+                                borderRadius: BorderRadius.circular(32),
+                                border: Border.all(
+                                  color: AppColors.neutral30,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Stack(
                                     children: [
                                       FenceMapWidget(
                                         initialCameraPosition:
                                             _initialCameraPosition,
-                                        onMapCreated: (controller) =>
-                                            _googleMapController = controller,
+                                        onMapCreated: (controller) {
+                                          _googleMapController = controller;
+                                          _mapInitialized = true;
+                                          _updateMarker();
+
+                                          controller.animateCamera(
+                                            CameraUpdate.newCameraPosition(
+                                              CameraPosition(
+                                                target: _centerLatLng,
+                                                zoom: _calculateZoomLevel(
+                                                    _pantauRadius),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                         borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(32),
                                           topRight: Radius.circular(32),
                                         ),
+                                        markers: _markers,
                                         circles: {
                                           Circle(
                                             circleId:
@@ -312,29 +434,30 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                             ),
                                         },
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: FenceInfoWidget(
-                                          centerPoint: _centerPoint,
-                                          mandiriRadius: _mandiriRadius,
-                                          pantauRadius: _pantauRadius,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 16.0, right: 16, bottom: 16),
-                                        child: MainButton(
-                                          buttonText: "Simpan Area",
-                                          onTap: _saveArea,
-                                        ),
-                                      )
                                     ],
                                   ),
-                                )
-                              ],
-                            ),
-                    ),
-                  ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: FenceInfoWidget(
+                                      centerPoint: _centerPoint,
+                                      mandiriRadius: _mandiriRadius,
+                                      pantauRadius: _pantauRadius,
+                                    ),
+                                  ),
+                                  if (!isElderMode)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16.0, right: 16, bottom: 16),
+                                      child: MainButton(
+                                        buttonText: "Simpan Area",
+                                        onTap: _saveArea,
+                                      ),
+                                    )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                 ),
               ),
             ],
@@ -345,7 +468,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   }
 
   String _formatCoordinates(LatLng position) {
-    // Format coordinates for display
     final lat = position.latitude.toStringAsFixed(4);
     final lng = position.longitude.toStringAsFixed(4);
     return "$lat° ${position.latitude >= 0 ? 'LU' : 'LS'} - $lng° ${position.longitude >= 0 ? 'BT' : 'BB'}";

@@ -65,7 +65,7 @@ class _MeasurementFieldState extends State<MeasurementField> {
         ),
         const SizedBox(height: 8),
         Container(
-          height: 48, // Standard height
+          height: 48,
           decoration: BoxDecoration(
             border: Border.all(color: AppColors.neutral80),
             borderRadius: BorderRadius.circular(32),
@@ -73,7 +73,6 @@ class _MeasurementFieldState extends State<MeasurementField> {
           ),
           child: Row(
             children: [
-              // Left icon
               Padding(
                 padding: const EdgeInsets.only(left: 16.0, right: 8.0),
                 child: Icon(
@@ -143,7 +142,6 @@ class _MeasurementFieldState extends State<MeasurementField> {
                       ),
                     ),
 
-              // Unit display
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(

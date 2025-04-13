@@ -1,12 +1,21 @@
+import 'package:flutter/material.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
+import 'package:elderwise/presentation/screens/main_screen/homescreen.dart';
+import 'package:elderwise/presentation/screens/main_screen/homescreen_elder.dart';
 import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
-import 'package:elderwise/presentation/themes/colors.dart';
-import 'package:flutter/material.dart';
+import 'package:elderwise/presentation/screens/reminder_sceen/reminder_screen.dart';
 import 'package:elderwise/presentation/screens/agenda_screen/agenda_page.dart';
+import 'package:elderwise/presentation/themes/colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  static final GlobalKey<_MainScreenState> mainScreenKey =
+      GlobalKey<_MainScreenState>();
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -15,31 +24,76 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
 
+  void changeTab(int index) {
+    if (index >= 0) {
+      setState(() {
+        selectedIndex = index;
+
+        final isElderMode =
+            context.read<UserModeBloc>().state.userMode == UserMode.elder;
+        final maxIndex =
+            isElderMode ? elderScreens.length : regularScreens.length;
+
+        if (selectedIndex >= maxIndex) {
+          selectedIndex = 0;
+        }
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: AppColors.primaryMain,
-          body: screens[selectedIndex],
-        ),
-        _navBar(),
-      ],
+    return BlocBuilder<UserModeBloc, UserModeState>(
+      builder: (context, state) {
+        final isElderMode = state.userMode == UserMode.elder;
+        final screens = isElderMode ? elderScreens : regularScreens;
+
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: AppColors.primaryMain,
+              body:
+                  screens[selectedIndex >= screens.length ? 0 : selectedIndex],
+            ),
+            _navBar(isElderMode),
+          ],
+        );
+      },
     );
   }
 
-  Widget _navBar() {
+  Widget _navBar(bool isElderMode) {
+    final navIcons = isElderMode ? elderNavIcons : regularNavIcons;
+    final navIconsActive =
+        isElderMode ? elderNavIconsActive : regularNavIconsActive;
+    final navTitles = isElderMode ? elderNavTitles : regularNavTitles;
+
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
         height: 64,
-        margin: const EdgeInsets.only(left: 18, right: 18, bottom: 24),
+        margin: EdgeInsets.only(
+            left: isElderMode ? 64 : 32,
+            right: isElderMode ? 64 : 32,
+            bottom: 24),
         decoration: BoxDecoration(
           color: AppColors.neutral10,
+          boxShadow: [
+            BoxShadow(
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 3),
+              color: AppColors.neutral100.withOpacity(0.05),
+            )
+          ],
           borderRadius: BorderRadius.circular(32),
+          border: Border.all(
+            color: AppColors.neutral20,
+            width: 1,
+          ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,13 +111,15 @@ class _MainScreenState extends State<MainScreen> {
                         ? navIconsActive[index]
                         : navIcons[index],
                     const SizedBox(height: 4),
-                    Text(navTitles[index],
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              fontSize: 8,
-                              color: selectedIndex == index
-                                  ? AppColors.primaryMain
-                                  : AppColors.neutral90,
-                            )),
+                    Text(
+                      navTitles[index],
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontSize: 8,
+                            color: selectedIndex == index
+                                ? AppColors.primaryMain
+                                : AppColors.neutral60,
+                          ),
+                    ),
                   ],
                 ),
               );
@@ -75,94 +131,56 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-List<Image> navIcons = [
-  Image.asset('${iconImages}home.png', width: 20, height: 20),
-  Image.asset('${iconImages}clock.png', width: 20, height: 20),
-  Image.asset('${iconImages}map.png', width: 20, height: 20),
-  Image.asset('${iconImages}profile.png', width: 20, height: 20),
+final List<Widget> regularScreens = [
+  const Homescreen(),
+  const AgendaPage(),
+  const GeofenceScreen(),
+  const MainProfileScreen(),
 ];
 
-List<Image> navIconsActive = [
-  Image.asset('${iconImages}home_active.png', width: 20, height: 20),
-  Image.asset('${iconImages}clock_active.png', width: 20, height: 20),
-  Image.asset('${iconImages}map_active.png', width: 20, height: 20),
-  Image.asset('${iconImages}profile_active.png', width: 20, height: 20),
+final List<Widget> regularNavIcons = [
+  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.neutral60),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral60),
 ];
 
-List<String> navTitles = [
+final List<Widget> regularNavIconsActive = [
+  Icon(Icons.home_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.primaryMain),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.primaryMain),
+];
+
+final List<String> regularNavTitles = [
   "Home",
   "Agenda",
   "Maps",
   "Profile",
 ];
 
-class HomePlaceholderScreen extends StatelessWidget {
-  const HomePlaceholderScreen({Key? key}) : super(key: key);
+//ELDER
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.home, size: 64, color: AppColors.primaryMain),
-            SizedBox(height: 16),
-            Text(
-              "Home Screen",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryMain,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Coming Soon",
-              style: TextStyle(fontSize: 16, color: AppColors.neutral90),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class AgendaPlaceholderScreen extends StatelessWidget {
-  const AgendaPlaceholderScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.calendar_today, size: 64, color: AppColors.primaryMain),
-            SizedBox(height: 16),
-            Text(
-              "Agenda Screen",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryMain,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "Coming Soon",
-              style: TextStyle(fontSize: 16, color: AppColors.neutral90),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-final List<Widget> screens = [
-  const HomePlaceholderScreen(),
+final List<Widget> elderScreens = [
+  const HomescreenElder(),
   const AgendaPage(),
-  const GeofenceScreen(),
   const MainProfileScreen(),
+];
+
+final List<Widget> elderNavIcons = [
+  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral60),
+];
+
+final List<Widget> elderNavIconsActive = [
+  Icon(Icons.home_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.primaryMain),
+];
+
+final List<String> elderNavTitles = [
+  "Home",
+  "Agenda",
+  "Profile",
 ];
