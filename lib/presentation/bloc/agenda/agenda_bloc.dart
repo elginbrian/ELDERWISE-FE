@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:elderwise/data/api/requests/agenda_request.dart';
 import 'package:elderwise/data/api/responses/agenda_response.dart';
-import 'package:elderwise/domain/entities/agenda.dart';
 import 'package:elderwise/domain/repositories/agenda_repository.dart';
 import 'package:elderwise/domain/repositories/elder_repository.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
