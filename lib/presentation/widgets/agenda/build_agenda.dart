@@ -106,7 +106,7 @@ class BuildAgenda extends StatelessWidget {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image(image: AssetImage(iconImages + 'clock2.png')),
+                    Image(image: AssetImage(iconImages + 'clock2.png'), width: 12,),
                     const SizedBox(width: 4),
                     Text(
                       time,

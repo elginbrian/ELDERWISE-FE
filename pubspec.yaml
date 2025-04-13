@@ -82,6 +82,7 @@ flutter:
     - lib/presentation/screens/assets/images/banner.png
     - lib/presentation/screens/assets/images/web_background.jpg
     - lib/presentation/screens/assets/images/onboard.png
+    - lib/presentation/screens/assets/images/illust1.png
 
   fonts:
     - family: Poppins

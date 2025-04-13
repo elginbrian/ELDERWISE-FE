@@ -235,7 +235,7 @@ class Homescreen extends StatelessWidget {
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          type[0].toUpperCase() + type.substring(1), // Capitalize
+                                          type[0].toUpperCase() + type.substring(1),
                                           style: TextStyle(
                                             color: AppColors.neutral90,
                                             fontSize: 12,
@@ -248,7 +248,7 @@ class Homescreen extends StatelessWidget {
                                           children: [
                                             Padding(
                                               padding: const EdgeInsets.only(right: 4.0),
-                                              child: Image.asset(iconImages + 'clock2.png'),
+                                              child: Image.asset(iconImages + 'clock2.png', width: 12,),
                                             ),
                                             Text(
                                               time,
