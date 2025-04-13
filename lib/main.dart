@@ -1,4 +1,5 @@
 import 'package:elderwise/data/api/env_config.dart';
+import 'package:elderwise/presentation/bloc/notification/notification_bloc.dart';
 import 'package:elderwise/presentation/widgets/web_layout.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +67,8 @@ Future<void> main() async {
             create: (context) => getIt<LocationHistoryBloc>()),
         BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
         BlocProvider<ImageBloc>(create: (context) => getIt<ImageBloc>()),
+        BlocProvider<NotificationBloc>(
+            create: (context) => getIt<NotificationBloc>()),
         BlocProvider<UserModeBloc>(
           create: (context) => UserModeBloc()..add(InitializeUserModeEvent()),
         ),

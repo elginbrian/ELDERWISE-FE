@@ -9,12 +9,23 @@ import 'package:elderwise/presentation/screens/agenda_screen/agenda_page.dart';
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
+  static final GlobalKey<_MainScreenState> mainScreenKey =
+      GlobalKey<_MainScreenState>();
+
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
+
+  void changeTab(int index) {
+    if (index >= 0 && index < screens.length) {
+      setState(() {
+        selectedIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

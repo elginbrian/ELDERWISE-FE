@@ -83,4 +83,13 @@ class ApiConfig {
       "/emergency-alerts/$alertId";
 
   static String processEntityImage = "/storage/images";
+
+  static String getNotifications(String elderId) =>
+      "/elders/$elderId/notifications";
+  static String checkNotifications(String elderId) =>
+      "/elders/$elderId/notifications/check";
+  static String getUnreadCount(String elderId) =>
+      "/elders/$elderId/notifications/unread";
+  static String markNotificationAsRead(String notificationId) =>
+      "/notifications/$notificationId/read";
 }

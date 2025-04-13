@@ -7,6 +7,7 @@ class NotificationItem extends StatelessWidget {
   final String content;
   final String time;
   final String type;
+  final bool isRead;
 
   const NotificationItem({
     Key? key,
@@ -14,80 +15,63 @@ class NotificationItem extends StatelessWidget {
     required this.content,
     required this.time,
     required this.type,
+    this.isRead = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    String iconFile;
+    String iconImage;
+
     switch (type.toLowerCase()) {
       case 'obat':
-        iconFile = 'medicine.png';
+        iconImage = 'medicine.png';
         break;
       case 'makan':
-        iconFile = 'food.png';
+        iconImage = 'food.png';
         break;
       case 'hidrasi':
-        iconFile = 'hydration.png';
+        iconImage = 'hidration.png';
         break;
       case 'aktivitas':
-        iconFile = 'activity.png';
+        iconImage = 'activity.png';
+        break;
+      case 'emergency':
+        iconImage = 'emergency.png';
         break;
       default:
-        iconFile = 'default.png';
+        iconImage = 'activity.png';
     }
 
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: AppColors.secondarySurface,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.1),
-            offset: const Offset(0, 2),
-            spreadRadius: 1,
-            blurRadius: 5,
-          ),
-        ],
-      ),
-      width: double.infinity,
       padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isRead
+            ? AppColors.neutral10
+            : AppColors.primaryMain.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.neutral30),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 42,
-            child: Image(image: AssetImage(iconImages + iconFile)),
+          Image.asset(
+            iconImages + iconImage,
+            width: 32,
+            height: 32,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      time,
-                      style: const TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                  ],
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: isRead ? FontWeight.normal : FontWeight.bold,
+                    color: AppColors.neutral90,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -95,12 +79,30 @@ class NotificationItem extends StatelessWidget {
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
-                    fontWeight: FontWeight.w400,
+                    color: AppColors.neutral70,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  time,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 10,
+                    color: AppColors.neutral60,
                   ),
                 ),
               ],
             ),
-          )
+          ),
+          if (!isRead)
+            Container(
+              width: 8,
+              height: 8,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primaryMain,
+              ),
+            ),
         ],
       ),
     );
