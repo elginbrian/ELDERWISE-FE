@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
 import 'package:elderwise/presentation/screens/main_screen/homescreen.dart';
@@ -7,9 +9,9 @@ import 'package:elderwise/presentation/screens/profile_screen/main_profile_scree
 import 'package:elderwise/presentation/screens/reminder_sceen/reminder_screen.dart';
 import 'package:elderwise/presentation/screens/agenda_screen/agenda_page.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatefulWidget {
-  final bool isElderMode = true;
   const MainScreen({super.key});
 
   static final GlobalKey<_MainScreenState> mainScreenKey =
@@ -23,40 +25,56 @@ class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
 
   void changeTab(int index) {
-    if (index >= 0 && index < screens.length) {
+    if (index >= 0) {
       setState(() {
         selectedIndex = index;
+
+        final isElderMode =
+            context.read<UserModeBloc>().state.userMode == UserMode.elder;
+        final maxIndex =
+            isElderMode ? elderScreens.length : regularScreens.length;
+
+        if (selectedIndex >= maxIndex) {
+          selectedIndex = 0;
+        }
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final screens = widget.isElderMode ? elderScreens : regularScreens;
+    return BlocBuilder<UserModeBloc, UserModeState>(
+      builder: (context, state) {
+        final isElderMode = state.userMode == UserMode.elder;
+        final screens = isElderMode ? elderScreens : regularScreens;
 
-    return Stack(
-      children: [
-        Scaffold(
-          backgroundColor: AppColors.primaryMain,
-          body: screens[selectedIndex],
-        ),
-        _navBar(),
-      ],
+        return Stack(
+          children: [
+            Scaffold(
+              backgroundColor: AppColors.primaryMain,
+              body:
+                  screens[selectedIndex >= screens.length ? 0 : selectedIndex],
+            ),
+            _navBar(isElderMode),
+          ],
+        );
+      },
     );
   }
 
-  Widget _navBar() {
-    final navIcons = widget.isElderMode ? elderNavIcons : regularNavIcons;
-    final navIconsActive = widget.isElderMode ? elderNavIconsActive : regularNavIconsActive;
-    final navTitles = widget.isElderMode ? elderNavTitles : regularNavTitles;
+  Widget _navBar(bool isElderMode) {
+    final navIcons = isElderMode ? elderNavIcons : regularNavIcons;
+    final navIconsActive =
+        isElderMode ? elderNavIconsActive : regularNavIconsActive;
+    final navTitles = isElderMode ? elderNavTitles : regularNavTitles;
 
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
         height: 64,
         margin: EdgeInsets.only(
-            left: widget.isElderMode ? 64 : 32,
-            right: widget.isElderMode ? 64 : 32,
+            left: isElderMode ? 64 : 32,
+            right: isElderMode ? 64 : 32,
             bottom: 24),
         decoration: BoxDecoration(
           color: AppColors.neutral10,
