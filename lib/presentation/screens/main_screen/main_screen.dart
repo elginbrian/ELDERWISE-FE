@@ -88,7 +88,7 @@ class _MainScreenState extends State<MainScreen> {
                             fontSize: 8,
                             color: selectedIndex == index
                                 ? AppColors.primaryMain
-                                : AppColors.neutral60,
+                                : AppColors.neutral90,
                           ),
                     ),
                   ],
@@ -110,10 +110,10 @@ final List<Widget> regularScreens = [
 ];
 
 final List<Widget> regularNavIcons = [
-  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral60),
-  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.neutral60),
-  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral60),
-  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral90),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.neutral90),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral90),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral90),
 ];
 
 final List<Widget> regularNavIconsActive = [
@@ -139,9 +139,9 @@ final List<Widget> elderScreens = [
 ];
 
 final List<Widget> elderNavIcons = [
-  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral60),
-  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral60),
-  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral90),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral90),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral90),
 ];
 
 final List<Widget> elderNavIconsActive = [
