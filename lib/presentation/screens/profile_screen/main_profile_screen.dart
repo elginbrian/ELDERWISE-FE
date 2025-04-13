@@ -189,7 +189,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                   decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage(
-                        iconImages + 'bg.png',
+                        'lib/presentation/screens/assets/images/bg_floral.png',
                       ),
                       fit: BoxFit.cover,
                     ),
