@@ -58,7 +58,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
         .add(MarkNotificationAsReadEvent(notificationId));
   }
 
-  // Group notifications by date category
   Map<String, List<domain.Notification>> _groupNotifications() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -115,7 +114,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       case domain.NotificationType.AGENDA_OVERDUE:
         return 'obat';
       case domain.NotificationType.AGENDA_COMPLETED:
-        return 'makan'; // Using 'makan' icon for completed agendas
+        return 'makan';
       case domain.NotificationType.EMERGENCY_ALERT:
         return 'emergency';
       default:
@@ -168,7 +167,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
             });
 
             if (state is MarkAsReadSuccess) {
-              // Reload notifications after marking as read
               _loadNotifications();
               ToastHelper.showSuccessToast(context, state.message);
             } else if (state is NotificationFailure) {

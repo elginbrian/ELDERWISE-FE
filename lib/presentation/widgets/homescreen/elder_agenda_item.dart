@@ -69,7 +69,7 @@ class ElderAgendaItem extends StatelessWidget {
                     agenda.content1,
                     style: const TextStyle(
                       color: AppColors.neutral90,
-                      fontSize: 20, // Reduced from 24
+                      fontSize: 20,
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600,
                     ),
@@ -85,7 +85,7 @@ class ElderAgendaItem extends StatelessWidget {
                           agenda.content2,
                           style: const TextStyle(
                             color: AppColors.neutral90,
-                            fontSize: 16, // Reduced from 20
+                            fontSize: 16,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
                           ),
@@ -102,7 +102,7 @@ class ElderAgendaItem extends StatelessWidget {
                               padding: const EdgeInsets.only(right: 4.0),
                               child: Image.asset(
                                 iconImages + 'clock2.png',
-                                width: 16, // Smaller icon
+                                width: 16,
                                 height: 16,
                                 fit: BoxFit.contain,
                               ),
@@ -112,7 +112,7 @@ class ElderAgendaItem extends StatelessWidget {
                                 time,
                                 style: const TextStyle(
                                   color: AppColors.neutral90,
-                                  fontSize: 16, // Reduced from 20
+                                  fontSize: 16,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
                                 ),

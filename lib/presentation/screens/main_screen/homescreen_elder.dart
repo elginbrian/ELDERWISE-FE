@@ -1,3 +1,4 @@
+import 'package:elderwise/data/api/requests/emergency_alert_request.dart';
 import 'package:elderwise/domain/entities/agenda.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_bloc.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
@@ -18,6 +19,15 @@ import 'package:elderwise/presentation/widgets/homescreen/elder_profile_header.d
 import 'package:elderwise/presentation/widgets/homescreen/sos_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/services/fall_detection_service.dart';
+import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_bloc.dart';
+import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_event.dart';
+import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_state.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:elderwise/presentation/bloc/caregiver/caregiver_bloc.dart';
+import 'package:elderwise/presentation/bloc/caregiver/caregiver_event.dart';
+import 'package:elderwise/presentation/bloc/caregiver/caregiver_state.dart';
 
 class HomescreenElder extends StatefulWidget {
   const HomescreenElder({super.key});
@@ -29,6 +39,7 @@ class HomescreenElder extends StatefulWidget {
 class _HomescreenElderState extends State<HomescreenElder> {
   String _userId = '';
   String _elderId = '';
+  String _caregiverId = '';
   bool _isLoading = true;
   bool _userDataLoaded = false;
   List<Agenda> _agendas = [];
@@ -40,8 +51,24 @@ class _HomescreenElderState extends State<HomescreenElder> {
   @override
   void initState() {
     super.initState();
-    // Permintaan data saat inisialisasi
     context.read<AuthBloc>().add(GetCurrentUserEvent());
+
+    FallDetectionService().startMonitoring(
+      onFallDetected: _handleFallDetection,
+      userMode: UserMode.elder,
+      startSosCountdown: () {
+        if (SosButton.globalKey.currentState != null) {
+          SosButton.globalKey.currentState!.startCountdown();
+        } else {
+          _activateSOS();
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void _loadUserData() {
@@ -54,6 +81,12 @@ class _HomescreenElderState extends State<HomescreenElder> {
   void _loadAgendas() {
     if (_elderId.isNotEmpty) {
       context.read<AgendaBloc>().add(GetAgendasByElderIdEvent(_elderId));
+    }
+  }
+
+  void _loadCaregiverData() {
+    if (_elderId.isNotEmpty) {
+      context.read<CaregiverBloc>().add(GetCaregiverEvent(_elderId));
     }
   }
 
@@ -72,6 +105,7 @@ class _HomescreenElderState extends State<HomescreenElder> {
 
       if (_elderId.isNotEmpty) {
         _loadAgendas();
+        _loadCaregiverData();
       }
     });
   }
@@ -81,7 +115,48 @@ class _HomescreenElderState extends State<HomescreenElder> {
   }
 
   void _activateSOS() {
-    ToastHelper.showSuccessToast(context, "Panggilan SOS diaktifkan");
+    _sendEmergencyAlert(false);
+  }
+
+  void _handleFallDetection() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _sendEmergencyAlert(true);
+    });
+  }
+
+  Future<void> _sendEmergencyAlert(bool isFallDetection) async {
+    try {
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+      } catch (e) {
+        debugPrint('Could not get location: $e');
+      }
+
+      final alertRequest = EmergencyAlertRequestDTO(
+        elderId: _elderId,
+        caregiverId: _caregiverId.isNotEmpty ? _caregiverId : _userId,
+        datetime: DateTime.now(),
+        elderLat: position?.latitude ?? 0.0,
+        elderLong: position?.longitude ?? 0.0,
+        isDismissed: false,
+      );
+
+      context.read<EmergencyAlertBloc>().add(
+            CreateEmergencyAlertEvent(alertRequest),
+          );
+
+      ToastHelper.showSuccessToast(
+        context,
+        isFallDetection
+            ? "Fall detected! Sending emergency alert..."
+            : "Emergency alert activated",
+      );
+    } catch (e) {
+      ToastHelper.showErrorToast(context, "Failed to send emergency alert: $e");
+    }
   }
 
   void _navigateToAgendaPage() {
@@ -135,6 +210,34 @@ class _HomescreenElderState extends State<HomescreenElder> {
             }
           },
         ),
+        BlocListener<EmergencyAlertBloc, EmergencyAlertState>(
+          listener: (context, state) {
+            if (state is EmergencyAlertLoading) {
+            } else if (state is EmergencyAlertSuccess) {
+              ToastHelper.showSuccessToast(
+                context,
+                "Emergency alert sent successfully. Help is on the way!",
+              );
+            } else if (state is EmergencyAlertFailure) {
+              ToastHelper.showErrorToast(
+                context,
+                "Failed to send emergency alert: ${state.error}",
+              );
+            }
+          },
+        ),
+        BlocListener<CaregiverBloc, CaregiverState>(
+          listener: (context, state) {
+            if (state is CaregiverSuccess) {
+              setState(() {
+                _caregiverId = state.caregiver.caregiver.caregiverId;
+              });
+              debugPrint('Caregiver ID set: $_caregiverId');
+            } else if (state is CaregiverFailure) {
+              debugPrint('Failed to fetch caregiver: ${state.error}');
+            }
+          },
+        ),
       ],
       child: Stack(
         children: [
@@ -150,7 +253,6 @@ class _HomescreenElderState extends State<HomescreenElder> {
               ),
               child: Column(
                 children: [
-                  // Upper section
                   Padding(
                     padding: const EdgeInsets.all(32.0),
                     child: Column(
@@ -164,8 +266,6 @@ class _HomescreenElderState extends State<HomescreenElder> {
                       ],
                     ),
                   ),
-
-                  // Lower section (agenda)
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(32),
@@ -189,15 +289,16 @@ class _HomescreenElderState extends State<HomescreenElder> {
               ),
             ),
           ),
-
-          // SOS button overlay
           Positioned(
             top: 180,
             left: 0,
             right: 0,
             child: Align(
               alignment: Alignment.topCenter,
-              child: SosButton(onTap: _activateSOS),
+              child: SosButton(
+                key: SosButton.globalKey,
+                onTap: _activateSOS,
+              ),
             ),
           ),
         ],

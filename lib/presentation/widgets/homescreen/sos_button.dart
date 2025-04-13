@@ -3,14 +3,17 @@ import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import 'dart:math';
 
 class SosButton extends StatefulWidget {
   final VoidCallback onTap;
 
-  const SosButton({
+  static GlobalKey<_SosButtonState> globalKey = GlobalKey<_SosButtonState>();
+
+  SosButton({
     Key? key,
     required this.onTap,
-  }) : super(key: key);
+  }) : super(key: key ?? globalKey);
 
   @override
   State<SosButton> createState() => _SosButtonState();
@@ -46,7 +49,13 @@ class _SosButtonState extends State<SosButton>
   }
 
   void _vibrate() {
-    HapticFeedback.heavyImpact(); // Vibrate with heavy impact effect
+    HapticFeedback.heavyImpact();
+  }
+
+  void startCountdown() {
+    if (!_isCountdownActive) {
+      _startCountdown();
+    }
   }
 
   void _startCountdown() {
@@ -55,16 +64,16 @@ class _SosButtonState extends State<SosButton>
       _countdown = 10;
     });
 
-    _vibrate(); // Initial vibration when countdown starts
+    _vibrate();
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_countdown <= 1) {
         _cancelCountdown();
-        widget.onTap(); // Actually send the SOS alert
+        widget.onTap();
       } else {
         setState(() {
           _countdown--;
-          _vibrate(); // Vibrate on each tick
+          _vibrate();
         });
       }
     });
@@ -81,7 +90,6 @@ class _SosButtonState extends State<SosButton>
   @override
   Widget build(BuildContext context) {
     if (_isCountdownActive) {
-      // Show countdown circle instead of SOS button with animation
       return AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
@@ -95,7 +103,6 @@ class _SosButtonState extends State<SosButton>
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Third outer circle with white background - larger and no shadow
               Container(
                 width: 260,
                 height: 260,
@@ -104,7 +111,6 @@ class _SosButtonState extends State<SosButton>
                   color: Color.fromRGBO(255, 252, 217, 1),
                 ),
               ),
-              // Middle circle - larger
               Container(
                 width: 220,
                 height: 220,
@@ -113,7 +119,6 @@ class _SosButtonState extends State<SosButton>
                   color: AppColors.primaryHover.withOpacity(0.3),
                 ),
               ),
-              // Inner circle with countdown - larger and no shadow
               Container(
                 width: 160,
                 height: 160,
@@ -151,7 +156,6 @@ class _SosButtonState extends State<SosButton>
         ),
       );
     } else {
-      // Show regular SOS button
       return AnimatedBuilder(
         animation: _controller,
         builder: (context, child) {
