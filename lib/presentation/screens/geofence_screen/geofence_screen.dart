@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
@@ -203,9 +204,10 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
           decoration: const BoxDecoration(
             image: DecorationImage(
               image: AssetImage(
-                'lib/presentation/screens/assets/images/bg_floral.png',
+                iconImages + 'bg.png'
               ),
-              fit: BoxFit.cover,
+              fit: BoxFit.cover
+              // fit: BoxFit.fill,
             ),
           ),
           child: Column(
@@ -218,7 +220,7 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                       padding: const EdgeInsets.all(32),
                       width: double.infinity,
                       decoration: const BoxDecoration(
-                        color: AppColors.neutral20,
+                        color: AppColors.secondarySurface,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0),
@@ -231,7 +233,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                 MainButton(
                                   buttonText: "Atur Area",
                                   onTap: () async {
-                                    // Navigate to SetFenceScreen and await result
                                     final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
@@ -243,7 +244,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       ),
                                     );
 
-                                    // Process the result if it exists
                                     if (result != null &&
                                         result is Map<String, dynamic>) {
                                       _updateFenceData(

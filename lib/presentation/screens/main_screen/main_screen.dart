@@ -1,5 +1,6 @@
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/geofence_screen.dart';
+import 'package:elderwise/presentation/screens/main_screen/homescreen.dart';
 import 'package:elderwise/presentation/screens/profile_screen/main_profile_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
@@ -161,7 +162,7 @@ class AgendaPlaceholderScreen extends StatelessWidget {
 }
 
 final List<Widget> screens = [
-  const HomePlaceholderScreen(),
+  const Homescreen(),
   const AgendaPage(),
   const GeofenceScreen(),
   const MainProfileScreen(),
