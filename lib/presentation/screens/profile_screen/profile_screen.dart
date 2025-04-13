@@ -650,102 +650,219 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
       child: Scaffold(
-        body: Stack(
-          children: [
-            Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                      'lib/presentation/screens/assets/images/bg_floral.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Column(
+        backgroundColor: AppColors.primaryMain,
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
                 children: [
-                  AnimatedOpacity(
-                    opacity: _isLoading ? 0.5 : 1.0,
-                    duration: const Duration(milliseconds: 300),
-                    child: ProfileHeader(
-                      isElder: switchValue,
-                      elderImage: _elderImage,
-                      caregiverImage: _caregiverImage,
-                      elderPhotoUrl: _elderPhotoUrl,
-                      caregiverPhotoUrl: _caregiverPhotoUrl,
-                      elderData: _elderData,
-                      caregiverData: _caregiverData,
-                      onImagePick: _isLoading || _isSaving
-                          ? (_) {}
-                          : _pickImageFromGallery,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 24.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: _isLoading || _isSaving
+                              ? null
+                              : () => _pickImageFromGallery(switchValue),
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 80.0,
+                                height: 80.0,
+                                decoration: BoxDecoration(
+                                  color: AppColors.secondarySurface,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: switchValue
+                                    ? ClipOval(
+                                        child: _elderImage != null
+                                            ? Image.file(
+                                                _elderImage!,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : _elderPhotoUrl != null &&
+                                                    _elderPhotoUrl!.isNotEmpty
+                                                ? Image.network(
+                                                    _elderPhotoUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        const Icon(Icons.person,
+                                                            size: 40,
+                                                            color: AppColors
+                                                                .neutral60),
+                                                  )
+                                                : const Icon(Icons.person,
+                                                    size: 40,
+                                                    color: AppColors.neutral60),
+                                      )
+                                    : ClipOval(
+                                        child: _caregiverImage != null
+                                            ? Image.file(
+                                                _caregiverImage!,
+                                                fit: BoxFit.cover,
+                                              )
+                                            : _caregiverPhotoUrl != null &&
+                                                    _caregiverPhotoUrl!
+                                                        .isNotEmpty
+                                                ? Image.network(
+                                                    _caregiverPhotoUrl!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        const Icon(Icons.person,
+                                                            size: 40,
+                                                            color: AppColors
+                                                                .neutral60),
+                                                  )
+                                                : const Icon(Icons.person,
+                                                    size: 40,
+                                                    color: AppColors.neutral60),
+                                      ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutral40,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.secondarySurface,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.edit,
+                                    size: 14,
+                                    color: AppColors.secondarySurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                switchValue
+                                    ? (_elderData != null
+                                        ? _elderData['name'] ?? 'Elder'
+                                        : 'Elder')
+                                    : (_caregiverData != null
+                                        ? _caregiverData['name'] ?? 'Caregiver'
+                                        : 'Caregiver'),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.neutral90,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                switchValue ? 'Elder' : 'Caregiver',
+                                style: const TextStyle(
+                                  fontSize: 14, // Reduced from 16
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Poppins',
+                                  color: AppColors.neutral80,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 32),
                   Expanded(
-                    child: _buildProfileContent(),
+                    child: AnimatedOpacity(
+                      opacity: _isLoading ? 0.5 : 1.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: AppColors.secondarySurface,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(32.0),
+                            topRight: Radius.circular(32.0),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 32),
+                            Expanded(
+                              child: _buildProfileContent(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-            Positioned(
-              top: 24,
-              left: 0,
-              child: FloatingActionButton(
-                onPressed: _isSaving ? null : () => Navigator.pop(context),
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                hoverElevation: 0,
-                focusElevation: 0,
-                highlightElevation: 0,
-                splashColor: Colors.transparent,
-                child: const Icon(Icons.keyboard_arrow_left,
-                    color: AppColors.neutral10, size: 36),
-              ),
-            ),
-            if (_isLoading || _isSaving)
-              Positioned.fill(
-                child: Container(
-                  color: Colors.black.withOpacity(0.1),
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColors.primaryMain),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _isSaving
-                                ? 'Menyimpan perubahan...'
-                                : 'Memuat data...',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Poppins',
+              if (_isLoading || _isSaving)
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withOpacity(0.1),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.primaryMain),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _isSaving
+                                  ? 'Menyimpan perubahan...'
+                                  : 'Memuat data...',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -753,24 +870,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileContent() {
     return Container(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.fromLTRB(
+          32, 0, 32, 32), // Further reduced top padding from 16 to 0
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: AppColors.neutral20,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(32.0),
-          topRight: Radius.circular(32.0),
-        ),
-      ),
       child: Column(
         children: [
-          ProfileToggle(
-            value: switchValue,
-            onChanged: _isLoading || _isSaving
-                ? (_) {}
-                : (value) => setState(() {
-                      switchValue = value;
-                    }),
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: AppColors.neutral40,
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+            child: ProfileToggle(
+              value: switchValue,
+              onChanged: _isLoading || _isSaving
+                  ? (_) {}
+                  : (value) => setState(() {
+                        switchValue = value;
+                      }),
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
