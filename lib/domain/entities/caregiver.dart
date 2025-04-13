@@ -87,7 +87,6 @@ class Caregiver {
   }
 
   String _formatDateForJson(DateTime date) {
-    // Already contains 'Z' if in UTC, so don't add another one
     final iso = date.toIso8601String();
     return iso.endsWith('Z') ? iso : iso + 'Z';
   }

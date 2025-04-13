@@ -1,8 +1,11 @@
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/widgets/profile/custom_profile_field.dart';
 import 'package:elderwise/presentation/widgets/profile/date_picker_field.dart';
 import 'package:elderwise/presentation/widgets/profile/gender_selector.dart';
 import 'package:elderwise/presentation/widgets/profile/relationship_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class CaregiverProfileView extends StatelessWidget {
   final TextEditingController nameController;
@@ -24,49 +27,89 @@ class CaregiverProfileView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
+    final bool actualReadOnly = isElderMode ? true : readOnly;
+
+    final List<String> relationshipOptions = [
+      'Anak',
+      'Menantu',
+      'Cucu',
+      'Kerabat',
+      'Perawat',
+      'Lainnya',
+    ];
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomProfileField(
           title: 'Nama Lengkap',
-          hintText: 'Nama caregiver',
+          hintText: 'Masukkan nama anda',
           controller: nameController,
           icon: Icons.person,
-          readOnly: readOnly,
+          readOnly: actualReadOnly,
         ),
         GenderSelector(
           controller: genderController,
-          selectedGender: genderController.text,
-          onGenderSelected: (_) {},
-          readOnly: readOnly,
+          selectedGender:
+              genderController.text.isEmpty ? null : genderController.text,
+          onGenderSelected: (gender) {
+            genderController.text = gender;
+          },
+          readOnly: actualReadOnly,
         ),
         DatePickerField(
           controller: birthdateController,
-          selectedDate: null,
-          onDateSelected: (_) {},
+          selectedDate: _parseDate(birthdateController.text),
+          onDateSelected: (date) {
+            final day = date.day.toString().padLeft(2, '0');
+            final month = date.month.toString().padLeft(2, '0');
+            final year = date.year.toString();
+            birthdateController.text = "$day/$month/$year";
+          },
           placeholder: 'Tanggal lahir caregiver',
-          readOnly: readOnly,
+          readOnly: actualReadOnly,
         ),
         CustomProfileField(
           title: 'No. Telepon',
-          hintText: 'Nomor telepon',
-          icon: Icons.phone,
+          hintText: 'Masukkan nomor telepon anda',
           controller: phoneController,
-          readOnly: readOnly,
+          icon: Icons.phone,
+          keyboardType: TextInputType.phone,
+          readOnly: actualReadOnly,
         ),
         RelationshipSelector(
           controller: relationshipController,
-          selectedRelationship: relationshipController.text,
-          onRelationshipSelected: (_) {},
-          relationshipOptions: const [
-            'Anak',
-            'Saudara',
-            'Cucu',
-            'Lainnya',
-          ],
-          readOnly: readOnly,
+          selectedRelationship: relationshipController.text.isEmpty
+              ? null
+              : relationshipController.text,
+          onRelationshipSelected: (relationship) {
+            relationshipController.text = relationship;
+          },
+          relationshipOptions: relationshipOptions,
+          readOnly: actualReadOnly,
         ),
       ],
     );
+  }
+
+  DateTime? _parseDate(String dateStr) {
+    if (dateStr.isEmpty) return null;
+
+    try {
+      final parts = dateStr.split('/');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error parsing date: $e');
+    }
+    return null;
   }
 }

@@ -24,14 +24,13 @@ class WeekSelector extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Position chevron left at the edge
         IconButton(
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
           icon: const Icon(Icons.chevron_left, color: AppColors.neutral90),
           onPressed: onPreviousWeek,
         ),
-        // Day selector takes the center space
+
         Expanded(
           child: SizedBox(
             height: 70,
@@ -90,7 +89,6 @@ class WeekSelector extends StatelessWidget {
             ),
           ),
         ),
-        // Position chevron right at the edge
         IconButton(
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),

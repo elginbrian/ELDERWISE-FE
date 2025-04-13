@@ -113,7 +113,6 @@ class _ElderProfileState extends State<ElderProfile> {
         }
       }
 
-      // Try both snake_case and camelCase field names for body height
       final bodyHeight = elder['body_height'] ?? elder['bodyHeight'];
       if (bodyHeight != null) {
         try {
@@ -153,9 +152,7 @@ class _ElderProfileState extends State<ElderProfile> {
   void _submitForm() {
     if (!_isFormValid) return;
 
-    // Ensure the birthdate has timezone information
     final DateTime birthdate = _selectedDate ?? DateTime.now();
-    // Convert to UTC and ensure it has the correct format
     final DateTime formattedBirthdate = DateTime.utc(
       birthdate.year,
       birthdate.month,

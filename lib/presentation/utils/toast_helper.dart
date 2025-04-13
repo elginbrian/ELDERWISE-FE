@@ -104,7 +104,7 @@ class ToastHelper {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(10),
-        duration: const Duration(seconds: 30), // Long duration for loading
+        duration: const Duration(seconds: 30),
       ),
     );
   }

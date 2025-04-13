@@ -26,7 +26,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
   bool _touched = false;
 
   Future<void> _selectDate(BuildContext context) async {
-    if (widget.readOnly) return; // Don't open date picker if readOnly
+    if (widget.readOnly) return;
 
     setState(() {
       _touched = true;
@@ -80,7 +80,7 @@ class _DatePickerFieldState extends State<DatePickerField> {
         GestureDetector(
           onTap: () => _selectDate(context),
           child: Container(
-            height: 48, // Standard height for input fields
+            height: 48,
             decoration: BoxDecoration(
               border: Border.all(color: AppColors.neutral80),
               borderRadius: BorderRadius.circular(32),
@@ -88,7 +88,6 @@ class _DatePickerFieldState extends State<DatePickerField> {
             ),
             child: Row(
               children: [
-                // Left calendar icon
                 const Padding(
                   padding: EdgeInsets.only(left: 16.0, right: 8.0),
                   child: Icon(Icons.calendar_today,
@@ -109,12 +108,12 @@ class _DatePickerFieldState extends State<DatePickerField> {
                     ),
                   ),
                 ),
-                // Right dropdown icon
-                const Padding(
-                  padding: EdgeInsets.only(right: 16.0),
-                  child: Icon(Icons.arrow_drop_down,
-                      size: 20, color: AppColors.neutral80),
-                ),
+                if (!widget.readOnly)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Icon(Icons.arrow_drop_down,
+                        size: 20, color: AppColors.neutral80),
+                  ),
               ],
             ),
           ),
