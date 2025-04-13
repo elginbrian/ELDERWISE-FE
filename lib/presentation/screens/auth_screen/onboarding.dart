@@ -41,7 +41,7 @@ class _OnboardingState extends State<Onboarding>
       curve: Curves.easeIn,
     ));
 
-    _controller.forward(); // Start animation
+    _controller.forward();
   }
 
   @override

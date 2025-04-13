@@ -48,12 +48,10 @@ class _RelationshipSelectorState extends State<RelationshipSelector> {
           ),
           child: Row(
             children: [
-              // Left icon
               const Padding(
                 padding: EdgeInsets.only(left: 16.0, right: 8.0),
                 child: Icon(Icons.people, size: 20, color: AppColors.neutral80),
               ),
-              // Display text or dropdown based on readOnly value
               widget.readOnly
                   ? Expanded(
                       child: Text(
@@ -156,13 +154,6 @@ class _RelationshipSelectorState extends State<RelationshipSelector> {
                         ),
                       ),
                     ),
-              // Display dropdown icon in readOnly mode for consistent appearance
-              if (widget.readOnly)
-                const Padding(
-                  padding: EdgeInsets.only(right: 12.0),
-                  child:
-                      Icon(Icons.arrow_drop_down, color: AppColors.neutral80),
-                ),
             ],
           ),
         ),

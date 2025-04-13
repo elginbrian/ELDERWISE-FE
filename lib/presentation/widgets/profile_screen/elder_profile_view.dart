@@ -25,43 +25,69 @@ class ElderProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomProfileField(
           title: 'Nama Lengkap',
-          hintText: 'Nama elder',
+          hintText: 'Masukkan nama elder',
           controller: nameController,
           icon: Icons.person,
           readOnly: readOnly,
         ),
         GenderSelector(
           controller: genderController,
-          selectedGender: genderController.text,
-          onGenderSelected: (_) {},
+          selectedGender:
+              genderController.text.isEmpty ? null : genderController.text,
+          onGenderSelected: (gender) {
+            genderController.text = gender;
+          },
           readOnly: readOnly,
         ),
         DatePickerField(
           controller: birthdateController,
-          selectedDate: null,
-          onDateSelected: (_) {},
+          selectedDate: _parseDate(birthdateController.text),
+          onDateSelected: (date) {
+            final day = date.day.toString().padLeft(2, '0');
+            final month = date.month.toString().padLeft(2, '0');
+            final year = date.year.toString();
+            birthdateController.text = "$day/$month/$year";
+          },
           placeholder: 'Tanggal lahir elder',
           readOnly: readOnly,
         ),
         MeasurementField(
           title: 'Tinggi Badan',
-          hint: 'Tinggi badan',
+          hint: 'Masukkan tinggi badan',
           controller: heightController,
           unit: 'cm',
           readOnly: readOnly,
         ),
         MeasurementField(
           title: 'Berat Badan',
-          hint: 'Berat badan',
+          hint: 'Masukkan berat badan',
           controller: weightController,
           unit: 'kg',
           readOnly: readOnly,
         ),
       ],
     );
+  }
+
+  DateTime? _parseDate(String dateStr) {
+    if (dateStr.isEmpty) return null;
+
+    try {
+      final parts = dateStr.split('/');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[2]), // year
+          int.parse(parts[1]), // month
+          int.parse(parts[0]), // day
+        );
+      }
+    } catch (e) {
+      debugPrint('Error parsing date: $e');
+    }
+    return null;
   }
 }

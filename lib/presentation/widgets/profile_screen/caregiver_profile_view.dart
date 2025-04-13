@@ -25,48 +25,74 @@ class CaregiverProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CustomProfileField(
           title: 'Nama Lengkap',
-          hintText: 'Nama caregiver',
+          hintText: 'Masukkan nama anda',
           controller: nameController,
           icon: Icons.person,
           readOnly: readOnly,
         ),
         GenderSelector(
           controller: genderController,
-          selectedGender: genderController.text,
-          onGenderSelected: (_) {},
+          selectedGender:
+              genderController.text.isEmpty ? null : genderController.text,
+          onGenderSelected: (gender) {
+            genderController.text = gender;
+          },
           readOnly: readOnly,
         ),
         DatePickerField(
           controller: birthdateController,
-          selectedDate: null,
-          onDateSelected: (_) {},
+          selectedDate: _parseDate(birthdateController.text),
+          onDateSelected: (date) {
+            final day = date.day.toString().padLeft(2, '0');
+            final month = date.month.toString().padLeft(2, '0');
+            final year = date.year.toString();
+            birthdateController.text = "$day/$month/$year";
+          },
           placeholder: 'Tanggal lahir caregiver',
           readOnly: readOnly,
         ),
         CustomProfileField(
           title: 'No. Telepon',
-          hintText: 'Nomor telepon',
-          icon: Icons.phone,
+          hintText: 'Masukkan nomor telepon anda',
           controller: phoneController,
+          icon: Icons.phone,
+          keyboardType: TextInputType.phone,
           readOnly: readOnly,
         ),
         RelationshipSelector(
           controller: relationshipController,
-          selectedRelationship: relationshipController.text,
-          onRelationshipSelected: (_) {},
-          relationshipOptions: const [
-            'Anak',
-            'Saudara',
-            'Cucu',
-            'Lainnya',
-          ],
+          selectedRelationship: relationshipController.text.isEmpty
+              ? null
+              : relationshipController.text,
+          onRelationshipSelected: (relationship) {
+            relationshipController.text = relationship;
+          },
+          relationshipOptions: const ['Anak', 'Cucu', 'Saudara', 'Lainnya'],
           readOnly: readOnly,
         ),
       ],
     );
+  }
+
+  DateTime? _parseDate(String dateStr) {
+    if (dateStr.isEmpty) return null;
+
+    try {
+      final parts = dateStr.split('/');
+      if (parts.length == 3) {
+        return DateTime(
+          int.parse(parts[2]), // year
+          int.parse(parts[1]), // month
+          int.parse(parts[0]), // day
+        );
+      }
+    } catch (e) {
+      debugPrint('Error parsing date: $e');
+    }
+    return null;
   }
 }

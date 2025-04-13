@@ -30,14 +30,12 @@ class _TimePickerState extends State<TimePicker> {
   @override
   void initState() {
     super.initState();
-    // Initialize with the initial time if provided
     _selectedTime = widget.initialTime;
   }
 
   @override
   void didUpdateWidget(TimePicker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update _selectedTime if the initialTime changes
     if (widget.initialTime != oldWidget.initialTime) {
       setState(() {
         _selectedTime = widget.initialTime;

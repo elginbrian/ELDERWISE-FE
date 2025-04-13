@@ -9,8 +9,8 @@ class ProfileImagePicker {
     try {
       final returnedImage = await ImagePicker().pickImage(
         source: ImageSource.gallery,
-        imageQuality: 80, // Optimize image quality
-        maxWidth: 800, // Limit dimensions for better performance
+        imageQuality: 80,
+        maxWidth: 800,
         maxHeight: 800,
       );
 
@@ -30,7 +30,7 @@ class ProfileImagePicker {
     bool result = false;
     await showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissing by tapping outside
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         backgroundColor: AppColors.neutral20,

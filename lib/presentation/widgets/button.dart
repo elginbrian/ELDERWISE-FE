@@ -5,20 +5,28 @@ import '../themes/colors.dart';
 
 class MainButton extends StatelessWidget {
   final String buttonText;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final Color color;
+  final Color textColor;
   final bool isLoading;
-  final Color? color;
-  final String? iconAsset;
   final TextAlign textAlign;
+  final String? iconAsset;
+  final bool hasShadow;
+  final bool hasBorder;
+  final Color borderColor;
 
   const MainButton({
     super.key,
     required this.buttonText,
-    required this.onTap,
-    this.isLoading = false,
+    this.onTap,
     this.color = AppColors.primaryMain,
-    this.iconAsset,
+    this.textColor = AppColors.neutral90,
+    this.isLoading = false,
     this.textAlign = TextAlign.center,
+    this.iconAsset,
+    this.hasShadow = true,
+    this.hasBorder = false,
+    this.borderColor = AppColors.neutral30,
   });
 
   @override
@@ -27,17 +35,24 @@ class MainButton extends StatelessWidget {
       onTap: isLoading ? null : onTap,
       child: Container(
         width: double.infinity,
-        height: 40,
+        padding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 16,
+        ),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          color: color ?? AppColors.primaryMain,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: const Offset(0, 3),
-              blurRadius: 2,
-            ),
-          ],
+          color: color,
+          borderRadius: BorderRadius.circular(24),
+          border: hasBorder ? Border.all(color: borderColor, width: 1) : null,
+          boxShadow: hasShadow
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 0,
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: isLoading
             ? const Center(
@@ -72,10 +87,10 @@ class MainButton extends StatelessWidget {
                     Text(
                       buttonText,
                       textAlign: textAlign,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 12,
-                        color: AppColors.neutral90,
+                        color: textColor,
                         fontFamily: 'Poppins',
                       ),
                     ),

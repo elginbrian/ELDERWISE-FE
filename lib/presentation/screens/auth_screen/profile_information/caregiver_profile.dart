@@ -62,7 +62,6 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
     tanggalLahirController.addListener(_validateForm);
     relationshipController.addListener(_validateForm);
 
-    // Check if user already has a caregiver profile
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<UserBloc>().add(GetUserCaregiversEvent(widget.userId));
     });
@@ -129,7 +128,6 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
         }
       }
 
-      // Try both snake_case and camelCase field names for phone number
       final phoneNumber = caregiver['phone_number'] ?? caregiver['phoneNumber'];
       if (phoneNumber != null) {
         try {
