@@ -209,7 +209,7 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                       padding: const EdgeInsets.all(32),
                       width: double.infinity,
                       decoration: const BoxDecoration(
-                        color: AppColors.neutral20,
+                        color: AppColors.secondarySurface,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(32.0),
                           topRight: Radius.circular(32.0),
@@ -253,14 +253,10 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                   decoration: BoxDecoration(
                                     color: AppColors.secondarySurface,
                                     borderRadius: BorderRadius.circular(32),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        spreadRadius: 2,
-                                        blurRadius: 5,
-                                        offset: const Offset(0, 4),
-                                      ),
-                                    ],
+                                    border: Border.all(
+                                      color: AppColors.neutral30,
+                                      width: 1,
+                                    ),
                                   ),
                                   child: Column(
                                     mainAxisAlignment:

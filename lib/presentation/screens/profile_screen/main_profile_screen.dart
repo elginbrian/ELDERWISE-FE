@@ -209,11 +209,15 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                             Container(
                               padding: const EdgeInsets.all(32),
                               width: double.infinity,
-                              decoration: const BoxDecoration(
-                                color: AppColors.neutral20,
-                                borderRadius: BorderRadius.only(
+                              decoration: BoxDecoration(
+                                color: AppColors.secondarySurface,
+                                borderRadius: const BorderRadius.only(
                                   topLeft: Radius.circular(32.0),
                                   topRight: Radius.circular(32.0),
+                                ),
+                                border: Border.all(
+                                  color: AppColors.neutral30,
+                                  width: 1,
                                 ),
                               ),
                               child: Column(
@@ -224,6 +228,9 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                     onTap: _navigateToProfileScreen,
                                     textAlign: TextAlign.left,
                                     iconAsset: 'username.png',
+                                    hasBorder: true,
+                                    hasShadow: false,
+                                    borderColor: AppColors.neutral30,
                                   ),
                                   const SizedBox(height: 16),
                                   MainButton(
@@ -232,6 +239,9 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                     onTap: () {},
                                     textAlign: TextAlign.left,
                                     iconAsset: 'username.png',
+                                    hasBorder: true,
+                                    hasShadow: false,
+                                    borderColor: AppColors.neutral30,
                                   ),
                                   const SizedBox(height: 24),
                                   MainButton(
@@ -268,7 +278,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   Widget _buildLoadingScreen() {
     return Container(
       key: const ValueKey('loading_screen'),
-      color: AppColors.neutral20,
+      color: AppColors.secondarySurface,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

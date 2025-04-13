@@ -143,8 +143,12 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
             const CustomFormField(hintText: "Pilih lokasi anda"),
             const SizedBox(height: 16),
             Container(
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(24)),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(
+                    color: AppColors.neutral30,
+                    width: 1,
+                  )),
               width: double.infinity,
               height: 300,
               child: ClipRRect(
