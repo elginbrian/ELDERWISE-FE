@@ -232,12 +232,6 @@ class _AgendaPageState extends State<AgendaPage> {
                         horizontal: 16.0, vertical: 24.0),
                     child: Row(
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: const Icon(Icons.arrow_back_ios,
-                              color: AppColors.neutral90),
-                        ),
-                        const SizedBox(width: 16),
                         const Text(
                           'Agenda',
                           style: TextStyle(

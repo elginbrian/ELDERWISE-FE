@@ -300,168 +300,167 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
         ),
       ],
       child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'lib/presentation/screens/assets/images/bg_floral.png',
-              ),
-              fit: BoxFit.cover,
-            ),
-          ),
+        backgroundColor: AppColors.primaryMain,
+        body: SafeArea(
           child: Column(
             children: [
-              const SizedBox(height: 128),
-              Expanded(
-                child: Stack(
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 24.0),
+                child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(32),
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: AppColors.secondarySurface,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32.0),
-                          topRight: Radius.circular(32.0),
-                        ),
+                    const Text(
+                      'Geofence',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: 'Poppins',
+                        color: AppColors.neutral90,
                       ),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : Column(
-                              children: [
-                                MainButton(
-                                  buttonText: "Atur Area",
-                                  onTap: () async {
-                                    final result = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SetFenceScreen(
-                                          initialMandiriRadius: _mandiriRadius,
-                                          initialPantauRadius: _pantauRadius,
-                                          initialCenter: _centerLatLng,
-                                        ),
-                                      ),
-                                    );
-
-                                    if (result != null &&
-                                        result is Map<String, dynamic>) {
-                                      _updateFenceData(
-                                        centerPoint: result['centerPoint'],
-                                        mandiriRadius: result['mandiriRadius'],
-                                        pantauRadius: result['pantauRadius'],
-                                        centerLatLng: result['centerLatLng'],
-                                      );
-
-                                      // Show indicator that changes need to be saved
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
-                                          duration: Duration(seconds: 3),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                                const SizedBox(height: 32),
-                                Container(
-                                  width: double.infinity,
-                                  height: 500,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.secondarySurface,
-                                    borderRadius: BorderRadius.circular(32),
-                                    border: Border.all(
-                                      color: AppColors.neutral30,
-                                      width: 1,
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(32),
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: AppColors.secondarySurface,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32.0),
+                      topRight: Radius.circular(32.0),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : Column(
+                          children: [
+                            MainButton(
+                              buttonText: "Atur Area",
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SetFenceScreen(
+                                      initialMandiriRadius: _mandiriRadius,
+                                      initialPantauRadius: _pantauRadius,
+                                      initialCenter: _centerLatLng,
                                     ),
                                   ),
-                                  child: Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Stack(
-                                        children: [
-                                          FenceMapWidget(
-                                            initialCameraPosition:
-                                                _initialCameraPosition,
-                                            onMapCreated: (controller) {
-                                              _googleMapController = controller;
-                                              _mapInitialized = true;
-                                              _updateMarker();
+                                );
 
-                                              // Initially set zoom based on pantau radius
-                                              controller.animateCamera(
-                                                CameraUpdate.newCameraPosition(
-                                                  CameraPosition(
-                                                    target: _centerLatLng,
-                                                    zoom: _calculateZoomLevel(
-                                                        _pantauRadius),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                            borderRadius:
-                                                const BorderRadius.only(
-                                              topLeft: Radius.circular(32),
-                                              topRight: Radius.circular(32),
-                                            ),
-                                            markers: _markers,
-                                            circles: {
-                                              Circle(
-                                                circleId: const CircleId(
-                                                    'mandiriArea'),
-                                                center: _centerLatLng,
-                                                radius: _mandiriRadius * 1000,
-                                                fillColor: AppColors.primaryMain
-                                                    .withOpacity(0.1),
-                                                strokeColor:
-                                                    AppColors.primaryMain,
-                                                strokeWidth: 2,
+                                if (result != null &&
+                                    result is Map<String, dynamic>) {
+                                  _updateFenceData(
+                                    centerPoint: result['centerPoint'],
+                                    mandiriRadius: result['mandiriRadius'],
+                                    pantauRadius: result['pantauRadius'],
+                                    centerLatLng: result['centerLatLng'],
+                                  );
+
+                                  // Show indicator that changes need to be saved
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                          'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
+                                      duration: Duration(seconds: 3),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 32),
+                            Container(
+                              width: double.infinity,
+                              height: 500,
+                              decoration: BoxDecoration(
+                                color: AppColors.secondarySurface,
+                                borderRadius: BorderRadius.circular(32),
+                                border: Border.all(
+                                  color: AppColors.neutral30,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      FenceMapWidget(
+                                        initialCameraPosition:
+                                            _initialCameraPosition,
+                                        onMapCreated: (controller) {
+                                          _googleMapController = controller;
+                                          _mapInitialized = true;
+                                          _updateMarker();
+
+                                          // Initially set zoom based on pantau radius
+                                          controller.animateCamera(
+                                            CameraUpdate.newCameraPosition(
+                                              CameraPosition(
+                                                target: _centerLatLng,
+                                                zoom: _calculateZoomLevel(
+                                                    _pantauRadius),
                                               ),
-                                              if (_pantauRadius >
-                                                  _mandiriRadius)
-                                                Circle(
-                                                  circleId: const CircleId(
-                                                      'pantauArea'),
-                                                  center: _centerLatLng,
-                                                  radius: _pantauRadius * 1000,
-                                                  fillColor: AppColors
-                                                      .primaryMain
-                                                      .withOpacity(0.05),
-                                                  strokeColor:
-                                                      AppColors.primaryMain,
-                                                  strokeWidth: 1,
-                                                ),
-                                            },
+                                            ),
+                                          );
+                                        },
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(32),
+                                          topRight: Radius.circular(32),
+                                        ),
+                                        markers: _markers,
+                                        circles: {
+                                          Circle(
+                                            circleId:
+                                                const CircleId('mandiriArea'),
+                                            center: _centerLatLng,
+                                            radius: _mandiriRadius * 1000,
+                                            fillColor: AppColors.primaryMain
+                                                .withOpacity(0.1),
+                                            strokeColor: AppColors.primaryMain,
+                                            strokeWidth: 2,
                                           ),
-                                        ],
+                                          if (_pantauRadius > _mandiriRadius)
+                                            Circle(
+                                              circleId:
+                                                  const CircleId('pantauArea'),
+                                              center: _centerLatLng,
+                                              radius: _pantauRadius * 1000,
+                                              fillColor: AppColors.primaryMain
+                                                  .withOpacity(0.05),
+                                              strokeColor:
+                                                  AppColors.primaryMain,
+                                              strokeWidth: 1,
+                                            ),
+                                        },
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: FenceInfoWidget(
-                                          centerPoint: _centerPoint,
-                                          mandiriRadius: _mandiriRadius,
-                                          pantauRadius: _pantauRadius,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 16.0, right: 16, bottom: 16),
-                                        child: MainButton(
-                                          buttonText: "Simpan Area",
-                                          onTap: _saveArea,
-                                        ),
-                                      )
                                     ],
                                   ),
-                                )
-                              ],
-                            ),
-                    ),
-                  ],
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: FenceInfoWidget(
+                                      centerPoint: _centerPoint,
+                                      mandiriRadius: _mandiriRadius,
+                                      pantauRadius: _pantauRadius,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 16.0, right: 16, bottom: 16),
+                                    child: MainButton(
+                                      buttonText: "Simpan Area",
+                                      onTap: _saveArea,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                 ),
               ),
             ],
