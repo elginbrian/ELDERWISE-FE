@@ -108,11 +108,13 @@ class _DatePickerFieldState extends State<DatePickerField> {
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.only(right: 16.0),
-                  child: Icon(Icons.arrow_drop_down,
-                      size: 20, color: AppColors.neutral80),
-                ),
+                // Only show dropdown arrow in non-readonly mode
+                if (!widget.readOnly)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Icon(Icons.arrow_drop_down,
+                        size: 20, color: AppColors.neutral80),
+                  ),
               ],
             ),
           ),

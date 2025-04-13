@@ -45,6 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _editMode = false; // Add this line to track edit mode
   String? _userId;
   String? _elderId;
   String? _caregiverId;
@@ -446,7 +447,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ));
   }
 
-  void _saveProfileChanges() {
+  void _saveChanges() {
     if (!_elderFormChanged &&
         !_caregiverFormChanged &&
         !_elderImageChanged &&
@@ -458,6 +459,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       _isSaving = true;
+      _editMode = false; // Exit edit mode after saving
     });
 
     if (switchValue) {
@@ -465,6 +467,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       _updateCaregiver();
     }
+  }
+
+  void _toggleEditMode() {
+    setState(() {
+      _editMode = !_editMode;
+    });
   }
 
   @override
@@ -493,45 +501,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _caregiverPhoneController.dispose();
     _caregiverRelationshipController.dispose();
     super.dispose();
-  }
-
-  void _showConfirmationDialog(VoidCallback onConfirmed) {
-    showDialog(
-      context: context,
-      builder: (context) => ConfirmationDialog(
-        onConfirmed: () {
-          Navigator.of(context).pop();
-          _saveProfileChanges();
-        },
-        onCancelled: () {
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
-
-  void _showEditDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => EditProfileDialog(
-        isElder: switchValue,
-        elderNameController: _elderNameController,
-        elderGenderController: _elderGenderController,
-        elderBirthdateController: _elderBirthdateController,
-        elderHeightController: _elderHeightController,
-        elderWeightController: _elderWeightController,
-        caregiverNameController: _caregiverNameController,
-        caregiverGenderController: _caregiverGenderController,
-        caregiverBirthdateController: _caregiverBirthdateController,
-        caregiverPhoneController: _caregiverPhoneController,
-        caregiverRelationshipController: _caregiverRelationshipController,
-        onSave: () {
-          Navigator.of(context).pop();
-          _showConfirmationDialog(() {});
-        },
-        showConfirmationDialog: _showConfirmationDialog,
-      ),
-    );
   }
 
   @override
@@ -885,7 +854,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: ProfileToggle(
               value: switchValue,
-              onChanged: _isLoading || _isSaving
+              onChanged: (_isLoading ||
+                      _isSaving ||
+                      _editMode) // Disable toggle when editing
                   ? (_) {}
                   : (value) => setState(() {
                         switchValue = value;
@@ -905,6 +876,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         birthdateController: _elderBirthdateController,
                         heightController: _elderHeightController,
                         weightController: _elderWeightController,
+                        readOnly: !_editMode, // Pass edit mode to view
                       )
                     : CaregiverProfileView(
                         key: const ValueKey('caregiver_profile'),
@@ -914,6 +886,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         phoneController: _caregiverPhoneController,
                         relationshipController:
                             _caregiverRelationshipController,
+                        readOnly: !_editMode, // Pass edit mode to view
                       ),
               ),
             ),
@@ -922,27 +895,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AnimatedOpacity(
             opacity: _isLoading || _isSaving ? 0.5 : 1.0,
             duration: const Duration(milliseconds: 300),
-            child: GestureDetector(
-              onTap: _isLoading || _isSaving ? null : _showEditDialog,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "Edit Profile",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                      color: AppColors.neutral90,
+            child: _editMode
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _saveChanges,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryMain,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text(
+                            "Simpan Perubahan",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Poppins',
+                              color: AppColors
+                                  .neutral100, // Changed from Colors.white to Colors.black
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      ElevatedButton(
+                        onPressed: _toggleEditMode,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            side: const BorderSide(color: AppColors.neutral40),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                        ),
+                        child: const Text(
+                          "Batal",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: AppColors.neutral90,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : GestureDetector(
+                    onTap: (_isLoading || _isSaving) ? null : _toggleEditMode,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Text(
+                          "Edit Profile",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                            color: AppColors.neutral90,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.edit, size: 16),
+                        ),
+                      ],
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Icon(Icons.edit, size: 16),
-                  ),
-                ],
-              ),
-            ),
           )
         ],
       ),

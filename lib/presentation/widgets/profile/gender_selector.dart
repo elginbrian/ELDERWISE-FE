@@ -154,12 +154,6 @@ class _GenderSelectorState extends State<GenderSelector> {
                         ),
                       ),
                     ),
-              if (widget.readOnly)
-                const Padding(
-                  padding: EdgeInsets.only(right: 12.0),
-                  child:
-                      Icon(Icons.arrow_drop_down, color: AppColors.neutral80),
-                ),
             ],
           ),
         ),
