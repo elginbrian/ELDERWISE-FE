@@ -2,7 +2,6 @@ import 'package:elderwise/data/repositories/user_mode_repository.dart';
 import 'package:elderwise/domain/enums/user_mode.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// Events
 abstract class UserModeEvent {}
 
 class InitializeUserModeEvent extends UserModeEvent {}
@@ -13,7 +12,6 @@ class ToggleUserModeEvent extends UserModeEvent {
   ToggleUserModeEvent(this.targetMode);
 }
 
-// States
 abstract class UserModeState {
   final UserMode userMode;
   const UserModeState(this.userMode);
@@ -27,7 +25,6 @@ class UserModeLoaded extends UserModeState {
   const UserModeLoaded(UserMode userMode) : super(userMode);
 }
 
-// Bloc
 class UserModeBloc extends Bloc<UserModeEvent, UserModeState> {
   final UserModeRepository _userModeRepository = UserModeRepository();
 

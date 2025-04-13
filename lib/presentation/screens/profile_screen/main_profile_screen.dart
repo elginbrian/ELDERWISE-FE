@@ -131,7 +131,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
 
-    // Get the current mode from the bloc
     final userModeState = context.watch<UserModeBloc>().state;
     _currentMode = userModeState.userMode;
 
@@ -344,7 +343,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   }
 
   Widget _buildProfileImages() {
-    // For better rebuild detection, use a key specific to the current mode
     Key key = Key('profile_images_${_currentMode.toString()}');
 
     if (_currentMode == UserMode.elder) {
@@ -352,7 +350,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
         key: key,
         clipBehavior: Clip.none,
         children: [
-          // Elder is main image (large)
           Container(
             width: 180,
             height: 180,
@@ -368,7 +365,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               ),
             ),
           ),
-          // Caregiver is secondary image (small)
           Positioned(
             top: -10,
             right: -20,
@@ -392,7 +388,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
         key: key,
         clipBehavior: Clip.none,
         children: [
-          // Caregiver is main image (large)
           Container(
             width: 180,
             height: 180,
@@ -409,7 +404,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               ),
             ),
           ),
-          // Elder is secondary image (small)
           Positioned(
             top: -10,
             right: -20,

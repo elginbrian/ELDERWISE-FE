@@ -14,7 +14,7 @@ class UserModeRepository {
     final modeString = prefs.getString(_userModeKey);
 
     if (modeString == null) {
-      return UserMode.caregiver; // Default mode
+      return UserMode.caregiver;
     }
 
     return UserMode.fromString(modeString);

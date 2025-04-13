@@ -47,7 +47,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool _isLoading = true;
   bool _isSaving = false;
-  bool _editMode = false; // Add this line to track edit mode
+  bool _editMode = false;
   String? _userId;
   String? _elderId;
   String? _caregiverId;
@@ -461,7 +461,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     setState(() {
       _isSaving = true;
-      _editMode = false; // Exit edit mode after saving
+      _editMode = false;
     });
 
     if (switchValue) {
@@ -511,7 +511,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isElderMode = userModeState.userMode == UserMode.elder;
     final isCaregiverMode = userModeState.userMode == UserMode.caregiver;
 
-    // Disable edit mode in Elder Mode
     if (isElderMode && _editMode) {
       setState(() {
         _editMode = false;
@@ -770,7 +769,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Text(
                                 switchValue ? 'Elder' : 'Caregiver',
                                 style: const TextStyle(
-                                  fontSize: 14, // Reduced from 16
+                                  fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   fontFamily: 'Poppins',
                                   color: AppColors.neutral80,
@@ -861,7 +860,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildProfileContent() {
     return Container(
       padding: const EdgeInsets.fromLTRB(
-          32, 0, 32, 32), // Further reduced top padding from 16 to 0
+          32, 0, 32, 32),
       width: double.infinity,
       child: Column(
         children: [
@@ -877,7 +876,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               value: switchValue,
               onChanged: (_isLoading ||
                       _isSaving ||
-                      _editMode) // Disable toggle when editing
+                      _editMode)
                   ? (_) {}
                   : (value) => setState(() {
                         switchValue = value;
@@ -897,7 +896,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         birthdateController: _elderBirthdateController,
                         heightController: _elderHeightController,
                         weightController: _elderWeightController,
-                        readOnly: !_editMode, // Pass edit mode to view
+                        readOnly: !_editMode,
                       )
                     : CaregiverProfileView(
                         key: const ValueKey('caregiver_profile'),
@@ -907,7 +906,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         phoneController: _caregiverPhoneController,
                         relationshipController:
                             _caregiverRelationshipController,
-                        readOnly: !_editMode, // Pass edit mode to view
+                        readOnly: !_editMode,
                       ),
               ),
             ),
@@ -928,7 +927,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isElderMode = userModeState.userMode == UserMode.elder;
 
     if (isElderMode) {
-      return const SizedBox.shrink(); // Hide edit buttons in Elder Mode
+      return const SizedBox.shrink();
     }
 
     return _editMode
@@ -952,7 +951,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
                       color: AppColors
-                          .neutral100, // Changed from Colors.white to Colors.black
+                          .neutral100,
                     ),
                   ),
                 ),

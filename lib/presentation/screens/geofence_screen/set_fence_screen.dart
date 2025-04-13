@@ -50,21 +50,17 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
     _pantauRadius = widget.initialPantauRadius;
     _center = widget.initialCenter ?? const LatLng(-7.9996, 112.629);
 
-    // Initialize marker icon first, then circles
     _centerMarkerIcon =
         BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
     _initMarkerIcon();
   }
 
   void _initMarkerIcon() {
-    // Just use the default yellow marker
     _centerMarkerIcon =
         BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
 
-    // Initialize circles immediately
     _initializeCircles();
 
-    // Get current location if no initial center provided
     if (widget.initialCenter == null) {
       _getCurrentLocation();
     }
@@ -84,7 +80,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      // First check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -97,7 +92,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         return;
       }
 
-      // Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -118,7 +112,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         return;
       }
 
-      // Show loading indicator
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Mendapatkan lokasi Anda...'),
@@ -126,7 +119,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         ),
       );
 
-      // Get current position with timeout
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
         timeLimit: const Duration(seconds: 10),
@@ -137,7 +129,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         throw error.toString();
       });
 
-      // Check if the widget is still mounted before updating state
       if (!mounted) return;
 
       setState(() {
@@ -146,7 +137,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
 
       _updateCircles();
 
-      // Success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Lokasi berhasil diperbarui'),
@@ -154,7 +144,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
         ),
       );
     } catch (e) {
-      // Check if the widget is still mounted before showing error
       if (!mounted) return;
 
       String errorMessage = 'Gagal mendapatkan lokasi: $e';
@@ -219,10 +208,8 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
   }
 
   void _updateCircles() {
-    // First update the circles/markers
     _initializeCircles();
 
-    // Then update camera if map is initialized
     if (_mapInitialized && _googleMapController != null) {
       _googleMapController!.animateCamera(
         CameraUpdate.newCameraPosition(
@@ -354,7 +341,6 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                                     onMapCreated: (controller) {
                                       _googleMapController = controller;
                                       _mapInitialized = true;
-                                      // Now that map is initialized, update camera
                                       _updateCircles();
                                     },
                                     circles: _circles,
@@ -364,7 +350,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                                       setState(() {
                                         _center = position;
                                       });
-                                      _updateCircles(); // This will update both circles and marker
+                                      _updateCircles();
                                     },
                                     height: 300,
                                   ),
@@ -434,7 +420,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                           ),
                           const SizedBox(
                               height:
-                                  32), // Add padding at the bottom for better scrolling
+                                  32),
                         ],
                       ),
                     ),

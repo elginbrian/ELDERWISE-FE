@@ -25,7 +25,6 @@ class AgendaListItem extends StatelessWidget {
     final userModeState = context.watch<UserModeBloc>().state;
     final isElderMode = userModeState.userMode == UserMode.elder;
 
-    // Format time to display
     final time = DateFormat('HH:mm').format(agenda.datetime);
 
     return Container(
@@ -95,7 +94,6 @@ class AgendaListItem extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Check button - available for elders too
             IconButton(
               icon: Icon(
                 agenda.isFinished
@@ -110,7 +108,6 @@ class AgendaListItem extends StatelessWidget {
               },
             ),
 
-            // Edit and delete - only for caregivers
             if (!isElderMode) ...[
               IconButton(
                 icon: const Icon(

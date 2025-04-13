@@ -108,7 +108,6 @@ class _DatePickerFieldState extends State<DatePickerField> {
                     ),
                   ),
                 ),
-                // Only show dropdown arrow in non-readonly mode
                 if (!widget.readOnly)
                   const Padding(
                     padding: EdgeInsets.only(right: 16.0),

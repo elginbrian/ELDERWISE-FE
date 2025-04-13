@@ -30,7 +30,6 @@ class ElderProfileView extends StatelessWidget {
     final userModeState = context.watch<UserModeBloc>().state;
     final isElderMode = userModeState.userMode == UserMode.elder;
 
-    // Force readOnly in Elder Mode
     final bool actualReadOnly = isElderMode ? true : readOnly;
 
     return Column(
@@ -89,9 +88,9 @@ class ElderProfileView extends StatelessWidget {
       final parts = dateStr.split('/');
       if (parts.length == 3) {
         return DateTime(
-          int.parse(parts[2]), // year
-          int.parse(parts[1]), // month
-          int.parse(parts[0]), // day
+          int.parse(parts[2]),
+          int.parse(parts[1]),
+          int.parse(parts[0]),
         );
       }
     } catch (e) {

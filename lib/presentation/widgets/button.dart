@@ -11,7 +11,7 @@ class MainButton extends StatelessWidget {
   final bool isLoading;
   final TextAlign textAlign;
   final String? iconAsset;
-  final Icon? icon; // Add support for Flutter Icon
+  final Icon? icon;
   final bool hasShadow;
   final bool hasBorder;
   final Color borderColor;
@@ -25,7 +25,7 @@ class MainButton extends StatelessWidget {
     this.isLoading = false,
     this.textAlign = TextAlign.center,
     this.iconAsset,
-    this.icon, // New parameter
+    this.icon,
     this.hasShadow = true,
     this.hasBorder = false,
     this.borderColor = AppColors.neutral30,

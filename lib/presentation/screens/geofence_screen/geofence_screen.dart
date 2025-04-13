@@ -59,14 +59,11 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   }
 
   void _initMarkerIcon() {
-    // Just use the default yellow marker
     _centerMarkerIcon =
         BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
 
-    // Update marker immediately
     _updateMarker();
 
-    // Get location
     _getCurrentLocation();
   }
 
@@ -102,7 +99,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      // Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -118,7 +114,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
         return;
       }
 
-      // Get current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -130,7 +125,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
       _updateMarker();
 
-      // Update camera if map is initialized
       if (_mapInitialized && _googleMapController != null) {
         _googleMapController!.animateCamera(
           CameraUpdate.newCameraPosition(
@@ -161,7 +155,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
     _updateMarker();
 
-    // Only update camera if map is initialized and controller exists
     if (pantauRadius != null &&
         _mapInitialized &&
         _googleMapController != null) {
@@ -177,7 +170,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   }
 
   double _calculateZoomLevel(double radiusInKm) {
-    // More zoomed out to ensure better visibility of the entire area
     return 13.0 - (radiusInKm / 5.0);
   }
 
@@ -283,7 +275,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
                 _updateMarker();
 
-                // Only update camera if map is initialized
                 if (_mapInitialized && _googleMapController != null) {
                   _googleMapController!.animateCamera(
                     CameraUpdate.newCameraPosition(
@@ -366,7 +357,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       centerLatLng: result['centerLatLng'],
                                     );
 
-                                    // Show indicator that changes need to be saved
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text(
@@ -403,7 +393,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                           _mapInitialized = true;
                                           _updateMarker();
 
-                                          // Initially set zoom based on pantau radius
                                           controller.animateCamera(
                                             CameraUpdate.newCameraPosition(
                                               CameraPosition(
