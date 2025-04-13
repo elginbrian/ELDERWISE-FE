@@ -1,12 +1,16 @@
 import 'dart:async';
 
 import 'package:elderwise/presentation/themes/colors.dart';
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 import 'package:elderwise/presentation/widgets/formfield.dart';
 import 'package:elderwise/presentation/widgets/geofence/fence_map_widget.dart';
 import 'package:elderwise/presentation/widgets/geofence/radius_slider_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 
 class SetFenceScreen extends StatefulWidget {
   final double initialMandiriRadius;
@@ -239,6 +243,18 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
+    if (isElderMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pop(context);
+        ToastHelper.showErrorToast(
+            context, 'Anda tidak dapat mengubah area saat dalam Mode Elder');
+      });
+      return Container();
+    }
+
     return Scaffold(
       backgroundColor: AppColors.primaryMain,
       body: SafeArea(

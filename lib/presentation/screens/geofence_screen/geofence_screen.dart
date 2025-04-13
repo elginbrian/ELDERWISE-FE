@@ -18,6 +18,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 
 class GeofenceScreen extends StatefulWidget {
   const GeofenceScreen({super.key});
@@ -209,6 +211,9 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -337,40 +342,41 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : Column(
                           children: [
-                            MainButton(
-                              buttonText: "Atur Area",
-                              onTap: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SetFenceScreen(
-                                      initialMandiriRadius: _mandiriRadius,
-                                      initialPantauRadius: _pantauRadius,
-                                      initialCenter: _centerLatLng,
-                                    ),
-                                  ),
-                                );
-
-                                if (result != null &&
-                                    result is Map<String, dynamic>) {
-                                  _updateFenceData(
-                                    centerPoint: result['centerPoint'],
-                                    mandiriRadius: result['mandiriRadius'],
-                                    pantauRadius: result['pantauRadius'],
-                                    centerLatLng: result['centerLatLng'],
-                                  );
-
-                                  // Show indicator that changes need to be saved
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
-                                      duration: Duration(seconds: 3),
+                            if (!isElderMode)
+                              MainButton(
+                                buttonText: "Atur Area",
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SetFenceScreen(
+                                        initialMandiriRadius: _mandiriRadius,
+                                        initialPantauRadius: _pantauRadius,
+                                        initialCenter: _centerLatLng,
+                                      ),
                                     ),
                                   );
-                                }
-                              },
-                            ),
+
+                                  if (result != null &&
+                                      result is Map<String, dynamic>) {
+                                    _updateFenceData(
+                                      centerPoint: result['centerPoint'],
+                                      mandiriRadius: result['mandiriRadius'],
+                                      pantauRadius: result['pantauRadius'],
+                                      centerLatLng: result['centerLatLng'],
+                                    );
+
+                                    // Show indicator that changes need to be saved
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             const SizedBox(height: 32),
                             Container(
                               width: double.infinity,
@@ -448,14 +454,15 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       pantauRadius: _pantauRadius,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 16.0, right: 16, bottom: 16),
-                                    child: MainButton(
-                                      buttonText: "Simpan Area",
-                                      onTap: _saveArea,
-                                    ),
-                                  )
+                                  if (!isElderMode)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16.0, right: 16, bottom: 16),
+                                      child: MainButton(
+                                        buttonText: "Simpan Area",
+                                        onTap: _saveArea,
+                                      ),
+                                    )
                                 ],
                               ),
                             )

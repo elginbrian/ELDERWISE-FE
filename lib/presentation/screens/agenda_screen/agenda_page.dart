@@ -1,4 +1,5 @@
 import 'package:elderwise/domain/entities/agenda.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_bloc.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_event.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_state.dart';
@@ -8,6 +9,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/agenda_screen/add_agenda.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
@@ -153,6 +155,9 @@ class _AgendaPageState extends State<AgendaPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
     final daysInWeek = getDaysInWeek();
 
     return MultiBlocListener(
@@ -313,28 +318,29 @@ class _AgendaPageState extends State<AgendaPage> {
                   ),
                 ],
               ),
-              Positioned(
-                right: 16,
-                bottom: 120,
-                child: FloatingActionButton(
-                  onPressed: () async {
-                    final result = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AddAgenda()),
-                    );
-                    if (result == true) {
-                      _loadAgendas();
-                    }
-                  },
-                  elevation: 2,
-                  backgroundColor: AppColors.primaryMain,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32),
+              if (!isElderMode)
+                Positioned(
+                  right: 16,
+                  bottom: 120,
+                  child: FloatingActionButton(
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const AddAgenda()),
+                      );
+                      if (result == true) {
+                        _loadAgendas();
+                      }
+                    },
+                    elevation: 2,
+                    backgroundColor: AppColors.primaryMain,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(32),
+                    ),
+                    child: const Icon(Icons.add, color: AppColors.neutral90),
                   ),
-                  child: const Icon(Icons.add, color: AppColors.neutral90),
                 ),
-              ),
             ],
           ),
         ),

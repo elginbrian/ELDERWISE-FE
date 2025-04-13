@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:elderwise/domain/entities/caregiver.dart';
 import 'package:elderwise/domain/entities/elder.dart';
 import 'package:elderwise/domain/enums/entity_type.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_bloc.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_event.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
@@ -18,6 +19,7 @@ import 'package:elderwise/presentation/bloc/image/image_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
 import 'package:elderwise/presentation/widgets/profile_screen/caregiver_profile_view.dart';
@@ -505,6 +507,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+    final isCaregiverMode = userModeState.userMode == UserMode.caregiver;
+
+    // Disable edit mode in Elder Mode
+    if (isElderMode && _editMode) {
+      setState(() {
+        _editMode = false;
+      });
+    }
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -620,6 +633,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
       child: Scaffold(
         backgroundColor: AppColors.primaryMain,
+        floatingActionButton: isCaregiverMode
+            ? null
+            : FloatingActionButton(
+                onPressed: _toggleEditMode,
+                backgroundColor:
+                    _editMode ? AppColors.primaryMain : AppColors.primaryMain,
+                child: Icon(_editMode ? Icons.close : Icons.edit),
+              ),
         body: SafeArea(
           child: Stack(
             children: [
@@ -895,80 +916,91 @@ class _ProfileScreenState extends State<ProfileScreen> {
           AnimatedOpacity(
             opacity: _isLoading || _isSaving ? 0.5 : 1.0,
             duration: const Duration(milliseconds: 300),
-            child: _editMode
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _saveChanges,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primaryMain,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                          ),
-                          child: const Text(
-                            "Simpan Perubahan",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                              color: AppColors
-                                  .neutral100, // Changed from Colors.white to Colors.black
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: _toggleEditMode,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                            side: const BorderSide(color: AppColors.neutral40),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 16),
-                        ),
-                        child: const Text(
-                          "Batal",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: AppColors.neutral90,
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                : GestureDetector(
-                    onTap: (_isLoading || _isSaving) ? null : _toggleEditMode,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Text(
-                          "Edit Profile",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Poppins',
-                            color: AppColors.neutral90,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 8.0),
-                          child: Icon(Icons.edit, size: 16),
-                        ),
-                      ],
-                    ),
-                  ),
+            child: _buildEditButtons(),
           )
         ],
       ),
     );
+  }
+
+  Widget _buildEditButtons() {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
+    if (isElderMode) {
+      return const SizedBox.shrink(); // Hide edit buttons in Elder Mode
+    }
+
+    return _editMode
+        ? Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryMain,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text(
+                    "Simpan Perubahan",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                      color: AppColors
+                          .neutral100, // Changed from Colors.white to Colors.black
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              ElevatedButton(
+                onPressed: _toggleEditMode,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    side: const BorderSide(color: AppColors.neutral40),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                ),
+                child: const Text(
+                  "Batal",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: AppColors.neutral90,
+                  ),
+                ),
+              ),
+            ],
+          )
+        : GestureDetector(
+            onTap: (_isLoading || _isSaving) ? null : _toggleEditMode,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  "Edit Profile",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    color: AppColors.neutral90,
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Icon(Icons.edit, size: 16),
+                ),
+              ],
+            ),
+          );
   }
 }
