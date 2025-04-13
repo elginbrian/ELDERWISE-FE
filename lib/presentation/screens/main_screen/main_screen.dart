@@ -33,13 +33,17 @@ class _MainScreenState extends State<MainScreen> {
       alignment: Alignment.bottomCenter,
       child: Container(
         height: 64,
-        margin: const EdgeInsets.only(left: 18, right: 18, bottom: 24),
+        margin: const EdgeInsets.only(left: 32, right: 32, bottom: 24),
         decoration: BoxDecoration(
           color: AppColors.neutral10,
           borderRadius: BorderRadius.circular(32),
+          border: Border.all(
+            color: AppColors.neutral20,
+            width: 1,
+          ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -62,7 +66,7 @@ class _MainScreenState extends State<MainScreen> {
                               fontSize: 8,
                               color: selectedIndex == index
                                   ? AppColors.primaryMain
-                                  : AppColors.neutral90,
+                                  : AppColors.neutral60,
                             )),
                   ],
                 ),
@@ -75,18 +79,18 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-List<Image> navIcons = [
-  Image.asset('${iconImages}home.png', width: 20, height: 20),
-  Image.asset('${iconImages}clock.png', width: 20, height: 20),
-  Image.asset('${iconImages}map.png', width: 20, height: 20),
-  Image.asset('${iconImages}profile.png', width: 20, height: 20),
+List<Widget> navIcons = [
+  Icon(Icons.home_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.neutral60),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.neutral60),
 ];
 
-List<Image> navIconsActive = [
-  Image.asset('${iconImages}home_active.png', width: 20, height: 20),
-  Image.asset('${iconImages}clock_active.png', width: 20, height: 20),
-  Image.asset('${iconImages}map_active.png', width: 20, height: 20),
-  Image.asset('${iconImages}profile_active.png', width: 20, height: 20),
+List<Widget> navIconsActive = [
+  Icon(Icons.home_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.primaryMain),
+  Icon(Icons.map_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.person_rounded, size: 24, color: AppColors.primaryMain),
 ];
 
 List<String> navTitles = [
