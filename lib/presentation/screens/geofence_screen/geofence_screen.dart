@@ -17,6 +17,7 @@ import 'package:elderwise/presentation/widgets/geofence/fence_map_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 class GeofenceScreen extends StatefulWidget {
   const GeofenceScreen({super.key});
@@ -31,7 +32,8 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
     zoom: 13,
   );
 
-  late GoogleMapController _googleMapController;
+  late GoogleMapController? _googleMapController;
+  bool _mapInitialized = false;
   String _userId = '';
   String _caregiverId = '';
   String _elderId = '';
@@ -43,10 +45,47 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   double _pantauRadius = 10.0;
   LatLng _centerLatLng = const LatLng(-7.9996, 112.629);
 
+  Set<Marker> _markers = {};
+  BitmapDescriptor _centerMarkerIcon =
+      BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+
   @override
   void initState() {
     super.initState();
     _loadCurrentUser();
+    _initMarkerIcon();
+  }
+
+  void _initMarkerIcon() {
+    // Just use the default yellow marker
+    _centerMarkerIcon =
+        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
+
+    // Update marker immediately
+    _updateMarker();
+
+    // Get location
+    _getCurrentLocation();
+  }
+
+  void _updateMarker() {
+    setState(() {
+      _markers = {
+        Marker(
+          markerId: const MarkerId('centerPoint'),
+          position: _centerLatLng,
+          icon: _centerMarkerIcon,
+          draggable: true,
+          onDragEnd: (newPosition) {
+            setState(() {
+              _centerLatLng = newPosition;
+              _centerPoint = _formatCoordinates(newPosition);
+            });
+            _updateMarker();
+          },
+        ),
+      };
+    });
   }
 
   void _loadCurrentUser() {
@@ -55,8 +94,54 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   @override
   void dispose() {
-    _googleMapController.dispose();
+    _googleMapController?.dispose();
     super.dispose();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ToastHelper.showErrorToast(context, 'Izin lokasi ditolak');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        ToastHelper.showErrorToast(context,
+            'Izin lokasi ditolak secara permanen, silakan ubah di pengaturan');
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        _centerLatLng = LatLng(position.latitude, position.longitude);
+        _centerPoint = _formatCoordinates(_centerLatLng);
+      });
+
+      _updateMarker();
+
+      // Update camera if map is initialized
+      if (_mapInitialized && _googleMapController != null) {
+        _googleMapController!.animateCamera(
+          CameraUpdate.newCameraPosition(
+            CameraPosition(
+              target: _centerLatLng,
+              zoom: _calculateZoomLevel(_pantauRadius),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      ToastHelper.showErrorToast(context, 'Gagal mendapatkan lokasi: $e');
+    }
   }
 
   void _updateFenceData({
@@ -71,6 +156,27 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
       if (pantauRadius != null) _pantauRadius = pantauRadius;
       if (centerLatLng != null) _centerLatLng = centerLatLng;
     });
+
+    _updateMarker();
+
+    // Only update camera if map is initialized and controller exists
+    if (pantauRadius != null &&
+        _mapInitialized &&
+        _googleMapController != null) {
+      _googleMapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: _centerLatLng,
+            zoom: _calculateZoomLevel(pantauRadius),
+          ),
+        ),
+      );
+    }
+  }
+
+  double _calculateZoomLevel(double radiusInKm) {
+    // More zoomed out to ensure better visibility of the entire area
+    return 13.0 - (radiusInKm / 5.0);
   }
 
   void _saveArea() {
@@ -170,14 +276,20 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                   _centerPoint = _formatCoordinates(latLng);
                 });
 
-                _googleMapController.animateCamera(
-                  CameraUpdate.newCameraPosition(
-                    CameraPosition(
-                      target: latLng,
-                      zoom: 13,
+                _updateMarker();
+
+                // Only update camera if map is initialized
+                if (_mapInitialized && _googleMapController != null) {
+                  _googleMapController!.animateCamera(
+                    CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        target: latLng,
+                        zoom: _calculateZoomLevel(
+                            area.watchAreaRadius.toDouble()),
+                      ),
                     ),
-                  ),
-                );
+                  );
+                }
               }
             } else if (state is AreaSuccess) {
               ToastHelper.showSuccessToast(context, 'Area berhasil disimpan');
@@ -242,7 +354,15 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                         centerLatLng: result['centerLatLng'],
                                       );
 
-                                      _saveArea();
+                                      // Show indicator that changes need to be saved
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
+                                          duration: Duration(seconds: 3),
+                                        ),
+                                      );
                                     }
                                   },
                                 ),
@@ -262,39 +382,62 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      FenceMapWidget(
-                                        initialCameraPosition:
-                                            _initialCameraPosition,
-                                        onMapCreated: (controller) =>
-                                            _googleMapController = controller,
-                                        borderRadius: const BorderRadius.only(
-                                          topLeft: Radius.circular(32),
-                                          topRight: Radius.circular(32),
-                                        ),
-                                        circles: {
-                                          Circle(
-                                            circleId:
-                                                const CircleId('mandiriArea'),
-                                            center: _centerLatLng,
-                                            radius: _mandiriRadius * 1000,
-                                            fillColor: AppColors.primaryMain
-                                                .withOpacity(0.1),
-                                            strokeColor: AppColors.primaryMain,
-                                            strokeWidth: 2,
-                                          ),
-                                          if (_pantauRadius > _mandiriRadius)
-                                            Circle(
-                                              circleId:
-                                                  const CircleId('pantauArea'),
-                                              center: _centerLatLng,
-                                              radius: _pantauRadius * 1000,
-                                              fillColor: AppColors.primaryMain
-                                                  .withOpacity(0.05),
-                                              strokeColor:
-                                                  AppColors.primaryMain,
-                                              strokeWidth: 1,
+                                      Stack(
+                                        children: [
+                                          FenceMapWidget(
+                                            initialCameraPosition:
+                                                _initialCameraPosition,
+                                            onMapCreated: (controller) {
+                                              _googleMapController = controller;
+                                              _mapInitialized = true;
+                                              _updateMarker();
+
+                                              // Initially set zoom based on pantau radius
+                                              controller.animateCamera(
+                                                CameraUpdate.newCameraPosition(
+                                                  CameraPosition(
+                                                    target: _centerLatLng,
+                                                    zoom: _calculateZoomLevel(
+                                                        _pantauRadius),
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                              topLeft: Radius.circular(32),
+                                              topRight: Radius.circular(32),
                                             ),
-                                        },
+                                            markers: _markers,
+                                            circles: {
+                                              Circle(
+                                                circleId: const CircleId(
+                                                    'mandiriArea'),
+                                                center: _centerLatLng,
+                                                radius: _mandiriRadius * 1000,
+                                                fillColor: AppColors.primaryMain
+                                                    .withOpacity(0.1),
+                                                strokeColor:
+                                                    AppColors.primaryMain,
+                                                strokeWidth: 2,
+                                              ),
+                                              if (_pantauRadius >
+                                                  _mandiriRadius)
+                                                Circle(
+                                                  circleId: const CircleId(
+                                                      'pantauArea'),
+                                                  center: _centerLatLng,
+                                                  radius: _pantauRadius * 1000,
+                                                  fillColor: AppColors
+                                                      .primaryMain
+                                                      .withOpacity(0.05),
+                                                  strokeColor:
+                                                      AppColors.primaryMain,
+                                                  strokeWidth: 1,
+                                                ),
+                                            },
+                                          ),
+                                        ],
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(16.0),
