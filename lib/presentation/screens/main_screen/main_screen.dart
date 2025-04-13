@@ -48,8 +48,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _handleFallDetection() {
-    ToastHelper.showSuccessToast(context, "Jatuh terdeteksi! Mengirim SOS...");
-
+    ToastHelper.showSuccessToast(
+        context, "Fall detected! Sending emergency alert...");
   }
 
   void changeTab(int index) {
