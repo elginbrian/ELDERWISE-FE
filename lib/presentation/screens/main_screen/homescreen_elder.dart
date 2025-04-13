@@ -18,6 +18,8 @@ import 'package:elderwise/presentation/widgets/homescreen/elder_profile_header.d
 import 'package:elderwise/presentation/widgets/homescreen/sos_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/services/fall_detection_service.dart';
 
 class HomescreenElder extends StatefulWidget {
   const HomescreenElder({super.key});
@@ -40,8 +42,30 @@ class _HomescreenElderState extends State<HomescreenElder> {
   @override
   void initState() {
     super.initState();
-    // Permintaan data saat inisialisasi
     context.read<AuthBloc>().add(GetCurrentUserEvent());
+
+    FallDetectionService().startMonitoring(
+      onFallDetected: _activateSOS,
+      userMode: UserMode.elder,
+      startSosCountdown: () {
+        if (SosButton.globalKey.currentState != null) {
+          SosButton.globalKey.currentState!.startCountdown();
+        } else {
+          _activateSOS();
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _handleFallDetection() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _activateSOS();
+    });
   }
 
   void _loadUserData() {
@@ -150,7 +174,6 @@ class _HomescreenElderState extends State<HomescreenElder> {
               ),
               child: Column(
                 children: [
-                  // Upper section
                   Padding(
                     padding: const EdgeInsets.all(32.0),
                     child: Column(
@@ -164,8 +187,6 @@ class _HomescreenElderState extends State<HomescreenElder> {
                       ],
                     ),
                   ),
-
-                  // Lower section (agenda)
                   Expanded(
                     child: Container(
                       padding: const EdgeInsets.all(32),
@@ -189,15 +210,16 @@ class _HomescreenElderState extends State<HomescreenElder> {
               ),
             ),
           ),
-
-          // SOS button overlay
           Positioned(
             top: 180,
             left: 0,
             right: 0,
             child: Align(
               alignment: Alignment.topCenter,
-              child: SosButton(onTap: _activateSOS),
+              child: SosButton(
+                key: SosButton.globalKey,
+                onTap: _activateSOS,
+              ),
             ),
           ),
         ],

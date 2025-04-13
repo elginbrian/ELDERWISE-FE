@@ -19,10 +19,14 @@ import 'package:elderwise/presentation/routes/app_route.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:elderwise/services/fall_detection_service.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await FallDetectionService().initialize();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -53,27 +57,29 @@ Future<void> main() async {
   await SharedPreferences.getInstance();
 
   runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider<AgendaBloc>(create: (context) => getIt<AgendaBloc>()),
-        BlocProvider<AuthBloc>(create: (context) => getIt<AuthBloc>()),
-        BlocProvider<AreaBloc>(create: (context) => getIt<AreaBloc>()),
-        BlocProvider<CaregiverBloc>(
-            create: (context) => getIt<CaregiverBloc>()),
-        BlocProvider<ElderBloc>(create: (context) => getIt<ElderBloc>()),
-        BlocProvider<EmergencyAlertBloc>(
-            create: (context) => getIt<EmergencyAlertBloc>()),
-        BlocProvider<LocationHistoryBloc>(
-            create: (context) => getIt<LocationHistoryBloc>()),
-        BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
-        BlocProvider<ImageBloc>(create: (context) => getIt<ImageBloc>()),
-        BlocProvider<NotificationBloc>(
-            create: (context) => getIt<NotificationBloc>()),
-        BlocProvider<UserModeBloc>(
-          create: (context) => UserModeBloc()..add(InitializeUserModeEvent()),
-        ),
-      ],
-      child: const MyApp(),
+    WithForegroundTask(
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AgendaBloc>(create: (context) => getIt<AgendaBloc>()),
+          BlocProvider<AuthBloc>(create: (context) => getIt<AuthBloc>()),
+          BlocProvider<AreaBloc>(create: (context) => getIt<AreaBloc>()),
+          BlocProvider<CaregiverBloc>(
+              create: (context) => getIt<CaregiverBloc>()),
+          BlocProvider<ElderBloc>(create: (context) => getIt<ElderBloc>()),
+          BlocProvider<EmergencyAlertBloc>(
+              create: (context) => getIt<EmergencyAlertBloc>()),
+          BlocProvider<LocationHistoryBloc>(
+              create: (context) => getIt<LocationHistoryBloc>()),
+          BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
+          BlocProvider<ImageBloc>(create: (context) => getIt<ImageBloc>()),
+          BlocProvider<NotificationBloc>(
+              create: (context) => getIt<NotificationBloc>()),
+          BlocProvider<UserModeBloc>(
+            create: (context) => UserModeBloc()..add(InitializeUserModeEvent()),
+          ),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }

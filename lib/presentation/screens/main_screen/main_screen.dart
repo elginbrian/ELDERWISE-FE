@@ -1,3 +1,4 @@
+import 'package:elderwise/presentation/utils/toast_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:elderwise/domain/enums/user_mode.dart';
 import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
@@ -10,6 +11,8 @@ import 'package:elderwise/presentation/screens/reminder_sceen/reminder_screen.da
 import 'package:elderwise/presentation/screens/agenda_screen/agenda_page.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:elderwise/services/fall_detection_service.dart';
+import 'package:elderwise/presentation/widgets/homescreen/sos_button.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -23,6 +26,31 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int selectedIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userModeState = context.read<UserModeBloc>().state;
+      FallDetectionService().startMonitoring(
+        onFallDetected: _handleFallDetection,
+        userMode: userModeState.userMode,
+        startSosCountdown: () {
+          if (SosButton.globalKey.currentState != null) {
+            SosButton.globalKey.currentState!.startCountdown();
+          } else {
+            _handleFallDetection();
+          }
+        },
+      );
+    });
+  }
+
+  void _handleFallDetection() {
+    ToastHelper.showSuccessToast(context, "Jatuh terdeteksi! Mengirim SOS...");
+
+  }
 
   void changeTab(int index) {
     if (index >= 0) {
@@ -158,8 +186,6 @@ final List<String> regularNavTitles = [
   "Maps",
   "Profile",
 ];
-
-//ELDER
 
 final List<Widget> elderScreens = [
   const HomescreenElder(),
