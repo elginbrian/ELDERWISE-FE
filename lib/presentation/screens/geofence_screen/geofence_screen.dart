@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
@@ -18,6 +19,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:elderwise/domain/enums/user_mode.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 
 class GeofenceScreen extends StatefulWidget {
   const GeofenceScreen({super.key});
@@ -57,14 +60,11 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   }
 
   void _initMarkerIcon() {
-    // Just use the default yellow marker
     _centerMarkerIcon =
         BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueYellow);
 
-    // Update marker immediately
     _updateMarker();
 
-    // Get location
     _getCurrentLocation();
   }
 
@@ -100,7 +100,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   Future<void> _getCurrentLocation() async {
     try {
-      // Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -116,7 +115,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
         return;
       }
 
-      // Get current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
@@ -128,7 +126,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
       _updateMarker();
 
-      // Update camera if map is initialized
       if (_mapInitialized && _googleMapController != null) {
         _googleMapController!.animateCamera(
           CameraUpdate.newCameraPosition(
@@ -159,7 +156,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
     _updateMarker();
 
-    // Only update camera if map is initialized and controller exists
     if (pantauRadius != null &&
         _mapInitialized &&
         _googleMapController != null) {
@@ -175,7 +171,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
   }
 
   double _calculateZoomLevel(double radiusInKm) {
-    // More zoomed out to ensure better visibility of the entire area
     return 13.0 - (radiusInKm / 5.0);
   }
 
@@ -209,6 +204,9 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userModeState = context.watch<UserModeBloc>().state;
+    final isElderMode = userModeState.userMode == UserMode.elder;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -278,7 +276,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
 
                 _updateMarker();
 
-                // Only update camera if map is initialized
                 if (_mapInitialized && _googleMapController != null) {
                   _googleMapController!.animateCamera(
                     CameraUpdate.newCameraPosition(
@@ -337,40 +334,40 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                       ? const Center(child: CircularProgressIndicator())
                       : Column(
                           children: [
-                            MainButton(
-                              buttonText: "Atur Area",
-                              onTap: () async {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => SetFenceScreen(
-                                      initialMandiriRadius: _mandiriRadius,
-                                      initialPantauRadius: _pantauRadius,
-                                      initialCenter: _centerLatLng,
-                                    ),
-                                  ),
-                                );
-
-                                if (result != null &&
-                                    result is Map<String, dynamic>) {
-                                  _updateFenceData(
-                                    centerPoint: result['centerPoint'],
-                                    mandiriRadius: result['mandiriRadius'],
-                                    pantauRadius: result['pantauRadius'],
-                                    centerLatLng: result['centerLatLng'],
-                                  );
-
-                                  // Show indicator that changes need to be saved
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                          'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
-                                      duration: Duration(seconds: 3),
+                            if (!isElderMode)
+                              MainButton(
+                                buttonText: "Atur Area",
+                                onTap: () async {
+                                  final result = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => SetFenceScreen(
+                                        initialMandiriRadius: _mandiriRadius,
+                                        initialPantauRadius: _pantauRadius,
+                                        initialCenter: _centerLatLng,
+                                      ),
                                     ),
                                   );
-                                }
-                              },
-                            ),
+
+                                  if (result != null &&
+                                      result is Map<String, dynamic>) {
+                                    _updateFenceData(
+                                      centerPoint: result['centerPoint'],
+                                      mandiriRadius: result['mandiriRadius'],
+                                      pantauRadius: result['pantauRadius'],
+                                      centerLatLng: result['centerLatLng'],
+                                    );
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                            'Perubahan belum disimpan. Klik "Simpan Area" untuk menyimpan.'),
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
                             const SizedBox(height: 32),
                             Container(
                               width: double.infinity,
@@ -397,7 +394,6 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                           _mapInitialized = true;
                                           _updateMarker();
 
-                                          // Initially set zoom based on pantau radius
                                           controller.animateCamera(
                                             CameraUpdate.newCameraPosition(
                                               CameraPosition(
@@ -448,14 +444,15 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       pantauRadius: _pantauRadius,
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                        left: 16.0, right: 16, bottom: 16),
-                                    child: MainButton(
-                                      buttonText: "Simpan Area",
-                                      onTap: _saveArea,
-                                    ),
-                                  )
+                                  if (!isElderMode)
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 16.0, right: 16, bottom: 16),
+                                      child: MainButton(
+                                        buttonText: "Simpan Area",
+                                        onTap: _saveArea,
+                                      ),
+                                    )
                                 ],
                               ),
                             )

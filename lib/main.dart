@@ -13,9 +13,11 @@ import 'package:elderwise/presentation/bloc/emergency_alert/emergency_alert_bloc
 import 'package:elderwise/presentation/bloc/image/image_bloc.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/routes/app_route.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -47,6 +49,8 @@ Future<void> main() async {
     debugPrint(stackTrace.toString());
   }
 
+  await SharedPreferences.getInstance();
+
   runApp(
     MultiBlocProvider(
       providers: [
@@ -62,6 +66,9 @@ Future<void> main() async {
             create: (context) => getIt<LocationHistoryBloc>()),
         BlocProvider<UserBloc>(create: (context) => getIt<UserBloc>()),
         BlocProvider<ImageBloc>(create: (context) => getIt<ImageBloc>()),
+        BlocProvider<UserModeBloc>(
+          create: (context) => UserModeBloc()..add(InitializeUserModeEvent()),
+        ),
       ],
       child: const MyApp(),
     ),
