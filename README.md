@@ -1,59 +1,77 @@
 # Elderwise by Masukin Andre ke Raion
 
-## 🌟 Tentang Aplikasi
+## 🌟 About the Application
 
-Elderwise adalah aplikasi inovatif yang dirancang untuk meningkatkan kualitas hidup lansia dengan bantuan teknologi. Dikembangkan oleh tim "Masukin Andre ke Raion" untuk kompetisi Hackathon FIND-IT UGM 2025, aplikasi ini menghubungkan lansia (elder) dengan pengasuh mereka (caregiver) dalam platform yang terintegrasi.
+Elderwise is an innovative application designed to improve the quality of life for elderly people through technology. Developed by the "Masukin Andre ke Raion" team for the FIND-IT UGM 2025 Hackathon competition, this app connects elderly people with their caregivers in an integrated platform.
 
-## ✨ Fitur Utama
+## ✨ Main Features
 
-### Untuk Lansia (Elder)
+### For Elderly Users (Elder)
 
-- **Mode Elder**: Antarmuka sederhana dan ramah untuk lansia
-- **Pelacakan Lokasi**: Memungkinkan pengasuh untuk memantau lokasi lansia secara real-time
-- **Tombol SOS/Darurat**: Fitur untuk mengirim peringatan ke pengasuh dalam situasi darurat
-- **Pengingat Kegiatan**: Notifikasi untuk obat-obatan, kegiatan, dan janji penting
-- **Deteksi Jatuh**: Sistem deteksi otomatis yang mengirim peringatan ke pengasuh jika lansia terjatuh
+- **Elder Mode**: Simple and user-friendly interface for seniors
+- **Location Tracking**: Allows caregivers to monitor the elderly's location in real-time
+- **SOS/Emergency Button**: Feature to send alerts to caregivers in emergency situations
+- **Activity Reminders**: Notifications for medications, activities, and important appointments
+- **Fall Detection**: Automatic detection system that alerts caregivers if an elderly person falls
 
-### Untuk Pengasuh (Caregiver)
+### For Caregivers
 
-- **Pantau Lansia**: Lihat lokasi, aktivitas, dan status kesehatan lansia
-- **Manajemen Agenda**: Buat dan kelola jadwal kegiatan untuk lansia
-- **Riwayat Lokasi**: Akses riwayat lokasi lansia untuk memastikan keselamatan
-- **Area Geofence**: Tentukan zona aman dan dapatkan peringatan jika lansia keluar area
-- **Notifikasi Real-time**: Peringatan untuk kondisi darurat atau aktivitas mencurigakan
+- **Monitor Elderly**: View location, activities, and health status of the elderly
+- **Agenda Management**: Create and manage activity schedules for the elderly
+- **Location History**: Access the elderly's location history to ensure safety
+- **Geofence Areas**: Define safe zones and receive alerts if the elderly exits the area
+- **Real-time Notifications**: Alerts for emergency conditions or suspicious activities
 
-## 📱 Tangkapan Layar
+## 🛠️ Technologies Used
 
-_Tangkapan layar aplikasi akan ditambahkan di sini_
+### Frontend
 
-## 🛠️ Teknologi yang Digunakan
+- **Flutter**: Cross-platform application development framework
+- **BLoC (Business Logic Component)**: State management pattern for applications
 
-- **Flutter & Dart**: Pengembangan aplikasi multi-platform
-- **Firebase**: Otentikasi dan manajemen pengguna
-- **Supabase**: Penyimpanan data dan file
-- **Google Maps API**: Pelacakan dan visualisasi lokasi
-- **BLoC Pattern**: Manajemen state aplikasi
-- **Sensors Plus**: Deteksi jatuh menggunakan sensor perangkat
-- **Geolocator**: Pelacakan lokasi GPS
+### Backend
 
-## 🚀 Instalasi dan Pengaturan
+- **Golang with Fiber**: Ultra-fast web framework for building APIs
+- **PostgreSQL**: Relational database for data storage
+- **Swagger**: API documentation and testing
 
-### Prasyarat
+### Cloud & Infrastructure
 
-- Flutter 3.6.1 atau yang lebih baru
-- Dart 3.6.0 atau yang lebih baru
+- **Docker**: Application containerization for consistent development and deployment
+- **GitHub Action**: CI/CD pipeline for build and deployment automation
+- **DigitalOcean**: Cloud hosting for backend and database
+- **Cloudflare**: Web security and performance optimization
+
+### Authentication & Storage
+
+- **Firebase**: Authentication, cloud messaging, and analytics
+- **Supabase**: Storage and real-time database
+- **SendGrid**: Email service for notifications and communication
+
+### Tracking & Sensors
+
+- **Google Maps API**: Location tracking and visualization
+- **Sensors Plus**: Fall detection using device sensors
+- **Geolocator**: GPS location tracking
+
+## 🚀 Installation and Setup
+
+### Prerequisites
+
+- Flutter 3.6.1 or newer
+- Dart 3.6.0 or newer
 - Android Studio / VSCode
-- Emulator Android / iOS atau perangkat fisik
+- Android / iOS emulator or physical device
 
-### Langkah-langkah Instalasi
+### Installation Steps
 
-1. **Clone repositori**
+1. **Clone the repository**
 
    ```
    git clone https://github.com/[username-repo]/elderwise.git
    ```
 
-2. **Masuk ke direktori proyek**
+2. **Navigate to the project directory**
 
    ```
    cd elderwise
@@ -65,19 +83,19 @@ _Tangkapan layar aplikasi akan ditambahkan di sini_
    flutter pub get
    ```
 
-4. **Jalankan aplikasi**
+4. **Run the application**
    ```
    flutter run
    ```
 
-## 👥 Tim Masukin Andre ke Raion
+## 👥 Team Masukin Andre ke Raion
 
-- **Andreas Bagasgoro** - _PM dan UI/UX_
-- **Muhammad Rizqi Aditya Firmansyah** - _FE dan UI/UX_
-- **Elgin Brian Wahyu Bramadhika** - _BE dan FE_
+- **Andreas Bagasgoro** - _PM and UI/UX_
+- **Muhammad Rizqi Aditya Firmansyah** - _Frontend and UI/UX_
+- **Elgin Brian Wahyu Bramadhika** - _Backend and Frontend_
 
 ## 🏆 FIND-IT UGM 2025 Hackathon
 
-Proyek ini dikembangkan untuk kompetisi Hackathon FIND-IT UGM 2025, dengan fokus pada solusi teknologi untuk meningkatkan kualitas hidup lansia melalui inovasi yang aksesibel dan mudah digunakan.
+This project was developed for the FIND-IT UGM 2025 Hackathon competition, focusing on technological solutions to improve the quality of life for elderly people through accessible and user-friendly innovations.
 
 ---
