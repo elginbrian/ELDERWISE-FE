@@ -62,16 +62,16 @@ final _publicRoutes = [
 ];
 
 Future<String?> _guardRoutes(BuildContext context, GoRouterState state) async {
-  final isPublicRoute = _publicRoutes.contains(state.matchedLocation);
-
-  if (isPublicRoute) {
-    return null;
-  }
-
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token');
+  final isAuthenticated = token != null && token.isNotEmpty;
 
-  if (token == null || token.isEmpty) {
+  if (isAuthenticated && _publicRoutes.contains(state.matchedLocation)) {
+    return '/home';
+  }
+
+  final isPublicRoute = _publicRoutes.contains(state.matchedLocation);
+  if (!isPublicRoute && !isAuthenticated) {
     return '/login';
   }
 
