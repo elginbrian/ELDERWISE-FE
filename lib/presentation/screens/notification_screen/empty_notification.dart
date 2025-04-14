@@ -14,13 +14,13 @@ class EmptyNotification extends StatelessWidget {
           width: 96,
           height: 96,
           decoration: BoxDecoration(
-            color: AppColors.primaryMain, // Yellow background
+            color: AppColors.primaryMain,
             shape: BoxShape.circle,
           ),
           child: const Icon(
             Icons.notifications_off_outlined,
             size: 48,
-            color: Colors.black, // Black icon
+            color: Colors.black,
           ),
         ),
         Padding(

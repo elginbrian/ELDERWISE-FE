@@ -30,7 +30,6 @@ class ReminderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get appropriate icon based on reminder type
     IconData iconData;
     Color iconColor = Colors.black;
 
@@ -59,7 +58,7 @@ class ReminderContent extends StatelessWidget {
             width: 200,
             height: 200,
             decoration: BoxDecoration(
-              color: AppColors.primaryMain, // Yellow background
+              color: AppColors.primaryMain,
               shape: BoxShape.circle,
               border: Border.all(
                 color: AppColors.primaryMain.withOpacity(0.3),
@@ -69,7 +68,7 @@ class ReminderContent extends StatelessWidget {
             child: Icon(
               iconData,
               size: 100,
-              color: iconColor, // Black icon
+              color: iconColor,
             ),
           ),
           Padding(

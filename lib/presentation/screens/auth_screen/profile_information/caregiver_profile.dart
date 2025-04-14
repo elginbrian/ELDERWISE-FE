@@ -47,7 +47,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
   String? _caregiverId;
   bool _isEditing = false;
   bool _isCheckingUser = true;
-  String? _caregiverPhotoUrl; // Add this field to store profile URL
+  String? _caregiverPhotoUrl;
 
   final List<String> _relationshipOptions = [
     'Anak',
@@ -112,7 +112,6 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
       _caregiverId = caregiver['caregiver_id'] ?? caregiver['id'] ?? '';
       _isEditing = true;
 
-      // Store the profile URL if available
       if (caregiver['profile_url'] != null) {
         _caregiverPhotoUrl = caregiver['profile_url'];
       } else if (caregiver['profileUrl'] != null) {
@@ -182,7 +181,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
       birthdate: formattedBirthdate,
       phoneNumber: teleponController.text,
       profileUrl:
-          _caregiverPhotoUrl ?? '', // Use fetched profile URL or empty string
+          _caregiverPhotoUrl ?? '',
       relationship: relationshipController.text,
       createdAt: DateTime.now().toUtc(),
       updatedAt: DateTime.now().toUtc(),

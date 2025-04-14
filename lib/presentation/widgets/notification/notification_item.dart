@@ -19,7 +19,6 @@ class NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Get appropriate icon based on notification type
     IconData iconData;
     Color iconColor = AppColors.primaryMain;
 
@@ -60,13 +59,13 @@ class NotificationItem extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: AppColors.primaryMain, // Yellow background
+              color: AppColors.primaryMain,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               iconData,
               size: 20,
-              color: Colors.black, // Black icon
+              color: Colors.black,
             ),
           ),
           const SizedBox(width: 16),

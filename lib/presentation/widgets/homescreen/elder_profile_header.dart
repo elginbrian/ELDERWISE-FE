@@ -30,7 +30,7 @@ class ElderProfileHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(
-                Icons.notifications_rounded, // Changed to rounded version
+                Icons.notifications_rounded,
                 color: AppColors.neutral100,
                 size: 24,
               ),

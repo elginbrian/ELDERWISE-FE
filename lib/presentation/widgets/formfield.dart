@@ -7,7 +7,7 @@ import '../themes/colors.dart';
 
 class CustomFormField extends StatelessWidget {
   final String hintText;
-  final dynamic icon; // Changed to dynamic to accept both String and IconData
+  final dynamic icon;
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final bool obscureText;
@@ -117,7 +117,6 @@ class CustomFormField extends StatelessWidget {
     );
   }
 
-  // New method to handle different icon types
   Widget _buildIcon() {
     if (icon is IconData) {
       return Icon(

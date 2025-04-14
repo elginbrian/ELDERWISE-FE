@@ -95,12 +95,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.deepPurple,
-          brightness: Brightness.light, // Ensure light mode
-          surface: AppColors.primarySurface, // Set surface color
-          background: AppColors.primarySurface, // Set background color
+          brightness: Brightness.light,
+          surface: AppColors.primarySurface,
+          background: AppColors.primarySurface,
         ),
         scaffoldBackgroundColor:
-            AppColors.primarySurface, // Set scaffold background
+            AppColors.primarySurface,
         useMaterial3: true,
       ),
       routerConfig: appRouter,

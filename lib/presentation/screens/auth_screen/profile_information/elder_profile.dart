@@ -46,7 +46,7 @@ class _ElderProfileState extends State<ElderProfile> {
   String? _elderId;
   bool _isEditing = false;
   bool _isCheckingUser = true;
-  String? _elderPhotoUrl; // Add this field to store photo URL
+  String? _elderPhotoUrl;
 
   final List<String> _genderOptions = ['Laki-laki', 'Perempuan'];
 
@@ -97,7 +97,6 @@ class _ElderProfileState extends State<ElderProfile> {
       _elderId = elder['elder_id'] ?? elder['id'] ?? '';
       _isEditing = true;
 
-      // Store the photo URL if available
       if (elder['photo_url'] != null) {
         _elderPhotoUrl = elder['photo_url'];
       }
@@ -178,7 +177,7 @@ class _ElderProfileState extends State<ElderProfile> {
       birthdate: formattedBirthdate,
       bodyHeight: (int.tryParse(tinggiController.text) ?? 0).toDouble(),
       bodyWeight: (int.tryParse(beratController.text) ?? 0).toDouble(),
-      photoUrl: _elderPhotoUrl ?? '', // Use fetched photo URL or empty string
+      photoUrl: _elderPhotoUrl ?? '',
       createdAt: DateTime.now().toUtc(),
       updatedAt: DateTime.now().toUtc(),
     );

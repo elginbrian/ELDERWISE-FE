@@ -9,6 +9,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
@@ -107,6 +108,8 @@ class _HomescreenElderState extends State<HomescreenElder> {
       if (_elderId.isNotEmpty) {
         _loadAgendas();
         _loadCaregiverData();
+
+        context.read<UserModeBloc>().setElderId(_elderId);
       }
     });
   }
@@ -277,7 +280,7 @@ class _HomescreenElderState extends State<HomescreenElder> {
                             elderPhotoUrl: _elderPhotoUrl,
                             onNotificationTap: _navigateToNotifications,
                             showNotifications:
-                                true, // Add this parameter to ensure notification icon is visible
+                                true,
                           ),
                           const SizedBox(height: 16),
                           ElderGreetingSection(userName: _userName),
