@@ -1,15 +1,16 @@
-import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:flutter/material.dart';
 
 class ElderProfileHeader extends StatelessWidget {
   final String? elderPhotoUrl;
-  final VoidCallback onNotificationTap;
+  final Function onNotificationTap;
+  final bool showNotifications;
 
   const ElderProfileHeader({
     Key? key,
     this.elderPhotoUrl,
     required this.onNotificationTap,
+    this.showNotifications = true,
   }) : super(key: key);
 
   @override
@@ -17,35 +18,42 @@ class ElderProfileHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.secondarySurface,
-                spreadRadius: 3,
-                blurRadius: 0,
-              )
-            ],
-            image: DecorationImage(
-              image: elderPhotoUrl != null && elderPhotoUrl!.isNotEmpty
-                  ? NetworkImage(elderPhotoUrl!) as ImageProvider
-                  : const AssetImage(
-                      'lib/presentation/screens/assets/images/elder_placeholder.png'),
-              fit: BoxFit.cover,
+        _buildElderAvatar(),
+        if (showNotifications)
+          GestureDetector(
+            onTap: () => onNotificationTap(),
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primaryMain,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(
+                Icons.notifications_rounded,
+                color: AppColors.neutral100,
+                size: 24,
+              ),
             ),
           ),
-        ),
-        GestureDetector(
-          onTap: onNotificationTap,
-          child: Image.asset(
-            iconImages + 'notif.png',
-            width: 24,
-          ),
-        ),
       ],
+    );
+  }
+
+  Widget _buildElderAvatar() {
+    return CircleAvatar(
+      radius: 24,
+      backgroundColor: AppColors.neutral40,
+      backgroundImage: elderPhotoUrl != null && elderPhotoUrl!.isNotEmpty
+          ? NetworkImage(elderPhotoUrl!)
+          : null,
+      child: elderPhotoUrl == null || elderPhotoUrl!.isEmpty
+          ? const Icon(
+              Icons.person,
+              size: 30,
+              color: AppColors.neutral60,
+            )
+          : null,
     );
   }
 }

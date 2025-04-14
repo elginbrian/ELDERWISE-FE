@@ -47,6 +47,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
   String? _caregiverId;
   bool _isEditing = false;
   bool _isCheckingUser = true;
+  String? _caregiverPhotoUrl;
 
   final List<String> _relationshipOptions = [
     'Anak',
@@ -111,6 +112,12 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
       _caregiverId = caregiver['caregiver_id'] ?? caregiver['id'] ?? '';
       _isEditing = true;
 
+      if (caregiver['profile_url'] != null) {
+        _caregiverPhotoUrl = caregiver['profile_url'];
+      } else if (caregiver['profileUrl'] != null) {
+        _caregiverPhotoUrl = caregiver['profileUrl'];
+      }
+
       namaController.text = caregiver['name'] ?? '';
 
       if (caregiver['gender'] != null) {
@@ -173,7 +180,8 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
       gender: genderController.text,
       birthdate: formattedBirthdate,
       phoneNumber: teleponController.text,
-      profileUrl: '',
+      profileUrl:
+          _caregiverPhotoUrl ?? '',
       relationship: relationshipController.text,
       createdAt: DateTime.now().toUtc(),
       updatedAt: DateTime.now().toUtc(),
@@ -215,7 +223,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
               }
             } else if (state is UserFailure) {
               setState(() => _isCheckingUser = false);
-              ToastHelper.showErrorToast(context, state.error);
+              debugPrint('User Error: ${state.error}');
             }
           },
         ),
@@ -226,7 +234,7 @@ class _CaregiverProfileState extends State<CaregiverProfile> {
                 widget.onNext();
               }
             } else if (state is CaregiverFailure) {
-              ToastHelper.showErrorToast(context, state.error);
+              debugPrint('Caregiver Error: ${state.error}');
             }
           },
         ),

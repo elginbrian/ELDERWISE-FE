@@ -1,115 +1,50 @@
-import 'package:flutter/material.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
+import 'package:flutter/material.dart';
 
 class ToastHelper {
   static void showSuccessToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.check_circle_outline,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.black),
         ),
         backgroundColor: AppColors.primaryMain,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(10),
-        duration: const Duration(seconds: 2),
       ),
     );
   }
 
-  static void showErrorToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  static void showErrorToast(BuildContext context, String error) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.error_outline,
-              color: Colors.white,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
+        content: Text(
+          error,
+          style: const TextStyle(color: Colors.black),
         ),
-        backgroundColor: Colors.red.shade700,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(10),
-        duration: const Duration(seconds: 3),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
-        ),
+        backgroundColor: AppColors.primaryMain,
       ),
     );
   }
 
-  static void showLoadingToast(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  static void showInfoToast(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Row(
-          children: [
-            SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                ),
-              ),
-            ),
-          ],
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.black),
         ),
-        backgroundColor: AppColors.neutral80,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        margin: const EdgeInsets.all(10),
-        duration: const Duration(seconds: 30),
+        backgroundColor: AppColors.primaryMain,
       ),
     );
   }
 
   static String getUserFriendlyErrorMessage(String error) {
+    if (error.toLowerCase().contains('invalid credentials') ||
+        error.toLowerCase().contains('invalid password') ||
+        error.toLowerCase().contains('user not found')) {
+      return 'Email atau password tidak valid. Silakan periksa kembali.';
+    }
+
     if (error.contains('DioException') ||
         error.contains('SocketException') ||
         error.contains('HttpException')) {

@@ -231,6 +231,10 @@ class _HomescreenState extends State<Homescreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -297,24 +301,24 @@ class _HomescreenState extends State<Homescreen> {
         ),
       ],
       child: Scaffold(
-        body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(iconImages + 'bg.png'),
-              fit: BoxFit.cover,
+        body: SafeArea(
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(iconImages + 'bg.png'),
+                fit: BoxFit.cover,
+              ),
             ),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(32.0, 48.0, 32.0, 32.0),
-                child: SizedBox(
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                      32.0, screenHeight * 0.02, 32.0, 16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 12),
                       ProfileHeader(
                         currentMode: _currentMode,
                         elderPhotoUrl: _elderPhotoUrl,
@@ -328,291 +332,271 @@ class _HomescreenState extends State<Homescreen> {
                     ],
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(32),
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    color: AppColors.secondarySurface,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(32.0),
-                      topRight: Radius.circular(32.0),
+                Expanded(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 24),
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: AppColors.secondarySurface,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(32.0),
+                        topRight: Radius.circular(32.0),
+                      ),
                     ),
-                  ),
-                  child: _isLoading
-                      ? const Center(child: CircularProgressIndicator())
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: const [
-                                  Icon(
-                                    Icons.location_on,
-                                    color: AppColors.neutral90,
-                                    size: 24,
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "Lokasi Elder",
-                                    style: TextStyle(
-                                      color: AppColors.neutral90,
-                                      fontSize: 22,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              width: double.infinity,
-                              height: 216,
-                              decoration: BoxDecoration(
-                                color: AppColors.neutral40,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Stack(
-                                  children: [
-                                    FenceMapWidget(
-                                      initialCameraPosition: CameraPosition(
-                                        target: _centerLatLng,
-                                        zoom:
-                                            _calculateZoomLevel(_pantauRadius),
-                                      ),
-                                      onMapCreated: (controller) {
-                                        _googleMapController = controller;
-                                        _mapInitialized = true;
-                                        _updateMarker();
-                                      },
-                                      markers: _markers,
-                                      circles: {
-                                        Circle(
-                                          circleId:
-                                              const CircleId('mandiriArea'),
-                                          center: _centerLatLng,
-                                          radius: _mandiriRadius * 1000,
-                                          fillColor: AppColors.primaryMain
-                                              .withOpacity(0.1),
-                                          strokeColor: AppColors.primaryMain,
-                                          strokeWidth: 2,
-                                        ),
-                                        if (_pantauRadius > _mandiriRadius)
-                                          Circle(
-                                            circleId:
-                                                const CircleId('pantauArea'),
-                                            center: _centerLatLng,
-                                            radius: _pantauRadius * 1000,
-                                            fillColor: AppColors.primaryMain
-                                                .withOpacity(0.05),
-                                            strokeColor: AppColors.primaryMain,
-                                            strokeWidth: 1,
-                                          ),
-                                      },
-                                      zoomControlsEnabled: false,
-                                      myLocationButtonEnabled: false,
-                                    ),
-                                    Positioned(
-                                      right: 10,
-                                      bottom: 10,
-                                      child: FloatingActionButton.small(
-                                        backgroundColor: AppColors.primaryMain,
-                                        onPressed: _getCurrentLocation,
-                                        elevation: 2,
-                                        child: const Icon(
-                                          Icons.my_location,
-                                          color: AppColors.neutral90,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 8.0, top: 24),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: const [
                                       Icon(
-                                        Icons.event_note,
+                                        Icons.location_on,
                                         color: AppColors.neutral90,
                                         size: 24,
                                       ),
                                       SizedBox(width: 8),
                                       Text(
-                                        "Agenda",
+                                        "Lokasi Elder",
                                         style: TextStyle(
                                           color: AppColors.neutral90,
                                           fontSize: 22,
                                           fontFamily: 'Poppins',
                                           fontWeight: FontWeight.w600,
                                         ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  width: double.infinity,
+                                  height: screenHeight * 0.25,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutral40,
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Stack(
+                                      children: [
+                                        FenceMapWidget(
+                                          initialCameraPosition: CameraPosition(
+                                            target: _centerLatLng,
+                                            zoom: _calculateZoomLevel(
+                                                _pantauRadius),
+                                          ),
+                                          onMapCreated: (controller) {
+                                            _googleMapController = controller;
+                                            _mapInitialized = true;
+                                            _updateMarker();
+                                          },
+                                          markers: _markers,
+                                          circles: {
+                                            Circle(
+                                              circleId:
+                                                  const CircleId('mandiriArea'),
+                                              center: _centerLatLng,
+                                              radius: _mandiriRadius * 1000,
+                                              fillColor: AppColors.primaryMain
+                                                  .withOpacity(0.1),
+                                              strokeColor:
+                                                  AppColors.primaryMain,
+                                              strokeWidth: 2,
+                                            ),
+                                            if (_pantauRadius > _mandiriRadius)
+                                              Circle(
+                                                circleId: const CircleId(
+                                                    'pantauArea'),
+                                                center: _centerLatLng,
+                                                radius: _pantauRadius * 1000,
+                                                fillColor: AppColors.primaryMain
+                                                    .withOpacity(0.05),
+                                                strokeColor:
+                                                    AppColors.primaryMain,
+                                                strokeWidth: 1,
+                                              ),
+                                          },
+                                          zoomControlsEnabled: false,
+                                          myLocationButtonEnabled: false,
+                                        ),
+                                        Positioned(
+                                          right: 10,
+                                          bottom: 10,
+                                          child: FloatingActionButton.small(
+                                            backgroundColor:
+                                                AppColors.primaryMain,
+                                            onPressed: _getCurrentLocation,
+                                            elevation: 2,
+                                            child: const Icon(
+                                              Icons.my_location,
+                                              color: AppColors.neutral90,
+                                              size: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      bottom: 8.0, top: 24),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: const [
+                                          Icon(
+                                            Icons.event_note,
+                                            color: AppColors.neutral90,
+                                            size: 24,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            "Agenda",
+                                            style: TextStyle(
+                                              color: AppColors.neutral90,
+                                              fontSize: 22,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          MainScreen.mainScreenKey.currentState
+                                              ?.changeTab(1);
+                                        },
+                                        child: const Text(
+                                          "Lihat Semua",
+                                          style: TextStyle(
+                                            color: AppColors.neutral90,
+                                            fontSize: 14,
+                                            fontFamily: 'Poppins',
+                                          ),
+                                        ),
                                       )
                                     ],
                                   ),
-                                  TextButton(
-                                    onPressed: () {
-                                      MainScreen.mainScreenKey.currentState
-                                          ?.changeTab(1);
-                                    },
-                                    child: const Text(
-                                      "Lihat Semua",
-                                      style: TextStyle(
-                                        color: AppColors.neutral90,
-                                        fontSize: 14,
-                                        fontFamily: 'Poppins',
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                            SizedBox(
-                              height: 128,
-                              child: _agendas.isEmpty
-                                  ? const Center(
-                                      child: Text(
-                                        "Tidak ada agenda untuk saat ini",
-                                        style: TextStyle(
-                                          color: AppColors.neutral70,
-                                          fontFamily: 'Poppins',
-                                        ),
-                                      ),
-                                    )
-                                  : ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: _agendas.length > 5
-                                          ? 5
-                                          : _agendas.length,
-                                      itemBuilder: (context, index) {
-                                        final agenda = _agendas[index];
-                                        final type =
-                                            agenda.category.toLowerCase();
-                                        final time = DateFormat('HH:mm')
-                                            .format(agenda.datetime);
-                                        String iconFile;
+                                ),
+                                SizedBox(
+                                  height: screenHeight * 0.15,
+                                  child: _agendas.isEmpty
+                                      ? const Center(
+                                          child: Text(
+                                            "Tidak ada agenda untuk saat ini",
+                                            style: TextStyle(
+                                              color: AppColors.neutral70,
+                                              fontFamily: 'Poppins',
+                                            ),
+                                          ),
+                                        )
+                                      : ListView.builder(
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: _agendas.length > 5
+                                              ? 5
+                                              : _agendas.length,
+                                          itemBuilder: (context, index) {
+                                            final agenda = _agendas[index];
+                                            final type =
+                                                agenda.category.toLowerCase();
+                                            final time = DateFormat('HH:mm')
+                                                .format(agenda.datetime);
+                                            String iconFile;
 
-                                        switch (type) {
-                                          case 'obat':
-                                            iconFile = 'medicine.png';
-                                            break;
-                                          case 'makan':
-                                            iconFile = 'food.png';
-                                            break;
-                                          case 'hidrasi':
-                                            iconFile = 'hidration.png';
-                                            break;
-                                          case 'aktivitas':
-                                            iconFile = 'activity.png';
-                                            break;
-                                          default:
-                                            iconFile = 'medicine.png';
-                                        }
+                                            switch (type) {
+                                              case 'obat':
+                                                iconFile = 'medicine.png';
+                                                break;
+                                              case 'makan':
+                                                iconFile = 'food.png';
+                                                break;
+                                              case 'hidrasi':
+                                                iconFile = 'hidration.png';
+                                                break;
+                                              case 'aktivitas':
+                                                iconFile = 'activity.png';
+                                                break;
+                                              default:
+                                                iconFile = 'medicine.png';
+                                            }
 
-                                        return GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => AddAgenda(
-                                                  agendaId: agenda.agendaId,
-                                                  category: agenda.category,
-                                                  content1: agenda.content1,
-                                                  content2: agenda.content2,
-                                                  timeStr:
-                                                      '${agenda.datetime.hour}:${agenda.datetime.minute}',
-                                                ),
-                                              ),
-                                            ).then((result) {
-                                              if (result == true) {
-                                                _loadAgendas();
-                                              }
-                                            });
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 16.0),
-                                            child: Container(
-                                              padding: const EdgeInsets.all(8),
-                                              width: 72,
-                                              height: 128,
-                                              decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                                color:
-                                                    AppColors.secondarySurface,
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                    blurRadius: 3,
-                                                    color: AppColors.neutral30,
-                                                    spreadRadius: 0,
-                                                    offset: Offset(1, 3),
-                                                  )
-                                                ],
-                                              ),
-                                              child: Column(
-                                                children: [
-                                                  Image.asset(
-                                                      iconImages + iconFile),
-                                                  Expanded(
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Text(
-                                                          agenda.category[0]
-                                                                  .toUpperCase() +
-                                                              agenda.category
-                                                                  .substring(1)
-                                                                  .toLowerCase(),
-                                                          style:
-                                                              const TextStyle(
-                                                            color: AppColors
-                                                                .neutral90,
-                                                            fontSize: 12,
-                                                            fontFamily:
-                                                                'Poppins',
-                                                            fontWeight:
-                                                                FontWeight.w600,
-                                                          ),
-                                                        ),
-                                                        Row(
+                                            return GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AddAgenda(
+                                                      agendaId: agenda.agendaId,
+                                                      category: agenda.category,
+                                                      content1: agenda.content1,
+                                                      content2: agenda.content2,
+                                                      timeStr:
+                                                          '${agenda.datetime.hour}:${agenda.datetime.minute}',
+                                                    ),
+                                                  ),
+                                                ).then((result) {
+                                                  if (result == true) {
+                                                    _loadAgendas();
+                                                  }
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 16.0),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(8),
+                                                  width: 72,
+                                                  height: screenHeight * 0.15,
+                                                  decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                    color: AppColors
+                                                        .secondarySurface,
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        blurRadius: 3,
+                                                        color:
+                                                            AppColors.neutral30,
+                                                        spreadRadius: 0,
+                                                        offset: Offset(1, 3),
+                                                      )
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Image.asset(iconImages +
+                                                          iconFile),
+                                                      Expanded(
+                                                        child: Column(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
                                                                   .center,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
                                                           children: [
-                                                            const Padding(
-                                                              padding: EdgeInsets
-                                                                  .only(
-                                                                      right:
-                                                                          4.0),
-                                                              child: Icon(
-                                                                Icons
-                                                                    .access_time,
-                                                                size: 10,
-                                                                color: AppColors
-                                                                    .neutral90,
-                                                              ),
-                                                            ),
                                                             Text(
-                                                              time,
+                                                              agenda.category[0]
+                                                                      .toUpperCase() +
+                                                                  agenda
+                                                                      .category
+                                                                      .substring(
+                                                                          1)
+                                                                      .toLowerCase(),
                                                               style:
                                                                   const TextStyle(
                                                                 color: AppColors
@@ -620,26 +604,61 @@ class _HomescreenState extends State<Homescreen> {
                                                                 fontSize: 12,
                                                                 fontFamily:
                                                                     'Poppins',
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w600,
                                                               ),
+                                                            ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                const Padding(
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                          right:
+                                                                              4.0),
+                                                                  child: Icon(
+                                                                    Icons
+                                                                        .access_time,
+                                                                    size: 10,
+                                                                    color: AppColors
+                                                                        .neutral90,
+                                                                  ),
+                                                                ),
+                                                                Text(
+                                                                  time,
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    color: AppColors
+                                                                        .neutral90,
+                                                                    fontSize:
+                                                                        12,
+                                                                    fontFamily:
+                                                                        'Poppins',
+                                                                  ),
+                                                                ),
+                                                              ],
                                                             ),
                                                           ],
                                                         ),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                            )
-                          ],
-                        ),
+                                            );
+                                          },
+                                        ),
+                                )
+                              ],
+                            ),
+                          ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

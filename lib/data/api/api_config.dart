@@ -70,6 +70,9 @@ class ApiConfig {
       "/location-history/$locationHistoryId";
   static String getLocationHistoryPoints(String locationHistoryId) =>
       "/location-history/$locationHistoryId/points";
+  static String addLocationHistoryPoint(String locationHistoryId) =>
+      "/location-history/$locationHistoryId/points";
+  static String createLocationHistory = "/location-history";
 
   static String getAgenda(String agendaId) => "/agendas/$agendaId";
   static String createAgenda = "/agendas";

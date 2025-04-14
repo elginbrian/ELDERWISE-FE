@@ -242,15 +242,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
           SizedBox(width: 10),
-          Text('Mempersiapkan galeri...'),
+          Text(
+            'Mempersiapkan galeri...',
+            style: TextStyle(color: Colors.black),
+          ),
         ],
       ),
       duration: const Duration(milliseconds: 800),
-      backgroundColor: Colors.black54,
+      backgroundColor: AppColors.primaryMain,
       behavior: SnackBarBehavior.floating,
     );
 
@@ -632,7 +635,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
       child: Scaffold(
         backgroundColor: AppColors.primaryMain,
-        floatingActionButton: isCaregiverMode
+        floatingActionButton: isElderMode || isCaregiverMode
             ? null
             : FloatingActionButton(
                 onPressed: _toggleEditMode,
@@ -859,8 +862,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildProfileContent() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(
-          32, 0, 32, 32),
+      padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
       width: double.infinity,
       child: Column(
         children: [
@@ -874,9 +876,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             child: ProfileToggle(
               value: switchValue,
-              onChanged: (_isLoading ||
-                      _isSaving ||
-                      _editMode)
+              onChanged: (_isLoading || _isSaving || _editMode)
                   ? (_) {}
                   : (value) => setState(() {
                         switchValue = value;
@@ -950,8 +950,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
-                      color: AppColors
-                          .neutral100,
+                      color: AppColors.neutral100,
                     ),
                   ),
                 ),

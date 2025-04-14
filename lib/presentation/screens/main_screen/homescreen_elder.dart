@@ -9,6 +9,7 @@ import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:elderwise/presentation/bloc/user/user_bloc.dart';
 import 'package:elderwise/presentation/bloc/user/user_event.dart';
 import 'package:elderwise/presentation/bloc/user/user_state.dart';
+import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
@@ -28,6 +29,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_bloc.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_event.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_state.dart';
+import 'package:elderwise/presentation/screens/notification_screen/notification_screen.dart';
 
 class HomescreenElder extends StatefulWidget {
   const HomescreenElder({super.key});
@@ -106,12 +108,19 @@ class _HomescreenElderState extends State<HomescreenElder> {
       if (_elderId.isNotEmpty) {
         _loadAgendas();
         _loadCaregiverData();
+
+        context.read<UserModeBloc>().setElderId(_elderId);
       }
     });
   }
 
   void _navigateToNotifications() {
-    Navigator.pushNamed(context, '/notifications');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificationScreen(),
+      ),
+    );
   }
 
   void _activateSOS() {
@@ -135,10 +144,12 @@ class _HomescreenElderState extends State<HomescreenElder> {
         debugPrint('Could not get location: $e');
       }
 
+      final currentDateTime = DateTime.now().toUtc();
+
       final alertRequest = EmergencyAlertRequestDTO(
         elderId: _elderId,
         caregiverId: _caregiverId.isNotEmpty ? _caregiverId : _userId,
-        datetime: DateTime.now(),
+        datetime: currentDateTime,
         elderLat: position?.latitude ?? 0.0,
         elderLong: position?.longitude ?? 0.0,
         isDismissed: false,
@@ -165,6 +176,12 @@ class _HomescreenElderState extends State<HomescreenElder> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final topPadding = mediaQuery.padding.top;
+    final bottomInset = mediaQuery.viewInsets.bottom;
+    final availableHeight = screenHeight - topPadding - bottomInset;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -239,69 +256,75 @@ class _HomescreenElderState extends State<HomescreenElder> {
           },
         ),
       ],
-      child: Stack(
-        children: [
-          Scaffold(
-            body: Container(
-              width: double.infinity,
-              height: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(iconImages + 'bg.png'),
-                  fit: BoxFit.cover,
+      child: SafeArea(
+        child: Stack(
+          children: [
+            Scaffold(
+              body: Container(
+                width: double.infinity,
+                height: double.infinity,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(iconImages + 'bg.png'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(32.0, 16.0, 32.0, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ElderProfileHeader(
+                            elderPhotoUrl: _elderPhotoUrl,
+                            onNotificationTap: _navigateToNotifications,
+                            showNotifications:
+                                true,
+                          ),
+                          const SizedBox(height: 16),
+                          ElderGreetingSection(userName: _userName),
+                          SizedBox(height: screenHeight * 0.09),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(32),
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: AppColors.secondarySurface,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(32.0),
+                            topRight: Radius.circular(32.0),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElderAgendaSection(
+                                agendas: _agendas,
+                                onSeeAllTap: _navigateToAgendaPage,
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ElderProfileHeader(
-                          elderPhotoUrl: _elderPhotoUrl,
-                          onNotificationTap: _navigateToNotifications,
-                        ),
-                        ElderGreetingSection(userName: _userName),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(32),
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: AppColors.secondarySurface,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(32.0),
-                          topRight: Radius.circular(32.0),
-                        ),
-                      ),
-                      child: _isLoading
-                          ? const Center(child: CircularProgressIndicator())
-                          : ElderAgendaSection(
-                              agendas: _agendas,
-                              onSeeAllTap: _navigateToAgendaPage,
-                            ),
-                    ),
-                  ),
-                ],
+            ),
+            Positioned(
+              top: screenHeight * 0.2,
+              left: 0,
+              right: 0,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SosButton(
+                  key: SosButton.globalKey,
+                  onTap: _activateSOS,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            top: 180,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: SosButton(
-                key: SosButton.globalKey,
-                onTap: _activateSOS,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
