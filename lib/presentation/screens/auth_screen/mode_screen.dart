@@ -18,7 +18,6 @@ class ModeScreen extends StatefulWidget {
 }
 
 class _ModeScreenState extends State<ModeScreen> {
-  // Initialize with caregiver as default
   UserRole? _selectedRole = UserRole.caregiver;
 
   Widget buildRoleOption(UserRole role, String label, String imageAsset) {
@@ -93,7 +92,6 @@ class _ModeScreenState extends State<ModeScreen> {
           : 'Mode Caregiver diaktifkan',
     );
 
-    // Navigate to home instead of popping
     context.go('/home');
   }
 

@@ -117,7 +117,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   }
 
   void _navigateToModeScreen() {
-    // Navigate to mode screen with GoRouter instead
     context.push('/mode');
   }
 
@@ -151,6 +150,11 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
         },
       ),
     );
+  }
+
+  void _logout() {
+    context.read<AuthBloc>().add(LogoutEvent());
+    context.go('/login');
   }
 
   @override
@@ -309,7 +313,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   TextButton(
-                                    onPressed: () {},
+                                    onPressed: _logout,
                                     child: const Text(
                                       "Keluar",
                                       style: TextStyle(
