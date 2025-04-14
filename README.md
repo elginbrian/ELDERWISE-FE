@@ -1,4 +1,5 @@
 # Elderwise by Masukin Andre ke Raion
+![ElderWise by Masukin Andre ke Raion (1)](https://github.com/user-attachments/assets/73bd0027-17f8-432e-9a31-b3d01ff1192b)
 
 ## 🌟 About the Application
 
