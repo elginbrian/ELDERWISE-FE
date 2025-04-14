@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:elderwise/presentation/themes/colors.dart';
 
 class ReminderContent extends StatelessWidget {
   final String type;
@@ -29,15 +30,53 @@ class ReminderContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get appropriate icon based on reminder type
+    IconData iconData;
+    Color iconColor = Colors.black;
+
+    switch (type.toLowerCase()) {
+      case 'makan':
+        iconData = Icons.restaurant;
+        break;
+      case 'hidrasi':
+        iconData = Icons.water_drop;
+        break;
+      case 'obat':
+        iconData = Icons.medication;
+        break;
+      case 'aktivitas':
+        iconData = Icons.directions_run;
+        break;
+      default:
+        iconData = Icons.notifications_active;
+    }
+
     return Expanded(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset("lib/presentation/screens/assets/images/illust1.png"),
+          Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              color: AppColors.primaryMain, // Yellow background
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppColors.primaryMain.withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              iconData,
+              size: 100,
+              color: iconColor, // Black icon
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 24.0, bottom: 8),
             child: Text(
-              "Saatnya $theType!", textAlign: TextAlign.center,
+              "Saatnya $theType!",
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 28,

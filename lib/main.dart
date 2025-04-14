@@ -1,5 +1,6 @@
 import 'package:elderwise/data/api/env_config.dart';
 import 'package:elderwise/presentation/bloc/notification/notification_bloc.dart';
+import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/web_layout.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Elderwise',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.light, // Ensure light mode
+          surface: AppColors.primarySurface, // Set surface color
+          background: AppColors.primarySurface, // Set background color
+        ),
+        scaffoldBackgroundColor:
+            AppColors.primarySurface, // Set scaffold background
         useMaterial3: true,
       ),
       routerConfig: appRouter,

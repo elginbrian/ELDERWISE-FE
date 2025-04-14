@@ -264,10 +264,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   topLeft: Radius.circular(32.0),
                                   topRight: Radius.circular(32.0),
                                 ),
-                                border: Border.all(
-                                  color: AppColors.neutral30,
-                                  width: 1,
-                                ),
                               ),
                               child: Column(
                                 children: [

@@ -326,7 +326,8 @@ class _AgendaPageState extends State<AgendaPage> {
               if (!isElderMode)
                 Positioned(
                   right: 16,
-                  bottom: 120,
+                  bottom:
+                      32, // Changed from 120 to 32 for a more standard position
                   child: FloatingActionButton(
                     onPressed: () async {
                       final result = await Navigator.push(

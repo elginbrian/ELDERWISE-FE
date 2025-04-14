@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 
 class NotificationItem extends StatelessWidget {
@@ -20,26 +19,29 @@ class NotificationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String iconImage;
+    // Get appropriate icon based on notification type
+    IconData iconData;
+    Color iconColor = AppColors.primaryMain;
 
     switch (type.toLowerCase()) {
       case 'obat':
-        iconImage = 'medicine.png';
+        iconData = Icons.medication;
         break;
       case 'makan':
-        iconImage = 'food.png';
+        iconData = Icons.restaurant;
         break;
       case 'hidrasi':
-        iconImage = 'hidration.png';
+        iconData = Icons.water_drop;
         break;
       case 'aktivitas':
-        iconImage = 'activity.png';
+        iconData = Icons.directions_run;
         break;
       case 'emergency':
-        iconImage = 'emergency.png';
+        iconData = Icons.warning_amber;
+        iconColor = Colors.red;
         break;
       default:
-        iconImage = 'activity.png';
+        iconData = Icons.notifications;
     }
 
     return Container(
@@ -54,10 +56,18 @@ class NotificationItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            iconImages + iconImage,
+          Container(
             width: 32,
             height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primaryMain, // Yellow background
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              iconData,
+              size: 20,
+              color: Colors.black, // Black icon
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

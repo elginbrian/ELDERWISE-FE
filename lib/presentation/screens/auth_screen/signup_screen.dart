@@ -22,7 +22,6 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
@@ -30,7 +29,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -207,139 +205,148 @@ class _SignupScreenState extends State<SignupScreen> {
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    "Daftar",
-                    style: TextStyle(
-                      fontSize: 40,
-                      fontWeight: FontWeight.w700,
-                      fontFamily: 'Poppins',
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.center,
+                  Image.asset(
+                    'lib/presentation/screens/assets/images/banner.png',
+                    fit: BoxFit.cover,
                   ),
-                  const Text(
-                    "Buat akun baru",
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Poppins',
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
-                  Form(
-                    key: _formKey,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 32),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        CustomFormField(
-                          hintText: "Username",
-                          icon: 'home.png',
-                          controller: _usernameController,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Username tidak boleh kosong'
-                              : null,
+                        const Text(
+                          "Daftar",
+                          style: TextStyle(
+                            fontSize: 40,
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Poppins',
+                            color: Colors.black,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 24),
-                        CustomFormField(
-                          hintText: "Email",
-                          icon: 'home.png',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Email tidak boleh kosong'
-                              : (!_isValidEmail(value)
-                                  ? 'Format email tidak valid'
-                                  : null),
-                        ),
-                        const SizedBox(height: 24),
-                        CustomFormField(
-                          hintText: "Password",
-                          icon: 'home.png',
-                          controller: _passwordController,
-                          obscureText: true,
-                          validator: (value) => value == null || value.isEmpty
-                              ? 'Password tidak boleh kosong'
-                              : null,
+                        const Text(
+                          "Buat akun baru",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: 'Poppins',
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 48),
-                        MainButton(
-                          buttonText: "Register",
-                          onTap: _submitForm,
-                          isLoading: _isLoading,
+                        Form(
+                          key: _formKey,
+                          child: Column(
+                            children: [
+                              CustomFormField(
+                                hintText: "Email",
+                                icon: Icons.email_rounded,
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) =>
+                                    value == null || value.isEmpty
+                                        ? 'Email tidak boleh kosong'
+                                        : (!_isValidEmail(value)
+                                            ? 'Format email tidak valid'
+                                            : null),
+                              ),
+                              const SizedBox(height: 24),
+                              CustomFormField(
+                                hintText: "Password",
+                                icon: Icons.lock_rounded,
+                                controller: _passwordController,
+                                obscureText: true,
+                                validator: (value) =>
+                                    value == null || value.isEmpty
+                                        ? 'Password tidak boleh kosong'
+                                        : null,
+                              ),
+                              const SizedBox(height: 48),
+                              MainButton(
+                                buttonText: "Register",
+                                onTap: _submitForm,
+                                isLoading: _isLoading,
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                children: const [
+                                  Expanded(
+                                      child:
+                                          Divider(color: AppColors.neutral80)),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 8.0),
+                                    child: Text(
+                                      "Atau lanjutkan dengan",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child:
+                                          Divider(color: AppColors.neutral80)),
+                                ],
+                              ),
+                              const SizedBox(height: 32),
+                              GestureDetector(
+                                onTap: _isLoading ? null : _handleGoogleSignIn,
+                                child: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  width: 48,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.neutral10,
+                                    borderRadius: BorderRadius.circular(32),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        offset: const Offset(0, 3),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Image.asset('${iconImages}google.png'),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: 24),
-                        Row(
-                          children: const [
-                            Expanded(
-                                child: Divider(color: AppColors.neutral80)),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                "Atau lanjutkan dengan",
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.05),
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Sudah punya akun?",
                                 style: TextStyle(
+                                  color: AppColors.neutral90,
                                   fontSize: 12,
                                   fontFamily: 'Poppins',
                                 ),
                               ),
-                            ),
-                            Expanded(
-                                child: Divider(color: AppColors.neutral80)),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        GestureDetector(
-                          onTap: _isLoading ? null : _handleGoogleSignIn,
-                          child: Container(
-                            padding: const EdgeInsets.all(10),
-                            width: 48,
-                            decoration: BoxDecoration(
-                              color: AppColors.neutral10,
-                              borderRadius: BorderRadius.circular(32),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  offset: const Offset(0, 3),
-                                  blurRadius: 4,
+                              TextSpan(
+                                text: " Masuk",
+                                style: TextStyle(
+                                  color: AppColors.primaryMain,
+                                  fontSize: 12,
+                                  fontFamily: 'Poppins',
                                 ),
-                              ],
-                            ),
-                            child: Image.asset('${iconImages}google.png'),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    context.go('/login');
+                                  },
+                              ),
+                            ],
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                  ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                  RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: "Sudah punya akun?",
-                          style: TextStyle(
-                            color: AppColors.neutral90,
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                          ),
-                        ),
-                        TextSpan(
-                          text: " Masuk",
-                          style: TextStyle(
-                            color: AppColors.primaryMain,
-                            fontSize: 12,
-                            fontFamily: 'Poppins',
-                          ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              context.go('/login');
-                            },
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),

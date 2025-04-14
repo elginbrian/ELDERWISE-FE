@@ -181,8 +181,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
   void _uploadElderPhoto() {
     if (_elderId == null || _elderId!.isEmpty) {
-      ToastHelper.showErrorToast(
-          context, 'Elder ID is missing. Cannot upload photo.');
+      debugPrint('Elder ID is missing. Cannot upload photo.');
       setState(() {
         _elderPhotoUploaded = true;
         _checkCompletionStatus();
@@ -209,8 +208,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
   void _uploadCaregiverPhoto() {
     if (_caregiverId == null || _caregiverId!.isEmpty) {
-      ToastHelper.showErrorToast(
-          context, 'Caregiver ID is missing. Cannot upload photo.');
+      debugPrint('Caregiver ID is missing. Cannot upload photo.');
       setState(() {
         _caregiverPhotoUploaded = true;
         _checkCompletionStatus();
@@ -370,20 +368,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
-                                child: Text(
-                                  isAvailable
-                                      ? "Tap untuk tambah foto"
-                                      : "Profil belum dibuat",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: 'Poppins',
-                                    color: isAvailable
-                                        ? AppColors.neutral80
-                                        : AppColors.neutral30,
-                                  ),
-                                ),
                               ),
                             ),
                           ],
@@ -415,7 +399,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
 
               _checkCompletionStatus();
             } else if (state is ImageFailure) {
-              ToastHelper.showErrorToast(context, state.error);
+              debugPrint('Image Upload Error: ${state.error}');
 
               setState(() {
                 _isUploading = false;
@@ -471,11 +455,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
                 _isCheckingElderUser = false;
                 _isCheckingCaregiverUser = false;
               });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content:
-                        Text('Failed to fetch profile data: ${state.error}')),
-              );
+              debugPrint('Failed to fetch profile data: ${state.error}');
             }
           },
         ),
@@ -503,7 +483,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-
                 Center(
                   child: Column(
                     children: [
@@ -525,9 +504,7 @@ class _PhotoProfileState extends State<PhotoProfile> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 36),
-
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -560,7 +537,6 @@ class _PhotoProfileState extends State<PhotoProfile> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
               ],
             ),

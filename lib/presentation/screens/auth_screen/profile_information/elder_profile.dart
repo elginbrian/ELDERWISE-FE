@@ -46,6 +46,7 @@ class _ElderProfileState extends State<ElderProfile> {
   String? _elderId;
   bool _isEditing = false;
   bool _isCheckingUser = true;
+  String? _elderPhotoUrl; // Add this field to store photo URL
 
   final List<String> _genderOptions = ['Laki-laki', 'Perempuan'];
 
@@ -95,6 +96,11 @@ class _ElderProfileState extends State<ElderProfile> {
     setState(() {
       _elderId = elder['elder_id'] ?? elder['id'] ?? '';
       _isEditing = true;
+
+      // Store the photo URL if available
+      if (elder['photo_url'] != null) {
+        _elderPhotoUrl = elder['photo_url'];
+      }
 
       namaController.text = elder['name'] ?? '';
 
@@ -172,7 +178,7 @@ class _ElderProfileState extends State<ElderProfile> {
       birthdate: formattedBirthdate,
       bodyHeight: (int.tryParse(tinggiController.text) ?? 0).toDouble(),
       bodyWeight: (int.tryParse(beratController.text) ?? 0).toDouble(),
-      photoUrl: '',
+      photoUrl: _elderPhotoUrl ?? '', // Use fetched photo URL or empty string
       createdAt: DateTime.now().toUtc(),
       updatedAt: DateTime.now().toUtc(),
     );
@@ -210,7 +216,7 @@ class _ElderProfileState extends State<ElderProfile> {
               }
             } else if (state is UserFailure) {
               setState(() => _isCheckingUser = false);
-              ToastHelper.showErrorToast(context, state.error);
+              debugPrint('User Error: ${state.error}');
             }
           },
         ),
@@ -221,7 +227,7 @@ class _ElderProfileState extends State<ElderProfile> {
                 widget.onNext();
               }
             } else if (state is ElderFailure) {
-              ToastHelper.showErrorToast(context, state.error);
+              debugPrint('Elder Error: ${state.error}');
             }
           },
         ),

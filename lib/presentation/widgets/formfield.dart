@@ -7,7 +7,7 @@ import '../themes/colors.dart';
 
 class CustomFormField extends StatelessWidget {
   final String hintText;
-  final String? icon;
+  final dynamic icon; // Changed to dynamic to accept both String and IconData
   final TextEditingController? controller;
   final TextInputType keyboardType;
   final bool obscureText;
@@ -40,6 +40,7 @@ class CustomFormField extends StatelessWidget {
       keyboardType: keyboardType,
       obscureText: obscureText,
       onChanged: onChanged,
+      validator: validator,
       inputFormatters: keyboardType == TextInputType.number
           ? [FilteringTextInputFormatter.digitsOnly]
           : null,
@@ -92,12 +93,7 @@ class CustomFormField extends StatelessWidget {
           fontFamily: 'Poppins',
           color: AppColors.neutral80,
         ),
-        prefixIcon: icon != null
-            ? Padding(
-                padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-                child: Image.asset(iconImages + icon!, height: 18),
-              )
-            : null,
+        prefixIcon: _buildIcon(),
         contentPadding: icon != null
             ? const EdgeInsets.symmetric(vertical: 0, horizontal: 0)
             : const EdgeInsets.symmetric(vertical: 0, horizontal: 32),
@@ -119,5 +115,28 @@ class CustomFormField extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // New method to handle different icon types
+  Widget _buildIcon() {
+    if (icon is IconData) {
+      return Icon(
+        icon as IconData,
+        color: AppColors.neutral60,
+        size: 20,
+      );
+    } else if (icon is String) {
+      return Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Image.asset(
+          '${iconImages}${icon as String}',
+          width: 20,
+          height: 20,
+          color: AppColors.neutral60,
+        ),
+      );
+    } else {
+      return const SizedBox(width: 20, height: 20);
+    }
   }
 }
