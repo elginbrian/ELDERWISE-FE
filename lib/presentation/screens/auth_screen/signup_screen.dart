@@ -126,10 +126,10 @@ class _SignupScreenState extends State<SignupScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
               'Google sign in failed. Please try again.',
-              style: TextStyle(color: AppColors.neutral100),
+              style: TextStyle(color: Colors.black),
             ),
             backgroundColor: AppColors.primaryMain,
           ),
@@ -145,7 +145,7 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(
           content: Text(
             _getFormattedErrorMessage(e.toString()),
-            style: const TextStyle(color: AppColors.neutral100),
+            style: const TextStyle(color: Colors.black),
           ),
           backgroundColor: AppColors.primaryMain,
         ),
@@ -171,7 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const SnackBar(
                 content: Text(
                   'Registrasi berhasil! Silakan login.',
-                  style: TextStyle(color: AppColors.neutral100),
+                  style: TextStyle(color: Colors.black),
                 ),
                 backgroundColor: AppColors.primaryMain,
               ),
@@ -180,8 +180,10 @@ class _SignupScreenState extends State<SignupScreen> {
           } else if (state is AuthFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(_getFormattedErrorMessage(state.error),
-                    style: TextStyle(color: AppColors.neutral100)),
+                content: Text(
+                  _getFormattedErrorMessage(state.error),
+                  style: const TextStyle(color: Colors.black),
+                ),
                 backgroundColor: AppColors.primaryMain,
               ),
             );
@@ -190,7 +192,7 @@ class _SignupScreenState extends State<SignupScreen> {
               const SnackBar(
                 content: Text(
                   'Login berhasil!',
-                  style: TextStyle(color: AppColors.neutral100),
+                  style: TextStyle(color: Colors.black),
                 ),
                 backgroundColor: AppColors.primaryMain,
               ),

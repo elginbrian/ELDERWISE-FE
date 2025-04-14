@@ -242,15 +242,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
           SizedBox(width: 10),
-          Text('Mempersiapkan galeri...'),
+          Text(
+            'Mempersiapkan galeri...',
+            style: TextStyle(color: Colors.black),
+          ),
         ],
       ),
       duration: const Duration(milliseconds: 800),
-      backgroundColor: Colors.black54,
+      backgroundColor: AppColors.primaryMain,
       behavior: SnackBarBehavior.floating,
     );
 

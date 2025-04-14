@@ -126,10 +126,10 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
               'Google sign in failed. Please try again.',
-              style: TextStyle(color: AppColors.neutral100),
+              style: TextStyle(color: Colors.black),
             ),
             backgroundColor: AppColors.primaryMain,
           ),
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(
           content: Text(
             _getFormattedErrorMessage(e.toString()),
-            style: const TextStyle(color: AppColors.neutral100),
+            style: const TextStyle(color: Colors.black),
           ),
           backgroundColor: AppColors.primaryMain,
         ),
@@ -169,10 +169,10 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state is LoginSuccess) {
             context.go('/fill-information');
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
+              SnackBar(
+                content: const Text(
                   'Login berhasil!',
-                  style: TextStyle(color: AppColors.neutral100),
+                  style: TextStyle(color: Colors.black),
                 ),
                 backgroundColor: AppColors.primaryMain,
               ),
@@ -182,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SnackBar(
                 content: Text(
                   _getFormattedErrorMessage(state.error),
-                  style: const TextStyle(color: AppColors.neutral100),
+                  style: const TextStyle(color: Colors.black),
                 ),
                 backgroundColor: AppColors.primaryMain,
               ),

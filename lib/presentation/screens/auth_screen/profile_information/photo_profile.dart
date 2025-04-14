@@ -172,7 +172,12 @@ class _PhotoProfileState extends State<PhotoProfile> {
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-                content: Text('Upload timed out. Please try again.')),
+              content: Text(
+                'Upload timed out. Please try again.',
+                style: TextStyle(color: Colors.black),
+              ),
+              backgroundColor: AppColors.primaryMain,
+            ),
           );
         }
       });
