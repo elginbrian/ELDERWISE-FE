@@ -69,7 +69,7 @@ Elderwise is an innovative application designed to improve the quality of life f
 1. **Clone the repository**
 
    ```
-   git clone https://github.com/[username-repo]/elderwise.git
+   git clone https://github.com/elginrian/ELDERWiSE-FE.git
    ```
 
 2. **Navigate to the project directory**
