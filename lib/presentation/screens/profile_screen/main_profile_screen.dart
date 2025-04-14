@@ -117,29 +117,8 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   }
 
   void _navigateToModeScreen() {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const ModeScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          var tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          return SlideTransition(
-              position: animation.drive(tween), child: child);
-        },
-      ),
-    ).then((_) {
-      if (_userId != null) {
-        setState(() {
-          _dataFetched = false;
-        });
-        _fetchUserData(_userId!);
-      }
-    });
+    // Navigate to mode screen with GoRouter instead
+    context.push('/mode');
   }
 
   void _navigateToLocationHistory() {

@@ -6,6 +6,7 @@ import 'package:elderwise/presentation/utils/toast_helper.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 enum UserRole { elder, caregiver }
 
@@ -17,7 +18,8 @@ class ModeScreen extends StatefulWidget {
 }
 
 class _ModeScreenState extends State<ModeScreen> {
-  UserRole? _selectedRole;
+  // Initialize with caregiver as default
+  UserRole? _selectedRole = UserRole.caregiver;
 
   Widget buildRoleOption(UserRole role, String label, String imageAsset) {
     final bool isSelected = _selectedRole == role;
@@ -91,7 +93,8 @@ class _ModeScreenState extends State<ModeScreen> {
           : 'Mode Caregiver diaktifkan',
     );
 
-    Navigator.pop(context);
+    // Navigate to home instead of popping
+    context.go('/home');
   }
 
   @override

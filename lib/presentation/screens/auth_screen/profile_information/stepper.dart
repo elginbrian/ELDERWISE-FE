@@ -39,7 +39,7 @@ class _StepperScreenState extends State<StepperScreen> {
     if (currentStep < 2) {
       setState(() => currentStep += 1);
     } else {
-      context.go('/home');
+      context.go('/mode');
     }
   }
 
@@ -47,7 +47,7 @@ class _StepperScreenState extends State<StepperScreen> {
     if (currentStep < 2) {
       setState(() => currentStep += 1);
     } else {
-      context.go('/home');
+      context.go('/mode');
     }
   }
 
