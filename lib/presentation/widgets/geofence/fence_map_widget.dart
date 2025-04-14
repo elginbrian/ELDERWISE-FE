@@ -8,6 +8,7 @@ class FenceMapWidget extends StatelessWidget {
   final Set<Marker>? markers;
   final bool zoomControlsEnabled;
   final bool myLocationButtonEnabled;
+  final bool myLocationEnabled;
   final Function(LatLng)? onTap;
   final BorderRadius? borderRadius;
   final double height;
@@ -20,6 +21,7 @@ class FenceMapWidget extends StatelessWidget {
     this.markers,
     this.zoomControlsEnabled = false,
     this.myLocationButtonEnabled = false,
+    this.myLocationEnabled = false,
     this.onTap,
     this.borderRadius,
     this.height = 275,
@@ -34,6 +36,7 @@ class FenceMapWidget extends StatelessWidget {
       markers: markers ?? {},
       zoomControlsEnabled: zoomControlsEnabled,
       myLocationButtonEnabled: myLocationButtonEnabled,
+      myLocationEnabled: myLocationEnabled,
       onTap: onTap,
     );
 

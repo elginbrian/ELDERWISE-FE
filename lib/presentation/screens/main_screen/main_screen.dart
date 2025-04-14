@@ -187,13 +187,13 @@ final List<Widget> elderScreens = [
 
 final List<Widget> elderNavIcons = [
   Icon(Icons.home_rounded, size: 24, color: AppColors.neutral60),
-  Icon(Icons.map_rounded, size: 24, color: AppColors.neutral60),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.neutral60),
   Icon(Icons.person_rounded, size: 24, color: AppColors.neutral60),
 ];
 
 final List<Widget> elderNavIconsActive = [
   Icon(Icons.home_rounded, size: 24, color: AppColors.primaryMain),
-  Icon(Icons.map_rounded, size: 24, color: AppColors.primaryMain),
+  Icon(Icons.calendar_today_rounded, size: 20, color: AppColors.primaryMain),
   Icon(Icons.person_rounded, size: 24, color: AppColors.primaryMain),
 ];
 

@@ -422,8 +422,8 @@ class _HomescreenState extends State<Homescreen> {
                                                 strokeWidth: 1,
                                               ),
                                           },
+                                          myLocationEnabled: true,
                                           zoomControlsEnabled: false,
-                                          myLocationButtonEnabled: false,
                                         ),
                                         Positioned(
                                           right: 10,

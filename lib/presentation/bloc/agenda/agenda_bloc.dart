@@ -164,16 +164,30 @@ class AgendaBloc extends Bloc<AgendaEvent, AgendaState> {
   ) async {
     emit(AgendaLoading());
     try {
+      final getResponse = await agendaRepository.getAgendaByID(event.agendaId);
+
+      if (!getResponse.success) {
+        emit(
+            AgendaFailure('Failed to retrieve agenda: ${getResponse.message}'));
+        return;
+      }
+
+      final agendaDTO = AgendaResponseDTO.fromJson(getResponse.data);
+      final agenda = agendaDTO.agenda;
+
+      final updateRequest = AgendaRequestDTO(
+        elderId: agenda.elderId,
+        caregiverId: agenda.caregiverId,
+        category: agenda.category,
+        content1: agenda.content1,
+        content2: agenda.content2,
+        datetime: agenda.datetime.toIso8601String(),
+        isFinished: event.isFinished,
+      );
+
       final response = await agendaRepository.updateAgenda(
         event.agendaId,
-        AgendaRequestDTO(
-            elderId: event.agenda.elderId,
-            caregiverId: event.agenda.caregiverId,
-            category: event.agenda.category,
-            content1: event.agenda.content1,
-            content2: event.agenda.content2,
-            datetime: event.agenda.datetime.toIso8601String(),
-            isFinished: event.agenda.isFinished),
+        updateRequest,
       );
 
       if (response.success) {

@@ -25,12 +25,14 @@ class AddLocationHistoryPointEvent extends LocationHistoryEvent {
   final double latitude;
   final double longitude;
   final DateTime timestamp;
+  final String? caregiverId;
 
   AddLocationHistoryPointEvent({
     required this.elderId,
     required this.latitude,
     required this.longitude,
     required this.timestamp,
+    this.caregiverId,
   });
 }
 
