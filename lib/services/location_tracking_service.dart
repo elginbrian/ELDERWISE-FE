@@ -123,6 +123,12 @@ class LocationTrackingService {
           resPrefix: ResourcePrefix.ic,
           name: 'launcher',
         ),
+        buttons: [
+          const NotificationButton(
+            id: 'stopTracking',
+            text: 'Stop Tracking',
+          ),
+        ],
       ),
       iosNotificationOptions: const IOSNotificationOptions(
         showNotification: true,
@@ -131,8 +137,9 @@ class LocationTrackingService {
       foregroundTaskOptions: const ForegroundTaskOptions(
         interval: 300000,
         isOnceEvent: false,
-        autoRunOnBoot: false,
+        autoRunOnBoot: true,
         allowWifiLock: true,
+        allowWakeLock: true,
       ),
     );
 
@@ -146,16 +153,35 @@ class LocationTrackingService {
       notificationText: 'Monitoring location for elder safety',
       callback: startLocationTrackingCallback,
     );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      _updateLocationImmediate();
+    });
   }
 
   Future<bool> _checkLocationPermission() async {
     try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        debugPrint('Location services are disabled.');
+        return false;
+      }
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          debugPrint('Location permissions denied');
+          return false;
+        }
       }
-      return permission != LocationPermission.denied &&
-          permission != LocationPermission.deniedForever;
+
+      if (permission == LocationPermission.deniedForever) {
+        debugPrint('Location permissions permanently denied');
+        return false;
+      }
+
+      return true;
     } catch (e) {
       debugPrint('Error checking location permission: $e');
       return false;
@@ -180,8 +206,31 @@ class LocationTrackingService {
         _updateLocation();
       });
 
-      _updateLocation();
+      _updateLocationImmediate();
     });
+  }
+
+  Future<void> _updateLocationImmediate() async {
+    if (!_isActive || _elderId == null) return;
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 30),
+      );
+
+      _sendLocationUpdate(
+        _elderId!,
+        position.latitude,
+        position.longitude,
+        DateTime.now().toUtc(),
+      );
+
+      debugPrint(
+          'Immediate location update sent: ${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      debugPrint('Error getting immediate location: $e');
+    }
   }
 
   Future<void> _updateLocation() async {
@@ -205,8 +254,39 @@ class LocationTrackingService {
         position.longitude,
         DateTime.now().toUtc(),
       );
+
+      debugPrint(
+          'Periodic location update sent: ${position.latitude}, ${position.longitude}');
     } catch (e) {
       debugPrint('Error getting current location: $e');
+      Future.delayed(const Duration(seconds: 30), () {
+        if (_isActive) {
+          _retryLocationUpdate();
+        }
+      });
+    }
+  }
+
+  Future<void> _retryLocationUpdate() async {
+    if (!_isActive || _elderId == null) return;
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 20),
+      );
+
+      _sendLocationUpdate(
+        _elderId!,
+        position.latitude,
+        position.longitude,
+        DateTime.now().toUtc(),
+      );
+
+      debugPrint(
+          'Retry location update sent: ${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      debugPrint('Retry location update also failed: $e');
     }
   }
 
@@ -238,6 +318,7 @@ class LocationTrackingTaskHandler extends TaskHandler {
   String? caregiverId;
   Timer? _timer;
   final UserModeRepository _userModeRepository = UserModeRepository();
+  DateTime? _lastUpdateTime;
 
   LocationTrackingTaskHandler({this.elderId, this.caregiverId});
 
@@ -248,7 +329,7 @@ class LocationTrackingTaskHandler extends TaskHandler {
     _setupCommunication();
 
     _timer = Timer.periodic(const Duration(minutes: 5), (_) async {
-      _checkModeAndUpdateLocation(sendPort);
+      await _checkModeAndUpdateLocation(sendPort);
     });
 
     _checkModeAndUpdateLocation(sendPort);
@@ -269,6 +350,16 @@ class LocationTrackingTaskHandler extends TaskHandler {
     if (elderId == null) {
       debugPrint('Elder ID is null, cannot update location');
       return;
+    }
+
+    final now = DateTime.now();
+    if (_lastUpdateTime != null) {
+      final difference = now.difference(_lastUpdateTime!);
+      if (difference.inMinutes < 4) {
+        debugPrint(
+            'Skipping update, last update was ${difference.inMinutes} minutes ago');
+        return;
+      }
     }
 
     try {
@@ -304,10 +395,50 @@ class LocationTrackingTaskHandler extends TaskHandler {
         mainSendPort.send(locationData);
       }
 
+      _lastUpdateTime = now;
+
       debugPrint(
           'Location updated in background: ${position.latitude}, ${position.longitude}');
     } catch (e) {
       debugPrint('Error getting location in background: $e');
+      Future.delayed(const Duration(seconds: 30), () {
+        _retryLocationUpdate(sendPort);
+      });
+    }
+  }
+
+  Future<void> _retryLocationUpdate(SendPort? sendPort) async {
+    if (elderId == null) return;
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 20),
+      );
+
+      final locationData = {
+        'elderId': elderId,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
+        'timestamp': DateTime.now().toUtc().toIso8601String(),
+      };
+
+      if (sendPort != null) {
+        sendPort.send(locationData);
+      }
+
+      final mainSendPort =
+          IsolateNameServer.lookupPortByName('locationReceiver');
+      if (mainSendPort != null) {
+        mainSendPort.send(locationData);
+      }
+
+      _lastUpdateTime = DateTime.now();
+
+      debugPrint(
+          'Retry location updated in background: ${position.latitude}, ${position.longitude}');
+    } catch (e) {
+      debugPrint('Retry also failed to get location in background: $e');
     }
   }
 
@@ -324,7 +455,9 @@ class LocationTrackingTaskHandler extends TaskHandler {
 
   @override
   void onButtonPressed(String id) {
-    debugPrint('Button pressed: $id');
+    if (id == 'stopTracking') {
+      FlutterForegroundTask.stopService();
+    }
   }
 
   @override

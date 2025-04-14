@@ -115,7 +115,7 @@ class _AddAgendaState extends State<AddAgenda> {
         return;
       }
 
-      final datetime = DateTime(
+      final localDatetime = DateTime(
         _selectedDate.year,
         _selectedDate.month,
         _selectedDate.day,
@@ -123,8 +123,15 @@ class _AddAgendaState extends State<AddAgenda> {
         _selectedTime!.minute,
       );
 
-      final utcDatetime = datetime.toUtc();
-      final formattedDatetime = utcDatetime.toIso8601String();
+      final fakeUtcDatetime = DateTime.utc(
+        localDatetime.year,
+        localDatetime.month,
+        localDatetime.day,
+        localDatetime.hour,
+        localDatetime.minute,
+      );
+
+      final formattedDatetime = fakeUtcDatetime.toIso8601String();
 
       final agendaRequest = AgendaRequestDTO(
         elderId: _elderId,

@@ -16,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import '../../themes/colors.dart';
 import 'profile_screen.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainProfileScreen extends StatefulWidget {
   const MainProfileScreen({super.key});
@@ -152,9 +153,15 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
     );
   }
 
-  void _logout() {
+  void _logout() async {
     context.read<AuthBloc>().add(LogoutEvent());
-    context.go('/login');
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+
+    if (context.mounted) {
+      context.go('/login');
+    }
   }
 
   @override
