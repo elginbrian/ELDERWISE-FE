@@ -302,8 +302,8 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 24.0),
+                padding: const EdgeInsets.only(
+                    left: 16.0, right: 16.0, top: 24, bottom: 24),
                 child: Row(
                   children: [
                     const Text(
@@ -321,7 +321,7 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
               ),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.only(left: 32, right: 32, top: 32),
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     color: AppColors.secondarySurface,
