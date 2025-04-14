@@ -411,6 +411,9 @@ class _GeofenceScreenState extends State<GeofenceScreen> {
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.3,
+                                      myLocationEnabled: true,
+                                      myLocationButtonEnabled: true,
+                                      zoomControlsEnabled: true,
                                       circles: {
                                         Circle(
                                           circleId:

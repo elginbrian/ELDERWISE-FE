@@ -32,6 +32,8 @@ import 'package:elderwise/presentation/bloc/caregiver/caregiver_bloc.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_event.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_state.dart';
 import 'package:elderwise/presentation/screens/notification_screen/notification_screen.dart';
+import 'package:elderwise/presentation/bloc/location_history/location_history_bloc.dart';
+import 'package:elderwise/presentation/bloc/location_history/location_history_event.dart';
 
 class HomescreenElder extends StatefulWidget {
   const HomescreenElder({super.key});
@@ -48,6 +50,7 @@ class _HomescreenElderState extends State<HomescreenElder> {
   bool _userDataLoaded = false;
   List<Agenda> _agendas = [];
   Timer? _reminderCheckTimer;
+  Timer? _locationUpdateTimer;
   bool _isReminderShowing = false;
 
   String _userName = "Elder";
@@ -79,7 +82,50 @@ class _HomescreenElderState extends State<HomescreenElder> {
   @override
   void dispose() {
     _reminderCheckTimer?.cancel();
+    _locationUpdateTimer?.cancel();
     super.dispose();
+  }
+
+  void _startLocationUpdates() {
+    _locationUpdateTimer?.cancel();
+
+    _locationUpdateTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      _sendLocationUpdate();
+    });
+
+    _sendLocationUpdate();
+  }
+
+  Future<void> _sendLocationUpdate() async {
+    if (_elderId.isEmpty) return;
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      ).catchError((e) {
+        debugPrint('Could not get location for update: $e');
+        return null;
+      });
+
+      if (position != null) {
+        final now = DateTime.now().toUtc();
+
+        context.read<LocationHistoryBloc>().add(
+              AddLocationHistoryPointEvent(
+                elderId: _elderId,
+                latitude: position.latitude,
+                longitude: position.longitude,
+                timestamp: now,
+                caregiverId: _caregiverId,
+              ),
+            );
+
+        debugPrint(
+            'Location update sent: ${position.latitude}, ${position.longitude}');
+      }
+    } catch (e) {
+      debugPrint('Error sending location update: $e');
+    }
   }
 
   void _loadUserData() {
@@ -119,6 +165,8 @@ class _HomescreenElderState extends State<HomescreenElder> {
         _loadCaregiverData();
 
         context.read<UserModeBloc>().setElderId(_elderId);
+
+        _startLocationUpdates();
 
         Future.delayed(const Duration(seconds: 2), _checkForUpcomingReminders);
       }

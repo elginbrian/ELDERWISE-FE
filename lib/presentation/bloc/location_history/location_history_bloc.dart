@@ -125,27 +125,38 @@ class LocationHistoryBloc
       debugPrint(
           'Received location update for elder ${event.elderId}: ${event.latitude}, ${event.longitude}');
 
+      String? locationHistoryId;
+      bool needToCreateHistory = false;
+
       try {
         final historyResponse =
             await elderRepository.getElderLocationHistory(event.elderId);
 
         if (historyResponse.success && historyResponse.data != null) {
-          final locationHistoryId = historyResponse.data['id'] ??
+          locationHistoryId = historyResponse.data['id'] ??
               historyResponse.data['location_history_id'];
 
-          if (locationHistoryId != null) {
-            await _addPointToHistory(locationHistoryId, event.latitude,
-                event.longitude, event.timestamp);
+          if (locationHistoryId == null || locationHistoryId.isEmpty) {
+            debugPrint(
+                'Location history ID is empty, need to create a new one');
+            needToCreateHistory = true;
           } else {
-            debugPrint('Location history ID not found, creating new history');
-            await _createHistoryAndAddPoint(event);
+            debugPrint('Found existing location history: $locationHistoryId');
           }
         } else {
-          debugPrint('No location history found, creating new history');
-          await _createHistoryAndAddPoint(event);
+          debugPrint('No location history found, need to create a new one');
+          needToCreateHistory = true;
         }
       } catch (e) {
         debugPrint('Error accessing elder location history: $e');
+        needToCreateHistory = true;
+      }
+
+      if (needToCreateHistory) {
+        await _createHistoryAndAddPoint(event);
+      } else if (locationHistoryId != null) {
+        await _addPointToHistory(locationHistoryId, event.latitude,
+            event.longitude, event.timestamp);
       }
     } catch (e) {
       debugPrint('Error handling location point: $e');
@@ -155,7 +166,12 @@ class LocationHistoryBloc
   Future<void> _createHistoryAndAddPoint(
       AddLocationHistoryPointEvent event) async {
     try {
-      String caregiverId = event.elderId;
+      debugPrint('Creating new location history for elder ${event.elderId}');
+
+      String caregiverId = '';
+      if (event.caregiverId != null && event.caregiverId!.isNotEmpty) {
+        caregiverId = event.caregiverId!;
+      }
 
       final request = LocationHistoryRequestDTO(
         elderId: event.elderId,
@@ -170,9 +186,16 @@ class LocationHistoryBloc
             response.data['id'] ?? response.data['location_history_id'];
 
         if (locationHistoryId != null) {
+          debugPrint(
+              'Successfully created location history: $locationHistoryId');
+
           await _addPointToHistory(locationHistoryId, event.latitude,
               event.longitude, event.timestamp);
+        } else {
+          debugPrint('Created history but received null ID');
         }
+      } else {
+        debugPrint('Failed to create location history: ${response.message}');
       }
     } catch (e) {
       debugPrint('Failed to create history and add point: $e');

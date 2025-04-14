@@ -346,6 +346,8 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                                     circles: _circles,
                                     markers: _markers,
                                     zoomControlsEnabled: true,
+                                    myLocationEnabled: true,
+                                    myLocationButtonEnabled: true,
                                     onTap: (LatLng position) {
                                       setState(() {
                                         _center = position;
@@ -418,9 +420,7 @@ class _SetFenceScreenState extends State<SetFenceScreen> {
                               },
                             ),
                           ),
-                          const SizedBox(
-                              height:
-                                  32),
+                          const SizedBox(height: 32),
                         ],
                       ),
                     ),
