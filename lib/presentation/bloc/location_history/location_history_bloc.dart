@@ -7,6 +7,7 @@ import 'package:elderwise/presentation/bloc/location_history/location_history_ev
 import 'package:elderwise/presentation/bloc/location_history/location_history_state.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 
 class LocationHistoryBloc
     extends Bloc<LocationHistoryEvent, LocationHistoryState> {
@@ -18,6 +19,7 @@ class LocationHistoryBloc
     on<GetLocationHistoryPointsEvent>(_onGetHistoryPoints);
     on<CreateLocationHistoryEvent>(_onCreateLocationHistory);
     on<AddLocationHistoryPointEvent>(_onAddLocationHistoryPoint);
+    on<GetElderLocationHistoryEvent>(_onGetElderLocationHistoryByDate);
 
     try {
       elderRepository = GetIt.I<ElderRepository>();
@@ -200,6 +202,39 @@ class LocationHistoryBloc
       }
     } catch (e) {
       debugPrint('Error adding location point: $e');
+    }
+  }
+
+  Future<void> _onGetElderLocationHistoryByDate(
+      GetElderLocationHistoryEvent event,
+      Emitter<LocationHistoryState> emit) async {
+    emit(LocationHistoryLoading());
+    try {
+      final response =
+          await elderRepository.getElderLocationHistory(event.elderId);
+
+      if (response.success) {
+        try {
+          final historyData = response.data;
+
+          if (historyData != null) {
+            emit(LocationHistorySuccess(
+                LocationHistoryResponseDTO.fromJson(historyData)));
+          } else {
+            emit(LocationHistoryFailure(
+                'No location history found for this date'));
+          }
+        } catch (e) {
+          debugPrint('Error processing location history data: $e');
+          emit(
+              LocationHistoryFailure('Error processing location history data'));
+        }
+      } else {
+        emit(LocationHistoryFailure(response.message));
+      }
+    } catch (e) {
+      debugPrint('Get elder location history by date exception: $e');
+      emit(LocationHistoryFailure(e.toString()));
     }
   }
 }

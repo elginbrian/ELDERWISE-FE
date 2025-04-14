@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/bloc/user/user_state.dart';
 import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/auth_screen/mode_screen.dart';
+import 'package:elderwise/presentation/screens/location_history/location_history_screen.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -139,6 +140,38 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
         _fetchUserData(_userId!);
       }
     });
+  }
+
+  void _navigateToLocationHistory() {
+    String? targetId = _currentMode == UserMode.elder
+        ? _elderData != null
+            ? _elderData['elder_id'] ?? _elderData['id']
+            : null
+        : _elderData != null
+            ? _elderData['elder_id'] ?? _elderData['id']
+            : null;
+
+    if (targetId == null) {
+      ToastHelper.showErrorToast(context, "ID Elder tidak ditemukan");
+      return;
+    }
+
+    Navigator.push(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            LocationHistoryScreen(elderId: targetId),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          return SlideTransition(
+              position: animation.drive(tween), child: child);
+        },
+      ),
+    );
   }
 
   @override
@@ -282,7 +315,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   MainButton(
                                     buttonText: "Riwayat",
                                     color: AppColors.secondarySurface,
-                                    onTap: () {},
+                                    onTap: _navigateToLocationHistory,
                                     textAlign: TextAlign.left,
                                     icon: const Icon(Icons.history_rounded,
                                         size: 16, color: AppColors.neutral90),
