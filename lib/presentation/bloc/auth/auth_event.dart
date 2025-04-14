@@ -18,3 +18,5 @@ class GoogleSignInEvent extends AuthEvent {
 }
 
 class GetCurrentUserEvent extends AuthEvent {}
+
+class LogoutEvent extends AuthEvent {}

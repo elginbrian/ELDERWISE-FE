@@ -33,3 +33,13 @@ class AddLocationHistoryPointEvent extends LocationHistoryEvent {
     required this.timestamp,
   });
 }
+
+class GetElderLocationHistoryEvent extends LocationHistoryEvent {
+  final String elderId;
+  final DateTime date;
+
+  GetElderLocationHistoryEvent({
+    required this.elderId,
+    required this.date,
+  });
+}

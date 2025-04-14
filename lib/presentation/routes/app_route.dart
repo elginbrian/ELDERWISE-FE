@@ -11,9 +11,14 @@ import 'package:elderwise/presentation/screens/notification_screen/notification_
 import 'package:elderwise/presentation/screens/profile_screen/profile_screen.dart';
 import 'package:elderwise/presentation/screens/geofence_screen/set_fence_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:elderwise/data/api/interceptor.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/onboarding',
+  navigatorKey: navigatorKey,
+  redirect: _guardRoutes,
   routes: [
     GoRoute(
         path: '/onboarding', builder: (context, state) => const Onboarding()),
@@ -49,3 +54,26 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
+
+final _publicRoutes = [
+  '/onboarding',
+  '/login',
+  '/signup',
+];
+
+Future<String?> _guardRoutes(BuildContext context, GoRouterState state) async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+  final isAuthenticated = token != null && token.isNotEmpty;
+
+  if (isAuthenticated && _publicRoutes.contains(state.matchedLocation)) {
+    return '/home';
+  }
+
+  final isPublicRoute = _publicRoutes.contains(state.matchedLocation);
+  if (!isPublicRoute && !isAuthenticated) {
+    return '/login';
+  }
+
+  return null;
+}

@@ -167,7 +167,10 @@ class _LoginScreenState extends State<LoginScreen> {
           });
 
           if (state is LoginSuccess) {
+            debugPrint('Login successful, navigating to home screen');
+            Navigator.of(context).popUntil((route) => route.isFirst);
             context.go('/fill-information');
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text(

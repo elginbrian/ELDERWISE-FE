@@ -36,96 +36,88 @@ class ElderAgendaItem extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      height: 128,
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
+        color: AppColors.secondarySurface,
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: const [
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
           BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
             blurRadius: 3,
-            color: AppColors.neutral30,
-            spreadRadius: 0,
-            offset: Offset(1, 3),
-          )
+            offset: const Offset(0, 1),
+          ),
         ],
       ),
       child: Row(
         children: [
-          Image.asset(
-            iconImages + iconFile,
-            height: 72,
-            fit: BoxFit.fitHeight,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Image.asset(iconImages + iconFile),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    agenda.content1,
-                    style: const TextStyle(
-                      color: AppColors.neutral90,
-                      fontSize: 20,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  agenda.category[0].toUpperCase() +
+                      agenda.category.substring(1).toLowerCase(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    fontFamily: 'Poppins',
+                    color: AppColors.neutral80,
+                  ),
+                ),
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        agenda.content1,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          color: AppColors.neutral90,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Expanded(
-                        flex: 7,
-                        child: Text(
-                          agenda.content2,
-                          style: const TextStyle(
-                            color: AppColors.neutral90,
-                            fontSize: 16,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
+                    const SizedBox(width: 8),
+                    if (agenda.content2.isNotEmpty)
+                      Text(
+                        "(${agenda.content2})",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          fontFamily: 'Poppins',
+                          color: AppColors.neutral70,
                         ),
                       ),
-                      Expanded(
-                        flex: 3,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 4.0),
-                              child: Image.asset(
-                                iconImages + 'clock2.png',
-                                width: 16,
-                                height: 16,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                            Flexible(
-                              child: Text(
-                                time,
-                                style: const TextStyle(
-                                  color: AppColors.neutral90,
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image(
+                      image: AssetImage(iconImages + 'clock2.png'),
+                      width: 12,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Poppins',
+                        color: AppColors.neutral80,
                       ),
-                    ],
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],

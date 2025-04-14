@@ -1,4 +1,5 @@
 import 'package:elderwise/data/api/env_config.dart';
+import 'package:elderwise/data/api/interceptor.dart';
 import 'package:elderwise/presentation/bloc/notification/notification_bloc.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/widgets/web_layout.dart';
@@ -99,8 +100,7 @@ class MyApp extends StatelessWidget {
           surface: AppColors.primarySurface,
           background: AppColors.primarySurface,
         ),
-        scaffoldBackgroundColor:
-            AppColors.primarySurface,
+        scaffoldBackgroundColor: AppColors.primarySurface,
         useMaterial3: true,
       ),
       routerConfig: appRouter,

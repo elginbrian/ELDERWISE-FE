@@ -34,11 +34,9 @@ class CaregiverProfileView extends StatelessWidget {
 
     final List<String> relationshipOptions = [
       'Anak',
-      'Menantu',
       'Cucu',
-      'Kerabat',
-      'Perawat',
-      'Lainnya',
+      'Saudara',
+      'Lainnya'
     ];
 
     return Column(
