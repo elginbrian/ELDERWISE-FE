@@ -8,6 +8,7 @@ import 'package:elderwise/presentation/bloc/user/user_state.dart';
 import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/auth_screen/mode_screen.dart';
+import 'package:elderwise/presentation/screens/location_history/location_history_screen.dart';
 import 'package:elderwise/presentation/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import '../../themes/colors.dart';
 import 'profile_screen.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainProfileScreen extends StatefulWidget {
   const MainProfileScreen({super.key});
@@ -116,11 +118,28 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
   }
 
   void _navigateToModeScreen() {
+    context.push('/mode');
+  }
+
+  void _navigateToLocationHistory() {
+    String? targetId = _currentMode == UserMode.elder
+        ? _elderData != null
+            ? _elderData['elder_id'] ?? _elderData['id']
+            : null
+        : _elderData != null
+            ? _elderData['elder_id'] ?? _elderData['id']
+            : null;
+
+    if (targetId == null) {
+      ToastHelper.showErrorToast(context, "ID Elder tidak ditemukan");
+      return;
+    }
+
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) =>
-            const ModeScreen(),
+            LocationHistoryScreen(elderId: targetId),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(1.0, 0.0);
           const end = Offset.zero;
@@ -131,14 +150,18 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
               position: animation.drive(tween), child: child);
         },
       ),
-    ).then((_) {
-      if (_userId != null) {
-        setState(() {
-          _dataFetched = false;
-        });
-        _fetchUserData(_userId!);
-      }
-    });
+    );
+  }
+
+  void _logout() async {
+    context.read<AuthBloc>().add(LogoutEvent());
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+
+    if (context.mounted) {
+      context.go('/login');
+    }
   }
 
   @override
@@ -264,10 +287,6 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   topLeft: Radius.circular(32.0),
                                   topRight: Radius.circular(32.0),
                                 ),
-                                border: Border.all(
-                                  color: AppColors.neutral30,
-                                  width: 1,
-                                ),
                               ),
                               child: Column(
                                 children: [
@@ -286,7 +305,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   MainButton(
                                     buttonText: "Riwayat",
                                     color: AppColors.secondarySurface,
-                                    onTap: () {},
+                                    onTap: _navigateToLocationHistory,
                                     textAlign: TextAlign.left,
                                     icon: const Icon(Icons.history_rounded,
                                         size: 16, color: AppColors.neutral90),
@@ -301,7 +320,7 @@ class _MainProfileScreenState extends State<MainProfileScreen> {
                                   ),
                                   const SizedBox(height: 16),
                                   TextButton(
-                                    onPressed: () {},
+                                    onPressed: _logout,
                                     child: const Text(
                                       "Keluar",
                                       style: TextStyle(

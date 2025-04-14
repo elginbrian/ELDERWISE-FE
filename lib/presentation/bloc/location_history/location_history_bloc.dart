@@ -1,17 +1,31 @@
 import 'package:bloc/bloc.dart';
+import 'package:elderwise/data/api/requests/location_history_request.dart';
 import 'package:elderwise/data/api/responses/location_history_response.dart';
 import 'package:elderwise/domain/repositories/location_history_repository.dart';
+import 'package:elderwise/domain/repositories/elder_repository.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_event.dart';
 import 'package:elderwise/presentation/bloc/location_history/location_history_state.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 
 class LocationHistoryBloc
     extends Bloc<LocationHistoryEvent, LocationHistoryState> {
   final LocationHistoryRepository repository;
+  late ElderRepository elderRepository;
 
   LocationHistoryBloc(this.repository) : super(LocationHistoryInitial()) {
     on<GetLocationHistoryEvent>(_onGetHistory);
     on<GetLocationHistoryPointsEvent>(_onGetHistoryPoints);
+    on<CreateLocationHistoryEvent>(_onCreateLocationHistory);
+    on<AddLocationHistoryPointEvent>(_onAddLocationHistoryPoint);
+    on<GetElderLocationHistoryEvent>(_onGetElderLocationHistoryByDate);
+
+    try {
+      elderRepository = GetIt.I<ElderRepository>();
+    } catch (e) {
+      debugPrint('Warning: Elder repository not available: $e');
+    }
   }
 
   Future<void> _onGetHistory(
@@ -70,6 +84,179 @@ class LocationHistoryBloc
       }
     } catch (e) {
       debugPrint('Get location history points exception: $e');
+      emit(LocationHistoryFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onCreateLocationHistory(CreateLocationHistoryEvent event,
+      Emitter<LocationHistoryState> emit) async {
+    emit(LocationHistoryLoading());
+    try {
+      final request = LocationHistoryRequestDTO(
+        elderId: event.elderId,
+        caregiverId: event.caregiverId,
+        createdAt: DateTime.now().toUtc(),
+      );
+
+      final response = await repository.createLocationHistory(request);
+
+      if (response.success) {
+        try {
+          emit(LocationHistorySuccess(
+              LocationHistoryResponseDTO.fromJson(response.data)));
+          debugPrint('Successfully created location history');
+        } catch (e) {
+          debugPrint('Error processing location history data: $e');
+          emit(
+              LocationHistoryFailure('Error processing location history data'));
+        }
+      } else {
+        emit(LocationHistoryFailure(response.message));
+      }
+    } catch (e) {
+      debugPrint('Create location history exception: $e');
+      emit(LocationHistoryFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onAddLocationHistoryPoint(AddLocationHistoryPointEvent event,
+      Emitter<LocationHistoryState> emit) async {
+    try {
+      debugPrint(
+          'Received location update for elder ${event.elderId}: ${event.latitude}, ${event.longitude}');
+
+      String? locationHistoryId;
+      bool needToCreateHistory = false;
+
+      try {
+        final historyResponse =
+            await elderRepository.getElderLocationHistory(event.elderId);
+
+        if (historyResponse.success && historyResponse.data != null) {
+          locationHistoryId = historyResponse.data['id'] ??
+              historyResponse.data['location_history_id'];
+
+          if (locationHistoryId == null || locationHistoryId.isEmpty) {
+            debugPrint(
+                'Location history ID is empty, need to create a new one');
+            needToCreateHistory = true;
+          } else {
+            debugPrint('Found existing location history: $locationHistoryId');
+          }
+        } else {
+          debugPrint('No location history found, need to create a new one');
+          needToCreateHistory = true;
+        }
+      } catch (e) {
+        debugPrint('Error accessing elder location history: $e');
+        needToCreateHistory = true;
+      }
+
+      if (needToCreateHistory) {
+        await _createHistoryAndAddPoint(event);
+      } else if (locationHistoryId != null) {
+        await _addPointToHistory(locationHistoryId, event.latitude,
+            event.longitude, event.timestamp);
+      }
+    } catch (e) {
+      debugPrint('Error handling location point: $e');
+    }
+  }
+
+  Future<void> _createHistoryAndAddPoint(
+      AddLocationHistoryPointEvent event) async {
+    try {
+      debugPrint('Creating new location history for elder ${event.elderId}');
+
+      String caregiverId = '';
+      if (event.caregiverId != null && event.caregiverId!.isNotEmpty) {
+        caregiverId = event.caregiverId!;
+      }
+
+      final request = LocationHistoryRequestDTO(
+        elderId: event.elderId,
+        caregiverId: caregiverId,
+        createdAt: DateTime.now().toUtc(),
+      );
+
+      final response = await repository.createLocationHistory(request);
+
+      if (response.success && response.data != null) {
+        final locationHistoryId =
+            response.data['id'] ?? response.data['location_history_id'];
+
+        if (locationHistoryId != null) {
+          debugPrint(
+              'Successfully created location history: $locationHistoryId');
+
+          await _addPointToHistory(locationHistoryId, event.latitude,
+              event.longitude, event.timestamp);
+        } else {
+          debugPrint('Created history but received null ID');
+        }
+      } else {
+        debugPrint('Failed to create location history: ${response.message}');
+      }
+    } catch (e) {
+      debugPrint('Failed to create history and add point: $e');
+    }
+  }
+
+  Future<void> _addPointToHistory(String locationHistoryId, double latitude,
+      double longitude, DateTime timestamp) async {
+    try {
+      final pointRequest = LocationHistoryPointRequestDTO(
+        locationHistoryId: locationHistoryId,
+        latitude: latitude,
+        longitude: longitude,
+        timestamp: timestamp,
+      );
+
+      final response = await repository.addLocationPoint(
+        locationHistoryId,
+        pointRequest,
+      );
+
+      if (response.success) {
+        debugPrint(
+            'Successfully added location point to history $locationHistoryId');
+      } else {
+        debugPrint('Failed to add location point: ${response.message}');
+      }
+    } catch (e) {
+      debugPrint('Error adding location point: $e');
+    }
+  }
+
+  Future<void> _onGetElderLocationHistoryByDate(
+      GetElderLocationHistoryEvent event,
+      Emitter<LocationHistoryState> emit) async {
+    emit(LocationHistoryLoading());
+    try {
+      final response =
+          await elderRepository.getElderLocationHistory(event.elderId);
+
+      if (response.success) {
+        try {
+          final historyData = response.data;
+
+          if (historyData != null) {
+            emit(LocationHistorySuccess(
+                LocationHistoryResponseDTO.fromJson(historyData)));
+          } else {
+            emit(LocationHistoryFailure(
+                'No location history found for this date'));
+          }
+        } catch (e) {
+          debugPrint('Error processing location history data: $e');
+          emit(
+              LocationHistoryFailure('Error processing location history data'));
+        }
+      } else {
+        emit(LocationHistoryFailure(response.message));
+      }
+    } catch (e) {
+      debugPrint('Get elder location history by date exception: $e');
       emit(LocationHistoryFailure(e.toString()));
     }
   }

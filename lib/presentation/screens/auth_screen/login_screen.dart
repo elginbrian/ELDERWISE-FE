@@ -126,10 +126,10 @@ class _LoginScreenState extends State<LoginScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
+          SnackBar(
+            content: const Text(
               'Google sign in failed. Please try again.',
-              style: TextStyle(color: AppColors.neutral100),
+              style: TextStyle(color: Colors.black),
             ),
             backgroundColor: AppColors.primaryMain,
           ),
@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
         SnackBar(
           content: Text(
             _getFormattedErrorMessage(e.toString()),
-            style: const TextStyle(color: AppColors.neutral100),
+            style: const TextStyle(color: Colors.black),
           ),
           backgroundColor: AppColors.primaryMain,
         ),
@@ -167,12 +167,15 @@ class _LoginScreenState extends State<LoginScreen> {
           });
 
           if (state is LoginSuccess) {
+            debugPrint('Login successful, navigating to home screen');
+            Navigator.of(context).popUntil((route) => route.isFirst);
             context.go('/fill-information');
+
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
+              SnackBar(
+                content: const Text(
                   'Login berhasil!',
-                  style: TextStyle(color: AppColors.neutral100),
+                  style: TextStyle(color: Colors.black),
                 ),
                 backgroundColor: AppColors.primaryMain,
               ),
@@ -182,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SnackBar(
                 content: Text(
                   _getFormattedErrorMessage(state.error),
-                  style: const TextStyle(color: AppColors.neutral100),
+                  style: const TextStyle(color: Colors.black),
                 ),
                 backgroundColor: AppColors.primaryMain,
               ),
@@ -231,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 16),
                               CustomFormField(
                                 hintText: "Email",
-                                icon: 'home.png',
+                                icon: Icons.email_rounded,
                                 controller: _emailController,
                                 keyboardType: TextInputType.emailAddress,
                                 validator: (value) =>
@@ -244,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 24),
                               CustomFormField(
                                 hintText: "Password",
-                                icon: 'home.png',
+                                icon: Icons.lock_rounded,
                                 controller: _passwordController,
                                 obscureText: true,
                                 validator: (value) =>

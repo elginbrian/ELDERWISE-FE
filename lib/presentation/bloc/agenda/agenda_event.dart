@@ -45,10 +45,10 @@ class DeleteAgendaEvent extends AgendaEvent {
 
 class UpdateAgendaStatusEvent extends AgendaEvent {
   final String agendaId;
-  final Agenda agenda;
+  final bool isFinished;
 
-  UpdateAgendaStatusEvent(this.agendaId, this.agenda);
+  UpdateAgendaStatusEvent(this.agendaId, this.isFinished);
 
   @override
-  List<Object> get props => [agendaId, agenda];
+  List<Object> get props => [agendaId, isFinished];
 }

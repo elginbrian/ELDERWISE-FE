@@ -6,6 +6,8 @@ import 'package:elderwise/domain/repositories/auth_repository.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_event.dart';
 import 'package:elderwise/presentation/bloc/auth/auth_state.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepository;
@@ -15,6 +17,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RegisterEvent>(_onRegister);
     on<GoogleSignInEvent>(_onGoogleSignIn);
     on<GetCurrentUserEvent>(_onGetCurrentUser);
+    on<LogoutEvent>(_onLogout);
   }
 
   Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
@@ -35,6 +38,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             Map dataMap = response.data as Map;
             if (dataMap.containsKey('token') && dataMap['token'] is String) {
               token = dataMap['token'] as String;
+
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('token', token);
+              debugPrint(
+                  'Token saved to SharedPreferences: ${token.substring(0, 10)}...');
+
               emit(LoginSuccess(LoginResponseDTO(token: token)));
               return;
             }
@@ -97,6 +106,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       final result = await _authRepository.googleSignIn(event.request);
+
+      if (result.token.isNotEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', result.token);
+        debugPrint(
+            'Google Auth token saved to SharedPreferences: ${result.token.substring(0, 10)}...');
+      }
+
       emit(LoginSuccess(result));
     } catch (e) {
       debugPrint('Google sign in exception: $e');
@@ -142,6 +159,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       debugPrint('Get current user exception: $e');
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      await prefs.remove('refresh_token');
+      emit(AuthInitial());
+    } catch (e) {
       emit(AuthFailure(e.toString()));
     }
   }

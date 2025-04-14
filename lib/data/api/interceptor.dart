@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:elderwise/data/api/api_config.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 
 class TokenInterceptor extends Interceptor {
   final Dio dio;
@@ -15,13 +16,14 @@ class TokenInterceptor extends Interceptor {
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return prefs.getString('token');
   }
 
   Future<String?> _refreshToken() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final currentToken = prefs.getString('auth_token');
+      final currentToken =
+          prefs.getString('token');
       if (currentToken == null) return null;
 
       return currentToken;
@@ -48,24 +50,31 @@ class TokenInterceptor extends Interceptor {
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      final options = err.requestOptions;
+      final prefs = await SharedPreferences.getInstance();
 
-      if (_publicEndpoints.contains(options.path)) {
-        return handler.next(err);
-      }
-
-      try {
-        final newToken = await _refreshToken();
-        if (newToken != null) {
-          options.headers['Authorization'] = 'Bearer $newToken';
-          final response = await dio.fetch(options);
-          handler.resolve(response);
-          return;
+      final refreshToken = prefs.getString('refresh_token');
+      if (refreshToken != null && refreshToken.isNotEmpty) {
+        try {
+        } catch (e) {
+          await _clearTokensAndRedirect();
         }
-      } catch (e) {
-        debugPrint('Error during token refresh: $e');
+      } else {
+        await _clearTokensAndRedirect();
       }
     }
+
     handler.next(err);
   }
+
+  Future<void> _clearTokensAndRedirect() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
+    await prefs.remove('refresh_token');
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      navigatorKey.currentContext?.go('/login');
+    });
+  }
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
