@@ -28,6 +28,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_bloc.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_event.dart';
 import 'package:elderwise/presentation/bloc/caregiver/caregiver_state.dart';
+import 'package:elderwise/presentation/screens/notification_screen/notification_screen.dart';
 
 class HomescreenElder extends StatefulWidget {
   const HomescreenElder({super.key});
@@ -111,7 +112,12 @@ class _HomescreenElderState extends State<HomescreenElder> {
   }
 
   void _navigateToNotifications() {
-    Navigator.pushNamed(context, '/notifications');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificationScreen(),
+      ),
+    );
   }
 
   void _activateSOS() {
@@ -270,6 +276,8 @@ class _HomescreenElderState extends State<HomescreenElder> {
                           ElderProfileHeader(
                             elderPhotoUrl: _elderPhotoUrl,
                             onNotificationTap: _navigateToNotifications,
+                            showNotifications:
+                                true, // Add this parameter to ensure notification icon is visible
                           ),
                           const SizedBox(height: 16),
                           ElderGreetingSection(userName: _userName),
