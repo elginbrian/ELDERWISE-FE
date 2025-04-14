@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:elderwise/data/api/requests/emergency_alert_request.dart';
 import 'package:elderwise/domain/entities/agenda.dart';
 import 'package:elderwise/presentation/bloc/agenda/agenda_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:elderwise/presentation/bloc/user/user_state.dart';
 import 'package:elderwise/presentation/bloc/user_mode/user_mode_bloc.dart';
 import 'package:elderwise/presentation/screens/assets/image_string.dart';
 import 'package:elderwise/presentation/screens/main_screen/main_screen.dart';
+import 'package:elderwise/presentation/screens/reminder_sceen/reminder_screen.dart';
 import 'package:elderwise/presentation/themes/colors.dart';
 import 'package:elderwise/presentation/utils/toast_helper.dart';
 import 'package:elderwise/presentation/widgets/homescreen/elder_agenda_section.dart';
@@ -45,6 +47,8 @@ class _HomescreenElderState extends State<HomescreenElder> {
   bool _isLoading = true;
   bool _userDataLoaded = false;
   List<Agenda> _agendas = [];
+  Timer? _reminderCheckTimer;
+  bool _isReminderShowing = false;
 
   String _userName = "Elder";
   String? _elderPhotoUrl;
@@ -66,10 +70,15 @@ class _HomescreenElderState extends State<HomescreenElder> {
         }
       },
     );
+
+    _reminderCheckTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _checkForUpcomingReminders();
+    });
   }
 
   @override
   void dispose() {
+    _reminderCheckTimer?.cancel();
     super.dispose();
   }
 
@@ -110,6 +119,8 @@ class _HomescreenElderState extends State<HomescreenElder> {
         _loadCaregiverData();
 
         context.read<UserModeBloc>().setElderId(_elderId);
+
+        Future.delayed(const Duration(seconds: 2), _checkForUpcomingReminders);
       }
     });
   }
@@ -174,6 +185,56 @@ class _HomescreenElderState extends State<HomescreenElder> {
     MainScreen.mainScreenKey.currentState?.changeTab(1);
   }
 
+  void _checkForUpcomingReminders() {
+    if (_agendas.isEmpty || _isReminderShowing) return;
+
+    final now = DateTime.now();
+
+    for (var agenda in _agendas) {
+      if (agenda.isFinished) continue;
+
+      final timeDifference = agenda.datetime.difference(now);
+
+      if (timeDifference.inMinutes <= 15 && timeDifference.inMinutes > -30) {
+        _showReminderScreen(agenda);
+        break;
+      }
+    }
+  }
+
+  void _showReminderScreen(Agenda agenda) {
+    if (_isReminderShowing) return;
+
+    setState(() {
+      _isReminderShowing = true;
+    });
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ReminderScreen(
+        agenda: agenda,
+        onCompleted: (agendaId) {
+          context.read<AgendaBloc>().add(
+                UpdateAgendaStatusEvent(agendaId, true),
+              );
+          setState(() {
+            _isReminderShowing = false;
+          });
+        },
+        onDismissed: () {
+          setState(() {
+            _isReminderShowing = false;
+          });
+        },
+      ),
+    ).then((_) {
+      setState(() {
+        _isReminderShowing = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -224,6 +285,11 @@ class _HomescreenElderState extends State<HomescreenElder> {
               setState(() {
                 _agendas = state.agendas;
               });
+
+              Future.delayed(
+                const Duration(milliseconds: 500),
+                _checkForUpcomingReminders,
+              );
             }
           },
         ),
@@ -279,8 +345,7 @@ class _HomescreenElderState extends State<HomescreenElder> {
                           ElderProfileHeader(
                             elderPhotoUrl: _elderPhotoUrl,
                             onNotificationTap: _navigateToNotifications,
-                            showNotifications:
-                                true,
+                            showNotifications: true,
                           ),
                           const SizedBox(height: 16),
                           ElderGreetingSection(userName: _userName),
